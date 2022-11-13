@@ -2,10 +2,47 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <readline/readline.h>
-#include <readline/history.h>
 
 #include "slash.h"
+
+/*
+    Libere la mémoire de toute les chaines de caractères presente dans s
+*/
+void frees(char **s){
+    while(*s){
+        printf("%s\n", *s);
+        free(*s);
+        s++;
+    }
+}
+
+/**
+ * Retourne un tableau de chaînes de caractères, chacune d'elle étant une sous-chaîne du paramètre str extraite en utilisant le séparateur separators
+*/
+char ** explode(char *str, const char *separators){
+    int i = 0;
+    size_t size = 1;
+    char **res = malloc(size);
+    char * strToken = strtok ( str, separators );
+    while ( strToken != NULL ) {
+
+        // On alloue dynamiquement un char * avec pour valeur strToken
+        char *s = malloc(strlen(strToken));
+        if(s == NULL) perror("malloc");
+        sprintf(s, "%s", strToken);
+
+        // On ajoute la chaine de caractere au tableau
+        size += sizeof(char *);
+        res = realloc(res, size);
+        if(res == NULL) perror("realloc");
+        res[i] = s;
+        i++;
+
+        // On demande le token suivant.
+        strToken = strtok ( NULL, separators );
+    }
+    return res;
+}
 
 
 DIR *cd (char *pathname, char *option, char *ref){
@@ -46,7 +83,7 @@ int main(void){
 
         // TODO: On transforme la ligne en tableau
         char *delimiter = " ";
-        char tab[] = strtok(ligne, delimiter);
+        char **tab = explode(ligne, delimiter);
         
         switch (tab[0]){
             case "exit": break;
