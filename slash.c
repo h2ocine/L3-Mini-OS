@@ -53,7 +53,7 @@ DIR *cd (char *pathname, char *option, char *ref){
     return;
 }
 
-int exit(char *val){
+int exit(int val){
     return 0;
 }
 
