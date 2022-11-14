@@ -1,3 +1,10 @@
+
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 #include <dirent.h>
 
 #define MAX_ARGS_NUMBER 4096
@@ -18,4 +25,4 @@ int exit(char *val);
 /**
  * Affiche la (plus précisément), une référence absolue du répertoire de travail courant 
  */
-char *pwd(char *arg);
+int pwd(char **arg);

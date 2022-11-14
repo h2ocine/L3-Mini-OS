@@ -1,10 +1,3 @@
-
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-
 #include "slash.h"
 
 
@@ -16,10 +9,56 @@ int exit(char *val){
     return 0;
 }
 
-char *pwd(char *arg){
-    return;
+
+
+
+//TODO : retourner la référence absolue physique : FAIT
+//TODO : retourner la référence absolue logique
+int pwd(char **arg){
+    const int pathsize = 100; //TODO : set pathsize
+    char *ref = malloc(pathsize);
+
+    //Recuperer le chemin d'accès absolu du répertoire de travail courant 
+    if(!getcwd(ref,sizeof(ref)))   
+    {
+        perror("getcwd - Erreur ");
+        free(ref);
+        return 1;
+    }
+    strcat(ref,"\n");
+
+    //TODO : ption par défaut (référence absolue logique)
+    // if( arg[1] == NULL)
+
+    
+    //-P (référence absolue physique)
+    if( strcmp(arg[1],"-P") == 0 || strcmp(arg[1],"-p") == 0)
+    {
+        if(write(1,ref,strlen(ref)) == -1)
+        {
+            perror("Erreur ");
+            free(ref);
+            return 1;
+        }
+        free(ref);
+        return 0;
+    }
+    
+    //TODO : -L (référence absolue logique)
+    //if( strcmp(arg[1],"-L") == 0 || strcmp(arg[1],"-l") == 0)
+
+    //TODO : Paramettre faux (different de -p et -l) = Option par défaut (référence absolue logique) ???
+
+    free(ref);
+    return 0;
+    
 }
 
+
+
+/*
+    main
+*/
 int main(void){
     DIR *dir;
     if((dir = opendir(".")) < 0) exit(1);
