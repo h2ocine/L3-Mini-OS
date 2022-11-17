@@ -3,11 +3,15 @@
 /*
     Libere la mémoire de toute les chaines de caractères presente dans s
 */
-void frees(char **s){
+void free_StingArrayArray(char **s){
+    int i=0;
     while(*s){
         free(*s);
+        i++;
         s++;
     }
+    s-=i;
+    free(s);
 }
 
 /**
@@ -17,6 +21,7 @@ char ** explode(char *str, const char *separators){
     int i = 0;
     size_t size = 1;
     char **res = malloc(size);
+    if(res == NULL) perror("malloc");
     char * strToken = strtok ( str, separators );
     while ( strToken != NULL ) {
 
@@ -106,7 +111,7 @@ int main(void){
     char *ligne;
     ligne = malloc(MAX_ARGS_STRLEN);
     if(ligne == NULL) perror("malloc");
-    rl_outstream = stderr;
+    // rl_outstream = stderr;
    
 
     while(1){
@@ -114,13 +119,10 @@ int main(void){
         // TODO: On affiche le prompt (invite de commande)
         if(write(1, pre, strlen(pre)) < 0) exits("1");
 
-        // TODO: On lit la ligne (entré standart) et on la stocke dans ligne
-        if(read(0, ligne, MAX_ARGS_STRLEN) < 0) exits("1");
-
         // TODO: On utilise readline pour simplifier la lecture     
             
-        ligne = readline("");
-
+        char *l = readline("");
+        printf("ligne: %s\n", l);
         // TODO: On ajoute la dernière commande à l'historique
 
         add_history(ligne);
@@ -129,9 +131,16 @@ int main(void){
         char *delimiter = " ";
 
         //Ici on recupere un tableau via la fonction explode qui découpe la ligne en mots 
-        // tab = explode(ligne,delimiter);
-       
+        tab = explode(ligne,delimiter);
 
+        printf("tab[0]: %s\n", tab[0]);
+        // int i = 0;
+        // while(*tab){
+        //     printf("%s\n", *tab);
+        //     i++;
+        //     tab++;
+        // }
+        // tab -= i;
         // //On traite notre tableau 
         
         // if(strcmp("exit",tab[0]) == 0){
@@ -146,7 +155,7 @@ int main(void){
     }
 
     free(ligne);
-    // frees(tab);
+    free_StingArrayArray(tab);
     closedir(dir);
 
     return 0;
