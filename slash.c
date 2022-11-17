@@ -18,11 +18,11 @@ void free_StingArrayArray(char **s){
 /**
  * Retourne un tableau de chaînes de caractères, chacune d'elle étant une sous-chaîne du paramètre str extraite en utilisant le séparateur separators
 */
-char ** explode(char *str, const char *separators){
+int  explode(char *str, const char *separators, char **res){ 
     int i = 0;
-    size_t size = 1;
-    char **res = malloc(size);
-    if(res == NULL) perror("malloc");
+    size_t size = 0;
+    if(strlen(str) == 0) return 0;
+
     char * strToken = strtok ( str, separators );
     while ( strToken != NULL ) {
 
@@ -41,7 +41,7 @@ char ** explode(char *str, const char *separators){
         // On demande le token suivant.
         strToken = strtok ( NULL, separators );
     }
-    return res;
+    return i;
 }
 
 /*********************************  COMMANDES INTERNES *************************************************/
@@ -112,16 +112,15 @@ int pwd(char **arg){
 */
 int main(void){
     DIR *dir;
-    char **tab;
     if((dir = opendir(".")) < 0) exits("1");
-
-    char *ligne;
-    ligne = malloc(MAX_ARGS_STRLEN);
-    if(ligne == NULL) perror("malloc");
-    // rl_outstream = stderr;
+    char **tab;
+    rl_outstream = stderr;
    
 
     while(1){
+        tab = malloc(0);
+        if(tab == NULL) perror("malloc");
+
         char *pre = "$ ";
         // TODO: On affiche le prompt (invite de commande)
         if(write(1, pre, strlen(pre)) < 0) exits("1");
@@ -137,39 +136,37 @@ int main(void){
         } 
 
         //printf("ligne: %s\n", l);
+        char *ligne = readline("");
+
         // TODO: On ajoute la dernière commande à l'historique
 
-        add_history(ligne);
+        // TODO: On ajoute la dernière commande à l'historique
+        add_history(l);
         
         // TODO: On transforme la ligne en tableau
         char *delimiter = " ";
 
         //Ici on recupere un tableau via la fonction explode qui découpe la ligne en mots 
-        tab = explode(ligne,delimiter);
+        int taille = explode(ligne,delimiter, tab);
 
-        //printf("tab[0]: %s\n", tab[0]);
-        // int i = 0;
-        // while(*tab){
-        //     printf("%s\n", *tab);
-        //     i++;
-        //     tab++;
-        // }
-        // tab -= i;
         //On traite notre tableau 
-        
-        // if(strcmp("exit",tab[0]) == 0){
-        //     exits(tab[1]);
-        // }else if(strcmp("cd",tab[0])==0){
-        //     break;
-        // }else if(strcmp("pwd",tab[0]) == 0){
-        //     break;
-        // }else{
-        //     //Faire la commande externe .
-        // }
+        if (taille > 0){
+            if(strcmp("exit",tab[0]) == 0){
+                printf("On est dans exit \n");
+                break;
+            }else if(strcmp("cd",tab[0])==0){
+                break;
+            }else if(strcmp("pwd",tab[0]) == 0){
+                break;
+            }else{
+                //Faire la commande externe .
+            }
+            free_StingArrayArray(tab);
+        }else{
+            free(tab);
+        }
+       
     }
-
-    free(ligne);
-    free_StingArrayArray(tab);
     closedir(dir);
 
     return 0;

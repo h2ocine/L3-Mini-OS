@@ -20,11 +20,11 @@ void frees(char **s){
 /**
  * Retourne un tableau de chaînes de caractères, chacune d'elle étant une sous-chaîne du paramètre str extraite en utilisant le séparateur separators
 */
-char ** explode(char *str, const char *separators){
-    
+int explode(char *str, const char *separators, char **res){
     int i = 0;
-    size_t size = 1;
-    char **res = malloc(size);
+    size_t size = 0;
+    if(strlen(str) == 0) return 0;
+
     char * strToken = strtok ( str, separators );
     while ( strToken != NULL ) {
 
@@ -43,13 +43,16 @@ char ** explode(char *str, const char *separators){
         // On demande le token suivant.
         strToken = strtok ( NULL, separators );
     }
-    return res;
+    return i;
 }
 
 int main(void){
+    char **tab = malloc(0);
+
     while(1){
         printf("$");
         char *ligne = readline("");
-        printf("ligne: %s \n", ligne);
+        int taille = explode(ligne, " ", tab);
+        printf("taille: %d\n", taille);
     }
 }
