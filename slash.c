@@ -17,12 +17,10 @@ void free_StingArrayArray(char **s){
 /**
  * Retourne un tableau de chaînes de caractères, chacune d'elle étant une sous-chaîne du paramètre str extraite en utilisant le séparateur separators
 */
-int explode(char *str, const char *separators){ 
+int  explode(char *str, const char *separators, char **res){ 
     int i = 0;
     size_t size = 0;
-    char **res = malloc(size);
-    if(res == NULL) perror("malloc");
-    if(strlen(str) == 0) return res;
+    if(strlen(str) == 0) return 0;
 
     char * strToken = strtok ( str, separators );
     while ( strToken != NULL ) {
@@ -42,7 +40,7 @@ int explode(char *str, const char *separators){
         // On demande le token suivant.
         strToken = strtok ( NULL, separators );
     }
-    return res;
+    return i;
 }
 
 /*********************************  COMMANDES INTERNES *************************************************/
@@ -109,6 +107,8 @@ int main(void){
     DIR *dir;
     if((dir = opendir(".")) < 0) exits("1");
     char **tab;
+    tab = malloc(0);
+    if(tab == NULL) perror("malloc");
     rl_outstream = stderr;
    
 
@@ -130,9 +130,9 @@ int main(void){
         char *delimiter = " ";
 
         //Ici on recupere un tableau via la fonction explode qui découpe la ligne en mots 
-        tab = explode(ligne,delimiter);
+        int taille = explode(ligne,delimiter, tab);
 
-        printf("tab[0]: %s\n", tab[0]);
+        printf("tab[0]: %s ; taille: %d\n", tab[0], taille);
 
         //On traite notre tableau 
         
