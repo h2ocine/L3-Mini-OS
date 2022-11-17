@@ -17,11 +17,13 @@ void free_StingArrayArray(char **s){
 /**
  * Retourne un tableau de chaînes de caractères, chacune d'elle étant une sous-chaîne du paramètre str extraite en utilisant le séparateur separators
 */
-char ** explode(char *str, const char *separators){
+int explode(char *str, const char *separators){ 
     int i = 0;
-    size_t size = 1;
+    size_t size = 0;
     char **res = malloc(size);
     if(res == NULL) perror("malloc");
+    if(strlen(str) == 0) return res;
+
     char * strToken = strtok ( str, separators );
     while ( strToken != NULL ) {
 
@@ -105,13 +107,9 @@ int pwd(char **arg){
 */
 int main(void){
     DIR *dir;
-    char **tab;
     if((dir = opendir(".")) < 0) exits("1");
-
-    char *ligne;
-    ligne = malloc(MAX_ARGS_STRLEN);
-    if(ligne == NULL) perror("malloc");
-    // rl_outstream = stderr;
+    char **tab;
+    rl_outstream = stderr;
    
 
     while(1){
@@ -121,8 +119,9 @@ int main(void){
 
         // TODO: On utilise readline pour simplifier la lecture     
             
-        char *l = readline("");
-        printf("ligne: %s\n", l);
+        char *ligne = readline("");
+        printf("ligne: %s\n", ligne);
+
         // TODO: On ajoute la dernière commande à l'historique
 
         add_history(ligne);
@@ -134,27 +133,20 @@ int main(void){
         tab = explode(ligne,delimiter);
 
         printf("tab[0]: %s\n", tab[0]);
-        // int i = 0;
-        // while(*tab){
-        //     printf("%s\n", *tab);
-        //     i++;
-        //     tab++;
-        // }
-        // tab -= i;
-        // //On traite notre tableau 
+
+        //On traite notre tableau 
         
-        // if(strcmp("exit",tab[0]) == 0){
-        //     break;
-        // }else if(strcmp("cd",tab[0])==0){
-        //     break;
-        // }else if(strcmp("pwd",tab[0]) == 0){
-        //     break;
-        // }else{
-        //     //Faire la commande externe .
-        // }
+        if(strcmp("exit",tab[0]) == 0){
+            break;
+        }else if(strcmp("cd",tab[0])==0){
+            break;
+        }else if(strcmp("pwd",tab[0]) == 0){
+            break;
+        }else{
+            //Faire la commande externe .
+        }
     }
 
-    free(ligne);
     free_StingArrayArray(tab);
     closedir(dir);
 

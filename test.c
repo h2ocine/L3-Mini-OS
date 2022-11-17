@@ -47,9 +47,11 @@ char ** explode(char *str, const char *separators){
 }
 
 int main(void){
+    char **tab;
     while(1){
         printf("$");
         char *ligne = readline("");
-        printf("ligne: %s \n", ligne);
+        tab = explode(ligne, " ");
+        printf("tab[0]: %s\n", tab[0]);
     }
 }
