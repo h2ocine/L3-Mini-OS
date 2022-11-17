@@ -107,12 +107,13 @@ int main(void){
     DIR *dir;
     if((dir = opendir(".")) < 0) exits("1");
     char **tab;
-    tab = malloc(0);
-    if(tab == NULL) perror("malloc");
     rl_outstream = stderr;
    
 
     while(1){
+        tab = malloc(0);
+        if(tab == NULL) perror("malloc");
+
         char *pre = "$ ";
         // TODO: On affiche le prompt (invite de commande)
         if(write(1, pre, strlen(pre)) < 0) exits("1");
@@ -120,10 +121,8 @@ int main(void){
         // TODO: On utilise readline pour simplifier la lecture     
             
         char *ligne = readline("");
-        printf("ligne: %s\n", ligne);
 
         // TODO: On ajoute la dernière commande à l'historique
-
         add_history(ligne);
         
         // TODO: On transforme la ligne en tableau
@@ -132,22 +131,24 @@ int main(void){
         //Ici on recupere un tableau via la fonction explode qui découpe la ligne en mots 
         int taille = explode(ligne,delimiter, tab);
 
-        printf("tab[0]: %s ; taille: %d\n", tab[0], taille);
-
         //On traite notre tableau 
-        
-        if(strcmp("exit",tab[0]) == 0){
-            break;
-        }else if(strcmp("cd",tab[0])==0){
-            break;
-        }else if(strcmp("pwd",tab[0]) == 0){
-            break;
+        if (taille > 0){
+            if(strcmp("exit",tab[0]) == 0){
+                printf("On est dans exit \n");
+                break;
+            }else if(strcmp("cd",tab[0])==0){
+                break;
+            }else if(strcmp("pwd",tab[0]) == 0){
+                break;
+            }else{
+                //Faire la commande externe .
+            }
+            free_StingArrayArray(tab);
         }else{
-            //Faire la commande externe .
+            free(tab);
         }
+       
     }
-
-    free_StingArrayArray(tab);
     closedir(dir);
 
     return 0;
