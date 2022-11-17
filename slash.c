@@ -1,5 +1,6 @@
 #include "slash.h"
 
+
 /*
     Libere la mémoire de toute les chaines de caractères presente dans s
 */
@@ -50,7 +51,13 @@ DIR *cd (char *pathname, char *option, char *ref){
 }
 
 int exits(char *val){
-    return 0;
+    pid_t pid_p1;
+    pid_p1 = getpid();
+    if(kill(pid_p1,SIGKILL) == 0){
+        
+        return 100;
+    }
+    return 100;
 }
 
 
@@ -122,7 +129,14 @@ int main(void){
         // TODO: On utilise readline pour simplifier la lecture     
             
         char *l = readline("");
-        printf("ligne: %s\n", l);
+        //Cas du CTRL - D 
+        if (l == NULL) {
+            //On appelle exit sans paramètres 
+            exits("NULL");
+            
+        } 
+
+        //printf("ligne: %s\n", l);
         // TODO: On ajoute la dernière commande à l'historique
 
         add_history(ligne);
@@ -133,7 +147,7 @@ int main(void){
         //Ici on recupere un tableau via la fonction explode qui découpe la ligne en mots 
         tab = explode(ligne,delimiter);
 
-        printf("tab[0]: %s\n", tab[0]);
+        //printf("tab[0]: %s\n", tab[0]);
         // int i = 0;
         // while(*tab){
         //     printf("%s\n", *tab);
@@ -141,10 +155,10 @@ int main(void){
         //     tab++;
         // }
         // tab -= i;
-        // //On traite notre tableau 
+        //On traite notre tableau 
         
         // if(strcmp("exit",tab[0]) == 0){
-        //     break;
+        //     exits(tab[1]);
         // }else if(strcmp("cd",tab[0])==0){
         //     break;
         // }else if(strcmp("pwd",tab[0]) == 0){
