@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-=======
-
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-
->>>>>>> d773a05c667918c66a3abd4c2508e2a5cd7258ae
 #include "slash.h"
 
 /*
@@ -16,7 +5,6 @@
 */
 void frees(char **s){
     while(*s){
-        printf("%s\n", *s);
         free(*s);
         s++;
     }
@@ -53,14 +41,13 @@ char ** explode(char *str, const char *separators){
 /*********************************  COMMANDES INTERNES *************************************************/
 
 DIR *cd (char *pathname, char *option, char *ref){
-    return;
+    return NULL;
 }
 
-int exit(int val){
+int exits(char *val){
     return 0;
 }
 
-<<<<<<< HEAD
 
 
 
@@ -104,10 +91,6 @@ int pwd(char **arg){
     free(ref);
     return 0;
     
-=======
-char *pwd(char *arg){
-    return NULL;
->>>>>>> d773a05c667918c66a3abd4c2508e2a5cd7258ae
 }
 
 
@@ -117,24 +100,26 @@ char *pwd(char *arg){
 */
 int main(void){
     DIR *dir;
-    if((dir = opendir(".")) < 0) exit("1");
+    char **tab;
+    if((dir = opendir(".")) < 0) exits("1");
 
     char *ligne;
     ligne = malloc(MAX_ARGS_STRLEN);
     if(ligne == NULL) perror("malloc");
-
+    rl_outstream = stderr;
    
 
     while(1){
         char *pre = "$ ";
         // TODO: On affiche le prompt (invite de commande)
-        if(write(1, pre, strlen(pre)) < 0) exit("1");
+        if(write(1, pre, strlen(pre)) < 0) exits("1");
 
         // TODO: On lit la ligne (entré standart) et on la stocke dans ligne
-        if(read(0, ligne, MAX_ARGS_STRLEN) < 0) exit("1");
+        if(read(0, ligne, MAX_ARGS_STRLEN) < 0) exits("1");
 
-        // TODO: On utilise readline pour simplifier la lecture         
-        ligne = readline(ligne);
+        // TODO: On utilise readline pour simplifier la lecture     
+            
+        ligne = readline("");
 
         // TODO: On ajoute la dernière commande à l'historique
 
@@ -144,23 +129,24 @@ int main(void){
         char *delimiter = " ";
 
         //Ici on recupere un tableau via la fonction explode qui découpe la ligne en mots 
-        char **tab = explode(ligne,delimiter);
+        // tab = explode(ligne,delimiter);
        
 
-        //On traite notre tableau 
+        // //On traite notre tableau 
         
-        if(strcmp("exit",&tab[0]) == 0){
-            break;
-        }else if(strcmp("cd",&tab[0])==0){
-            break;
-        }else if(strcmp("pwd",&tab[0]) == 0){
-            break;
-        }else{
-            //Faire la commande externe .
-        }
+        // if(strcmp("exit",tab[0]) == 0){
+        //     break;
+        // }else if(strcmp("cd",tab[0])==0){
+        //     break;
+        // }else if(strcmp("pwd",tab[0]) == 0){
+        //     break;
+        // }else{
+        //     //Faire la commande externe .
+        // }
     }
 
     free(ligne);
+    // frees(tab);
     closedir(dir);
 
     return 0;
