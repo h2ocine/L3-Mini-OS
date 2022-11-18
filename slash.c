@@ -61,48 +61,68 @@ int exits(char *val){
 }
 
 
-
-
-//TODO : retourner la référence absolue physique : FAIT
-//TODO : retourner la référence absolue logique
 int pwd(char **arg){
     const int pathsize = 100; //TODO : set pathsize
     char *ref = malloc(pathsize);
-
-    //Recuperer le chemin d'accès absolu du répertoire de travail courant 
-    if(!getcwd(ref,sizeof(ref)))   
-    {
-        perror("getcwd - Erreur ");
-        free(ref);
-        return 1;
-    }
-    strcat(ref,"\n");
-
-    //TODO : ption par défaut (référence absolue logique)
-    // if( arg[1] == NULL)
-
+    //Recuperer le chemin d'accès du répertoire de travail courant
     
-    //-P (référence absolue physique)
-    if( strcmp(arg[1],"-P") == 0 || strcmp(arg[1],"-p") == 0)
+    if(arg[1] == NULL)
     {
-        if(write(1,ref,strlen(ref)) == -1)
+        //Cas par défault : 
+        //Référence absolu logique (avec getenv) :
+        ref = getenv("PWD");
+        if(!ref)   
         {
-            perror("Erreur ");
+            perror("getcwd - Erreur ");
             free(ref);
             return 1;
         }
-        free(ref);
-        return 0;
     }
-    
-    //TODO : -L (référence absolue logique)
-    //if( strcmp(arg[1],"-L") == 0 || strcmp(arg[1],"-l") == 0)
+    else
+    {
+        //Cas -L
+        //Référence absolu logique (avec getenv) :
+        if( strcmp(arg[1],"-L") == 0 || strcmp(arg[1],"-l") == 0)
+        {
+            ref = getenv("PWD");
+            if(!ref)   
+            {
+                perror("getcwd - Erreur ");
+                free(ref);
+                return 1;
+            }
+        }
+        else
+        {
+            //Cas -P
+            //Référence absolue physique (avec getcwd)
+            if(strcmp(arg[1],"-P") == 0 || strcmp(arg[1],"-p") == 0)
+            {
+                if(!getcwd(ref,sizeof(ref)))   
+                {
+                    perror("getcwd - Erreur ");
+                    free(ref);
+                    return 1;
+                }
+            }
+            else
+            {
+                //Cas paramètre faux
+                return 1; 
+            }
+        }
 
-    //TODO : Paramettre faux (different de -p et -l) = Option par défaut (référence absolue logique) ???
+    }
 
+    if(write(1,ref,strlen(ref)) == -1)
+    {
+        perror("Erreur ");
+        free(ref);
+        return 1;
+    }    
+    strcat(ref,"\n");
     free(ref);
     return 0;
-    
 }
 
 
@@ -127,21 +147,18 @@ int main(void){
 
         // TODO: On utilise readline pour simplifier la lecture     
             
-        char *l = readline("");
+        char *ligne = readline("");
         //Cas du CTRL - D 
-        if (l == NULL) {
+        if (ligne == NULL) {
             //On appelle exit sans paramètres 
             exits("NULL");
             
         } 
 
-        //printf("ligne: %s\n", l);
-        char *ligne = readline("");
-
         // TODO: On ajoute la dernière commande à l'historique
 
         // TODO: On ajoute la dernière commande à l'historique
-        add_history(l);
+        add_history(ligne);
         
         // TODO: On transforme la ligne en tableau
         char *delimiter = " ";
@@ -152,12 +169,12 @@ int main(void){
         //On traite notre tableau 
         if (taille > 0){
             if(strcmp("exit",tab[0]) == 0){
-                printf("On est dans exit \n");
+                printf("On est dans exit ligne = %s et %s\n",tab[0],tab[1]);
                 break;
             }else if(strcmp("cd",tab[0])==0){
                 break;
             }else if(strcmp("pwd",tab[0]) == 0){
-                break;
+                pwd(tab);
             }else{
                 //Faire la commande externe .
             }
