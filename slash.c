@@ -60,7 +60,9 @@ int main(void){
     if((dir = opendir(".")) < 0) exits("1");
     char **tab;
     rl_outstream = stderr;
-   
+    
+    //Initialisation variable d'environnement 
+    setenv("var_env","255",1);
 
     while(1){
 
@@ -134,9 +136,10 @@ int main(void){
             // for(int i = 0 ; i < taille; i++)
             //         printf("tab[%i] = %s\n",i,tab[i]);
 
-            if(strcmp("exit",tab[0]) == 0)
+            if(strcmp("exits",tab[0]) == 0)
             {
                 printf("ici on est dans exit\n");
+                exits(tab[1]);
                 
                 //break;
             }
