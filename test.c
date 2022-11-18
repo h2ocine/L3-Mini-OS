@@ -63,8 +63,8 @@ int explode(char *str, const char *separators, char **res){
 }
 
 int main(void){
-    char *prompt = "un/deux/trois/quatre/cinq/six/sept/huit/neufqsfqsf sqdsqdfsq fsdqfdsqfsdqffsqd";
-    int size = strlen(prompt);
-    printf("len: %d\n", size);
-    printf("%s\n", f(prompt));
+    char *prompt = "\033[0;31m test \033[0m";
+    printf("%s\n", prompt);
+    printf("sqdfsqd\n");
+    return 0;
 }

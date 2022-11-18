@@ -123,8 +123,13 @@ int main(void){
         /*****************************************************************/
         /*****************************************************************/
 
-        
-        char *ligne = readline(prompt);
+        char p[255];
+        char *rouge = "\033[0;31m";
+        char *blanc = "\033[0m";
+        strcpy(p, rouge);
+        strcat(p, prompt);
+        strcat(p, blanc);
+        char *ligne = readline(p);
         
 
         //Cas du CTRL - D 
