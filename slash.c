@@ -14,32 +14,40 @@ void free_StingArrayArray(char **s,int taille){
 /*
  * Retourne un tableau de chaînes de caractères, chacune d'elle étant une sous-chaîne du paramètre str extraite en utilisant le séparateur separators
 */
-char**  explode(char *str, const char *separators, int* taille){ 
-    char** res  = malloc(0);
-    if(res == NULL) perror("malloc");
-
-
+char**  explode(char *str, const char *separators, int* taille)
+{ 
     int i = 0;
     size_t size = 0;
+    char* s = NULL;
+    char** res  = malloc(0);
+    if(res == NULL) 
+        perror("malloc");
+
+    //Cas chaine vide
     if(strlen(str) == 0)
     {
         *taille = 0;
         return NULL;
     } 
-        
 
-    char * strToken = strtok ( str, separators );
-    while ( strToken != NULL ) {
+    //Séparer la chaine en plusieurs sous chaines :
+    char * strToken = strtok (str, separators);
+    while ( strToken != NULL ) 
+    {
+        // On copie strToken dans une chaine de caractère s (pour avoir utiliser la taille exact)
+        if(!(s = malloc(strlen(strToken)))) 
+            perror("malloc");
+        if(snprintf(s, strlen(strToken) + 1, "%s", strToken) < 0)
+        {
+            perror("explode snprintf error ");
+            exit(1);
+        }
 
-        // On alloue dynamiquement un char * avec pour valeur strToken
-        char *s = malloc(strlen(strToken));
-        if(s == NULL) perror("malloc");
-        sprintf(s, "%s", strToken);
-
-        // On ajoute la chaine de caractere au tableau
+        //On ajoute la chaine de caractere s au tableau res
         size += sizeof(char *);
         res = realloc(res, size);
-        if(res == NULL) perror("realloc");
+        if(res == NULL) 
+            perror("realloc");
         res[i] = s;
         i++;
 
@@ -47,7 +55,11 @@ char**  explode(char *str, const char *separators, int* taille){
         strToken = strtok ( NULL, separators );
     }
     
-    *taille = i;
+    if(!s)  
+        free(s);
+    free(strToken);
+
+    *taille = i;//ici on retourne la taille de res
     return res;
 }
 
@@ -60,7 +72,9 @@ int main(void){
     if((dir = opendir(".")) < 0) exits("1");
     char **tab;
     rl_outstream = stderr;
-   
+    
+    //Initialisation variable d'environnement 
+    setenv("var_env","255",1);
 
     while(1){
 
@@ -74,7 +88,7 @@ int main(void){
         strcat(prompt,getenv("NAME")); //deskeopname
         strcat(prompt,":"); //:
         strcat(prompt,getenv("PWD")); // /home/hocine/ + repertoire
-        strcat(prompt, "$\0"); // $
+        strcat(prompt, "$ \0"); // $
 
         int t;
         //Supprimer /home/nom
@@ -131,6 +145,8 @@ int main(void){
 
             if(strcmp("exit",tab[0]) == 0)
             {
+                exits(tab[1]);
+                
                 //break;
             }
             else if(strcmp("cd",tab[0])==0)

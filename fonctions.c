@@ -7,13 +7,14 @@ void *cd (char *pathname, char *option, char *ref){
 }
 
 int exits(char *val){
-    pid_t pid_p1;
-    pid_p1 = getpid();
-    if(kill(pid_p1,SIGKILL) == 0){
-        
-        return 100;
+    if (val != NULL){
+        if (atoi(val)!= 0){
+            exit(atoi(val));
+        }
     }
-    return 100;
+        //On exit sans paramètres
+    exit(atoi(getenv("var_env")));
+
 }
 
 
