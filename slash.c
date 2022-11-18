@@ -1,5 +1,22 @@
 #include "fonctions.c"
 
+/*
+    Cette fonction raccourcis si il le faut la chaine prompt à 30 caractères 
+*/
+char *truncate_prompt(char *prompt){
+    int size = strlen(prompt);
+    int max_size = 30;
+    if(size > max_size){
+        char res[30];
+        strcpy(res, "...");
+        for(int i=3; i<max_size; i++){
+            int ind = size - max_size + i;
+            res[i] = prompt[ind];
+        }
+        return res;
+    }
+    return prompt
+}
 
 /*
     Libere la mémoire de toute les chaines de caractères presente dans s
@@ -85,7 +102,7 @@ int main(void){
 
         strcpy(prompt, getenv("USER")); //username
         strcat(prompt,"@"); //@
-        strcat(prompt,getenv("NAME")); //deskeopname
+        //strcat(prompt,getenv("NAME")); //deskeopname
         strcat(prompt,":"); //:
         strcat(prompt,getenv("PWD")); // /home/hocine/ + repertoire
         strcat(prompt, "$ \0"); // $
