@@ -17,6 +17,22 @@ void frees(char **s){
     free(s);
 }
 
+char *f(char *prompt){
+    int size = strlen(prompt);
+    int max_size = 30;
+    if(size > max_size){
+        char *res = malloc(max_size);
+        if(res == NULL) perror("malloc");
+        strcpy(res, "...");
+        for(int i=3; i<max_size; i++){
+            int ind = size - max_size + i;
+            res[i] = prompt[ind];
+        }
+        return &res[0];
+    }
+    return prompt;
+}
+
 /**
  * Retourne un tableau de chaînes de caractères, chacune d'elle étant une sous-chaîne du paramètre str extraite en utilisant le séparateur separators
 */
@@ -47,12 +63,8 @@ int explode(char *str, const char *separators, char **res){
 }
 
 int main(void){
-    char **tab = malloc(0);
-
-    while(1){
-        printf("$");
-        char *ligne = readline("");
-        int taille = explode(ligne, " ", tab);
-        printf("taille: %d\n", taille);
-    }
+    char *prompt = "un/deux/trois/quatre/cinq/six/sept/huit/neufqsfqsf sqdsqdfsq fsdqfdsqfsdqffsqd";
+    int size = strlen(prompt);
+    printf("len: %d\n", size);
+    printf("%s\n", f(prompt));
 }
