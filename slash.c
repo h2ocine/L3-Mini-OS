@@ -15,7 +15,7 @@ char *truncate_prompt(char *prompt){
         }
         return res;
     }
-    return prompt
+    return prompt;
 }
 
 /*
