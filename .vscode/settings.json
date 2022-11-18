@@ -4,5 +4,6 @@
         "slash.h": "c",
         "stdlib.h": "c",
         "history.h": "c"
-    }
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
 }
