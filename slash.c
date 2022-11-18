@@ -146,8 +146,6 @@ int main(void){
             if(strcmp("exit",tab[0]) == 0)
             {
                 exits(tab[1]);
-                
-                //break;
             }
             else if(strcmp("cd",tab[0])==0)
             {
@@ -155,7 +153,7 @@ int main(void){
             }
             else if(strcmp("pwd",tab[0]) == 0)
             {
-                //pwd(tab);
+                pwd(taille,tab);
             }
             else
             {

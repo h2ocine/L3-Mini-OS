@@ -25,4 +25,4 @@ int exits(char *val);
 /**
  * Affiche la (plus précisément), une référence absolue du répertoire de travail courant 
  */
-int pwd(char **arg);
+int pwd(int argc, char **argv);

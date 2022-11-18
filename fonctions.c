@@ -1,5 +1,5 @@
 #include "fonctions.h"
-
+#include <errno.h>
 
 
 void *cd (char *pathname, char *option, char *ref){
@@ -18,66 +18,75 @@ int exits(char *val){
 }
 
 
-int pwd(char **arg){
-    const int pathsize = 100; //TODO : set pathsize
-    char *ref = malloc(pathsize);
-    //Recuperer le chemin d'accès du répertoire de travail courant
-    
-    if(arg[1] == NULL)
-    {
-        //Cas par défault : 
-        //Référence absolu logique (avec getenv) :
-        ref = getenv("PWD");
-        if(!ref)   
-        {
-            perror("getcwd - Erreur ");
-            free(ref);
-            return 1;
-        }
-    }
-    else
-    {
-        //Cas -L
-        //Référence absolu logique (avec getenv) :
-        if( strcmp(arg[1],"-L") == 0 || strcmp(arg[1],"-l") == 0)
-        {
-            ref = getenv("PWD");
-            if(!ref)   
-            {
-                perror("getcwd - Erreur ");
-                free(ref);
-                return 1;
-            }
-        }
-        else
-        {
-            //Cas -P
-            //Référence absolue physique (avec getcwd)
-            if(strcmp(arg[1],"-P") == 0 || strcmp(arg[1],"-p") == 0)
-            {
-                if(!getcwd(ref,sizeof(ref)))   
-                {
-                    perror("getcwd - Erreur ");
-                    free(ref);
-                    return 1;
-                }
-            }
-            else
-            {
-                //Cas paramètre faux
-                return 1; 
-            }
-        }
+//fonction pwd : //
 
-    }
-
+//write
+int pwd_affichage(char* ref)
+{
     if(write(1,ref,strlen(ref)) == -1)
     {
         perror("Erreur ");
         free(ref);
         return 1;
-    }    
+    }
+    return 0;
+}
+
+//Recuperation de la référence absolu logique
+int pwd_logique(char* ref)
+{
+    if(!strcpy(ref,getenv("PWD")))   
+    {
+        perror("getenv - Erreur ");
+        free(ref);
+        return 1;
+    }
     strcat(ref,"\n");
+    if(pwd_affichage(ref) == 1)
+        return 1;
     free(ref);
     return 0;
 }
+
+//Recuperation de la référence absolu phyique
+int pwd_physique(char* ref)
+{
+    if(!getcwd(ref,MAX_ARGS_STRLEN))   
+    {
+        perror("getcwd - Erreur ");
+        free(ref);
+        return 1;
+    }
+    strcat(ref,"\n");
+    if(pwd_affichage(ref) == 1)
+        return 1;
+    free(ref);
+    return 0;
+}
+
+int pwd(int argc, char **argv){
+    char *ref = malloc(MAX_ARGS_STRLEN);
+
+    //Cas par défault : (Référence absolu logique)
+    if(argc == 1)
+    {
+        return pwd_logique(ref);
+    }
+    else
+    {
+        //Cas -L : (Référence absolu logique)
+        if(strcmp(argv[1],"-L") == 0 || strcmp(argv[1],"-l") == 0)
+            return pwd_logique(ref);
+        else
+        {
+            //Cas -P : (Référence absolu phyique)
+            if(strcmp(argv[1],"-P") == 0 || strcmp(argv[1],"-p") == 0)
+                return pwd_physique(ref);
+            //Cas paramètre faux
+            else
+                return 1; 
+        }
+
+    }   
+}
+
