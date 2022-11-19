@@ -11,10 +11,10 @@
 #define MAX_ARGS_STRLEN 4096
 
 /**
- * Renvoie le répertoire ref (s'il s'agit d'une référence valide), le précédent répertoire de travail si le paramètre est -
+ * 
  * 
  */
-void *cd (char *pathname, char *option, char *ref);
+int cd (char *pathname, char *option, char *ref);
 
 /**
  * Termine le processus slash et renvoie comme valeur de retour val ou par default la valeur de retour de la dernière commande exécutée
@@ -26,3 +26,7 @@ int exits(char *val,int last_exit);
  * Affiche la (plus précisément), une référence absolue du répertoire de travail courant 
  */
 int pwd(int argc, char **argv);
+
+DIR *dir;
+char dossier_courant[MAX_ARGS_NUMBER]; 
+char oldPath[MAX_ARGS_NUMBER];

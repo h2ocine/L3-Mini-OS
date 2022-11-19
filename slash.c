@@ -23,90 +23,97 @@ void formatage_couleur(int last_exit,char *p,char *prompt){
 */
 char *truncate_prompt(char *prompt, int max_size){
     int size = strlen(prompt);
+    char *res;
     if(size > max_size){
-        char *res = malloc(max_size);
+        res = malloc(max_size + 1);
         if(res == NULL) perror("malloc");
         strcpy(res, "...");
         for(int i=3; i<max_size; i++){
             int ind = size - max_size + i;
             res[i] = prompt[ind];
         }
-        return &res[0];
+        res[max_size] = '\0';
+    }else{
+        res = malloc(size + 1);
+        if(res == NULL) perror("malloc");
+        sprintf(res, "%s", prompt);
     }
-    return prompt;
+    return res;
 
 }
 
 /*
     Libere la mémoire de toute les chaines de caractères presente dans s
 */
-void free_StingArrayArray(char **s,int taille){
-    for(int i = 0; i < taille ; i++)
-        free(s[i]);
+// void free_StingArrayArray(char **s,int taille){
+//     for(int i = 0; i < taille ; i++)
+//         free(s[i]);
     
-    free(s);
-}
+//     free(s);
+// }
 
-/*
- * Retourne un tableau de chaînes de caractères, chacune d'elle étant une sous-chaîne du paramètre str extraite en utilisant le séparateur separators
-*/
-char**  explode(char *str, const char *separators, int* taille)
-{ 
-    int i = 0;
-    size_t size = 0;
-    char* s = NULL;
-    char** res  = malloc(0);
-    if(res == NULL) 
-        perror("malloc");
+// /*
+//  * Retourne un tableau de chaînes de caractères, chacune d'elle étant une sous-chaîne du paramètre str extraite en utilisant le séparateur separators
+// */
+// char**  explode(char *str, const char *separators, int* taille)
+// { 
+//     int i = 0;
+//     size_t size = 0;
+//     char* s = NULL;
+//     char** res  = malloc(0);
+//     if(res == NULL) 
+//         perror("malloc");
 
-    //Cas chaine vide
-    if(strlen(str) == 0)
-    {
-        *taille = 0;
-        return NULL;
-    } 
+//     //Cas chaine vide
+//     if(strlen(str) == 0)
+//     {
+//         *taille = 0;
+//         return NULL;
+//     } 
 
-    //Séparer la chaine en plusieurs sous chaines :
-    char * strToken = strtok (str, separators);
-    while ( strToken != NULL ) 
-    {
-        // On copie strToken dans une chaine de caractère s (pour avoir utiliser la taille exact)
-        if(!(s = malloc(strlen(strToken)))) 
-            perror("malloc");
-        if(snprintf(s, strlen(strToken) + 1, "%s", strToken) < 0)
-        {
-            perror("explode snprintf error ");
-            exit(1);
-        }
+//     //Séparer la chaine en plusieurs sous chaines :
+//     char * strToken = strtok (str, separators);
+//     while ( strToken != NULL ) 
+//     {
+//         // On copie strToken dans une chaine de caractère s (pour avoir utiliser la taille exact)
+//         if(!(s = malloc(strlen(strToken)))) 
+//             perror("malloc");
+//         if(snprintf(s, strlen(strToken) + 1, "%s", strToken) < 0)
+//         {
+//             perror("explode snprintf error ");
+//             exit(1);
+//         }
 
-        //On ajoute la chaine de caractere s au tableau res
-        size += sizeof(char *);
-        res = realloc(res, size);
-        if(res == NULL) 
-            perror("realloc");
-        res[i] = s;
-        i++;
+//         //On ajoute la chaine de caractere s au tableau res
+//         size += sizeof(char *);
+//         res = realloc(res, size);
+//         if(res == NULL) 
+//             perror("realloc");
+//         res[i] = s;
+//         i++;
 
-        // On demande le token suivant.
-        strToken = strtok ( NULL, separators );
-    }
+//         // On demande le token suivant.
+//         strToken = strtok ( NULL, separators );
+//     }
     
-    if(!s)  
-        free(s);
-    free(strToken);
+//     if(!s)  
+//         free(s);
+//     free(strToken);
 
-    *taille = i;//ici on retourne la taille de res
-    return res;
-}
+//     *taille = i;//ici on retourne la taille de res
+//     return res;
+// }
 
 /*
     main
 */
 int main(void){
-    DIR *dir = opendir(".");
-    char dossier_courant[MAX_ARGS_NUMBER]; 
     getcwd(dossier_courant, MAX_ARGS_NUMBER);
 
+    strcpy(oldPath, dossier_courant);
+
+    dir = opendir(dossier_courant);
+    
     char **tab;
     int last_exit = 0;
     rl_outstream = stderr;
@@ -116,7 +123,6 @@ int main(void){
 
 
     while(1){
-        
         //Recupération du dosier prompt
         /*****************************************************************/
         /*****************************************************************/
@@ -151,9 +157,8 @@ int main(void){
         if(p== NULL) perror("malloc");
 
         formatage_couleur(last_exit,p,prompt);
-       
+
         char *ligne = readline(p);
-       
     
         //Cas du CTRL - D 
         if (ligne == NULL) {
@@ -192,8 +197,19 @@ int main(void){
                 last_exit = exits(t,last_exit);
             }
             else if(strcmp("cd",tab[0])==0)
-            {
-                //break;
+            {   
+                char *arg;
+                char *ref;
+                if(taille == 1){
+                    arg = NULL;
+                }else if(taille == 2){
+                    arg = NULL;
+                    ref = tab[1];
+                }else{
+                    arg = tab[1];
+                    ref = tab[2];
+                }
+                cd(dossier_courant, arg, ref);
             }
             else if(strcmp("pwd",tab[0]) == 0)
             {
@@ -209,11 +225,14 @@ int main(void){
         {
             free(tab);
         }
+
         free(p);
         free_StingArrayArray(tab,taille);
         /*****************************************************************/
         /*****************************************************************/
     }
+    free(dossier_courant);
+    free(oldPath);
     closedir(dir);
     return 0;
 }
