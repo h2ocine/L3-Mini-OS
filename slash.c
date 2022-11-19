@@ -2,20 +2,25 @@
 
 
 
-void formatage_couleur(int last_exit,char *p,char *prompt){
+void formatage_couleur(int last_exit,char *prompt,char *prompt_exit){
     char *rouge = "\033[0;31m";
-    char *blanc = "\033[0m";
+    //char *blanc = "\033[0m";
     char *vert = "\033[0;32m";
+    char *cyan = "\033[36m";
 
     if(last_exit == 0){
-        strcpy(p, vert);
-        strcat(p, prompt);
-        strcat(p, blanc);
+        strcpy(prompt,vert);
+        strcat(prompt, "[");
+        strcat(prompt, prompt_exit);
+        strcat(prompt, "]");
+        strcat(prompt,cyan);
             //Pas d'erreur à la derniere commande 
     }else if(last_exit == 1){
-        strcpy(p, rouge);
-        strcat(p, prompt);
-        strcat(p, blanc);
+        strcpy(prompt,rouge);
+        strcat(prompt, "[");
+        strcat(prompt, prompt_exit);
+        strcat(prompt, "]");
+        strcat(prompt,cyan);
     }
 }
 /*
@@ -127,6 +132,13 @@ int main(void){
     char **tab;
     int last_exit = 0;
     rl_outstream = stderr;
+
+    // char *rouge = "\033[0;31m";
+    char *blanc = "\033[0m";
+    // char *vert = "\033[0;32m";
+
+    //char *cyan = "\033[36m";
+
     
     //Initialisation variable d'environnement 
     //setenv("var_env","255",1);
@@ -138,14 +150,21 @@ int main(void){
         /*****************************************************************/
         /*****************************************************************/
         char prompt_exit[2];
+
         prompt_exit[0] = last_exit + '0'; //recuperer le premier caractère
         prompt_exit[1] = '\0'; //fin de la chaine de la valeur de retoure
 
 
-        char prompt[30];
-        strcpy(prompt, "[");
-        strcat(prompt, prompt_exit);
-        strcat(prompt, "]");
+        char prompt[33];
+
+        // strcpy(prompt,vert);
+        // strcat(prompt, "[");
+        // strcat(prompt, prompt_exit);
+        // strcat(prompt, "]");
+        // strcat(prompt,blanc);
+
+        //On s'occupe de la couleur du prompt ( [0] && [1])
+        formatage_couleur(last_exit,prompt,prompt_exit);
 
         int max_size = 30 - (strlen(prompt_exit) + 2) - 2; // 30 - taille de l'affichage du exit ([0] = 3) - 2 (taille du dollar et espace)
         char *prompt_dir = truncate_prompt(dossier_courant, max_size);
@@ -157,6 +176,10 @@ int main(void){
 
 
         strcat(prompt, "$ ");
+
+        //On met la saisie d'utilisateur en blanc
+
+        strcat(prompt,blanc);
 
         /*****************************************************************/
         /*****************************************************************/
@@ -172,7 +195,8 @@ int main(void){
         char*p = malloc(sizeof(char)*255);
         if(p== NULL) perror("malloc");
 
-        formatage_couleur(last_exit,p,prompt);
+        //formatage_couleur(last_exit,p,prompt);
+        strcat(p, prompt);
        
         char *ligne = readline(p);
 
@@ -214,6 +238,7 @@ int main(void){
             }
             else if(strcmp("cd",tab[0])==0)
             {
+                printf("ca rentre \n");
                 //break;
             }
             else if(strcmp("pwd",tab[0]) == 0)
@@ -222,7 +247,8 @@ int main(void){
             }
             else
             {
-                //Faire la commande externe .
+                last_exit = 10;
+
             }
         
         }
