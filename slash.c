@@ -103,6 +103,7 @@ char**  explode(char *str, const char *separators, int* taille)
     main
 */
 int main(void){
+    DIR *dir = opendir(".");
     char dossier_courant[MAX_ARGS_NUMBER]; 
     getcwd(dossier_courant, MAX_ARGS_NUMBER);
 
@@ -181,9 +182,14 @@ int main(void){
         if (taille > 0){
 
             if(strcmp("exit",tab[0]) == 0)
-            {
+            {   
+                char t[MAX_ARGS_NUMBER];
+                strcpy(t, tab[1]);
+                free(p);
+                free_StingArrayArray(tab,taille);
+                
                 //Pas besoin de la variable d'environnement ( voir avec adam)
-                last_exit = exits(tab[1],last_exit);
+                last_exit = exits(t,last_exit);
             }
             else if(strcmp("cd",tab[0])==0)
             {
@@ -208,6 +214,6 @@ int main(void){
         /*****************************************************************/
         /*****************************************************************/
     }
-
+    closedir(dir);
     return 0;
 }
