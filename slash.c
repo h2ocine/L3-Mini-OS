@@ -1,5 +1,23 @@
 #include "fonctions.c"
 
+
+
+void formatage_couleur(int last_exit,char *p,char *prompt){
+    char *rouge = "\033[0;31m";
+    char *blanc = "\033[0m";
+    char *vert = " \033[0;32m";
+
+    if(last_exit == 0){
+        strcpy(p, vert);
+        strcat(p, prompt);
+        strcat(p, blanc);
+            //Pas d'erreur à la derniere commande 
+    }else if(last_exit == 1){
+        strcpy(p, rouge);
+        strcat(p, prompt);
+        strcat(p, blanc);
+    }
+}
 /*
     Cette fonction raccourcis si il le faut la chaine prompt à 30 caractères 
 */
@@ -93,7 +111,8 @@ int main(void){
     rl_outstream = stderr;
     
     //Initialisation variable d'environnement 
-    setenv("var_env","255",1);
+    //setenv("var_env","255",1);
+
 
     while(1){
         
@@ -111,7 +130,9 @@ int main(void){
         int max_size = 30 - (strlen(prompt_exit) + 2) - 2; // 30 - taille de l'affichage du exit ([0] = 3) - 2 (taille du dollar et espace)
         char *prompt_dir = truncate_prompt(dossier_courant, max_size);
         
+        
         strcat(prompt, prompt_dir);
+
         free(prompt_dir);
 
         strcat(prompt, "$ ");
@@ -123,19 +144,20 @@ int main(void){
         /*****************************************************************/
         /*****************************************************************/
 
-        char p[255];
-        char *rouge = "\033[0;31m";
-        char *blanc = "\033[0m";
-        strcpy(p, rouge);
-        strcat(p, prompt);
-        strcat(p, blanc);
-        char *ligne = readline(p);
-        
 
+        //Formatage couleur prompt
+        char*p = malloc(sizeof(char)*255);
+        if(p== NULL) perror("malloc");
+
+        formatage_couleur(last_exit,p,prompt);
+       
+        char *ligne = readline(p);
+       
+    
         //Cas du CTRL - D 
         if (ligne == NULL) {
             //On appelle exit sans paramètres 
-            exits("NULL");
+            exits(NULL,last_exit);
             
         } 
 
@@ -160,7 +182,8 @@ int main(void){
 
             if(strcmp("exit",tab[0]) == 0)
             {
-                exits(tab[1]);
+                //Pas besoin de la variable d'environnement ( voir avec adam)
+                last_exit = exits(tab[1],last_exit);
             }
             else if(strcmp("cd",tab[0])==0)
             {
@@ -168,7 +191,7 @@ int main(void){
             }
             else if(strcmp("pwd",tab[0]) == 0)
             {
-                pwd(taille,tab);
+                last_exit = pwd(taille,tab);
             }
             else
             {
@@ -180,6 +203,7 @@ int main(void){
         {
             free(tab);
         }
+        free(p);
         free_StingArrayArray(tab,taille);
         /*****************************************************************/
         /*****************************************************************/
