@@ -6,14 +6,18 @@ void *cd (char *pathname, char *option, char *ref){
     return NULL;
 }
 
-int exits(char *val){
+int exits(char *val,int last_exit){
     if (val != NULL){
         if (atoi(val)!= 0){
             exit(atoi(val));
         }
     }
-        //On exit sans paramètres
-    exit(atoi(getenv("var_env")));
+    //On exit sans paramètres
+    //exit(atoi(getenv("var_env")));
+    //Faire le cas de la variable d'environement
+    //printf("ca rentre ici");
+    exit(last_exit);
+
 
 }
 

@@ -20,7 +20,7 @@ void *cd (char *pathname, char *option, char *ref);
  * Termine le processus slash et renvoie comme valeur de retour val ou par default la valeur de retour de la dernière commande exécutée
  * 
  */
-int exits(char *val);
+int exits(char *val,int last_exit);
 
 /**
  * Affiche la (plus précisément), une référence absolue du répertoire de travail courant 
