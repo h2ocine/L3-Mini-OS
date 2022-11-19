@@ -3,19 +3,24 @@
 /*
     Cette fonction raccourcis si il le faut la chaine prompt à 30 caractères 
 */
-char *truncate_prompt(char *prompt){
+char *truncate_prompt(char *prompt, int max_size){
     int size = strlen(prompt);
-    int max_size = 30;
-    if(size > max_size){
-        char res[30];
+    if(size > max_size)
+    {
+        char *res = malloc(max_size+1);
+        if(res == NULL) 
+            perror("malloc");
         strcpy(res, "...");
-        for(int i=3; i<max_size; i++){
+        for(int i = 3; i < max_size; i++)
+        {
             int ind = size - max_size + i;
             res[i] = prompt[ind];
         }
-        return res;
+        res[max_size] = '\0';
+        return &res[0];
     }
     return prompt;
+
 }
 
 /*
@@ -85,54 +90,63 @@ char**  explode(char *str, const char *separators, int* taille)
 */
 int main(void){
 
-    DIR *dir;
-    if((dir = opendir(".")) < 0) exits("1");
+    char dossier_courant[MAX_ARGS_NUMBER]; 
+    if(!strcpy(dossier_courant,getenv("PWD")))   
+    {
+        perror("(main) - getenv - Erreur ");
+        exit(1);
+    }
+    //dossier_courant[strlen(dossier_courant)] = '\0';
+
     char **tab;
+    int last_exit = 0;
     rl_outstream = stderr;
     
     //Initialisation variable d'environnement 
     setenv("var_env","255",1);
 
-    while(1){
 
+    while(1){
+        
         //Recupération du dosier prompt
         /*****************************************************************/
         /*****************************************************************/
-        char prompt[MAX_ARGS_NUMBER];
+        char prompt_exit[2];
+        prompt_exit[0] = last_exit + '0'; //recuperer le premier caractère
+        prompt_exit[1] = '\0'; //fin de la chaine de la valeur de retoure
 
-        strcpy(prompt, getenv("USER")); //username
-        strcat(prompt,"@"); //@
-        //strcat(prompt,getenv("NAME")); //deskeopname
-        strcat(prompt,":"); //:
-        strcat(prompt,getenv("PWD")); // /home/hocine/ + repertoire
-        strcat(prompt, "$ \0"); // $
 
-        int t;
-        //Supprimer /home/nom
-        char** tabtmp = NULL;
-        tabtmp = explode(prompt, "/", &t);
-        char strcommande[MAX_ARGS_NUMBER];
+        char prompt[30];
+        strcpy(prompt, "[");
+        strcat(prompt, prompt_exit);
+        strcat(prompt, "]");
+
+        int max_size = 30 - (strlen(prompt_exit) + 2) - 2; // 30 - taille de l'affichage du exit ([0] = 3) - 2 (taille du dollar et espace)
+        char *prompt_dir = truncate_prompt(dossier_courant, max_size);
+        strcat(prompt, prompt_dir);
+        free(prompt_dir);
+
+
+        strcat(prompt, "$ ");
+
+
         
-        strcpy(strcommande,tabtmp[0]); 
-        for(int i = 1; i<t;i++)
-        {
-            if(i!=1 && i!=2)//eviter /home/nom
-            {
-                strcat(strcommande,tabtmp[i]); 
-                if(i != t-1)
-                    strcat(strcommande,"/");
-            }
-            if(i == 1)
-                strcat(strcommande,"~/");
-        }
-        free(tabtmp);
+
         /*****************************************************************/
         /*****************************************************************/
 
         //Lecture de la commande (On la récupére dans tab)
         /*****************************************************************/
         /*****************************************************************/
-        char *ligne = readline(strcommande);
+
+        char p[255];
+        char *rouge = "\033[0;31m";
+        char *blanc = "\033[0m";
+        strcpy(p, rouge);
+        strcat(p, prompt);
+        strcat(p, blanc);
+        char *ligne = readline(p);
+        
 
         //Cas du CTRL - D 
         if (ligne == NULL) {
@@ -186,7 +200,6 @@ int main(void){
         /*****************************************************************/
         /*****************************************************************/
     }
-    closedir(dir);
 
     return 0;
 }
