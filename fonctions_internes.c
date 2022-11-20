@@ -61,16 +61,19 @@ char *realLogiquePath(char *path){
     char **tab = explode(path, "/", &taille);
     free(path);
 
-    char *res = malloc(4000);
+    //char *res = malloc(200);
+    char *res = malloc(2);
     if(sprintf(res, "%s", "/")<0) {perror("sprintf erreur ");exit(1);}
+    res[1] = '\0';
 
     int *size = calloc(taille, sizeof(int));
 
-    for(int i=0; i<taille; i++){
+    for(int i = 0 ; i < taille ; i++)
+    {
         int len = strlen(res);
         int last_size = pop(size, taille);
 
-        // on ignore
+        // On ignore
         if(strcmp(tab[i], ".") == 0){
             if(i == taille-1) truncateString(res, 1);
             continue;
@@ -81,22 +84,35 @@ char *realLogiquePath(char *path){
         {
             int nb_slash; // Nombre de '/' a supprimer
             if(i == taille -1)
-            {
                 nb_slash = 2;
-            }
             else
-            {
                 nb_slash = 1;
-            }
             truncateString(res, last_size + nb_slash);
             deleteLast(size, taille);
-            
         }
         else
         {
-            sprintf(&res[len], "%s", tab[i]);
-            if(i != taille-1) 
-                strcat(res, "/");
+            printf("res = %s ; %ld\n",res,strlen(res));
+            printf("tab[i] = %s ; %ld\n",tab[i],strlen(tab[i]));
+
+            if(realloc(res, strlen(res) + strlen(tab[i])) == NULL)
+            {
+                perror("(ligne 97)fonction realLogiquePath realloc erreur ");
+                exit(1);
+            }
+            if(sprintf(&res[len], "%s", tab[i]) < 0) {perror("sprintf erreur ");exit(1);}
+            res[len + strlen(tab[i])] = '\0';
+        
+            if(i != taille-1)
+            {
+                if(realloc(res, strlen(res) + 1) == NULL)
+                {
+                    perror("(ligne 107)fonction realLogiquePath realloc erreur ");
+                    exit(1);
+                }    
+                res[len + strlen(tab[i])] = '/';
+                res[len + strlen(tab[i]) + 1] = '\0';
+            }
             push(size, taille, strlen(tab[i]));
         }
     }
