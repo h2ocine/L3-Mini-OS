@@ -39,7 +39,7 @@ void recherche_commande_interne(char ** tab,int *last_exit,int taille)
             arg = tab[1];
             ref = tab[2];
         }
-        *last_exit = cd(dossier_courant, arg, ref);
+        *last_exit = cd(arg, ref);
     }
     else if(strcmp("pwd",tab[0]) == 0)
     {

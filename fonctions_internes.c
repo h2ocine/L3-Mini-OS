@@ -119,14 +119,16 @@ int cd_physique(char *path, char *ref){
     setenv("PWD", real, 1);
 
     // On vide la chaine de caractere oldPath et on lui donne la valeur de dossier_courant
-    memset(oldPath, 0, MAX_ARGS_NUMBER);
-    strcpy(oldPath, dossier_courant);
-    oldPath[strlen(dossier_courant)] = '\0';
+    setenv("OLDPWD", getenv("PWD"), 1);
+    // memset(oldPath, 0, MAX_ARGS_NUMBER);
+    // strcpy(oldPath, dossier_courant);
+    // oldPath[strlen(dossier_courant)] = '\0';
 
     // On vide la chaine de caractere dossier_courant et on lui donne la valeur de path
-    memset(dossier_courant, 0, MAX_ARGS_NUMBER);
-    strcpy(dossier_courant, real);
-    dossier_courant[strlen(real)] = '\0';
+    setenv("PWD", real, 1);
+    // memset(dossier_courant, 0, MAX_ARGS_NUMBER);
+    // strcpy(dossier_courant, real);
+    // dossier_courant[strlen(real)] = '\0';
 
     return 0;
 }
@@ -148,23 +150,26 @@ int cd_logique(char *path, char *ref){
     setenv("PWD", realpath, 1); // On change la var d'environnement PWD car elle est utiliser dans la commande 
     
     // On vide la chaine de caractere oldPath et on lui donne la valeur de dossier_courant
-    memset(oldPath, 0, MAX_ARGS_NUMBER);
-    strcpy(oldPath, dossier_courant);
-    oldPath[strlen(dossier_courant)] = '\0';
+    setenv("OLDPWD", getenv("PWD"), 1);
+    // memset(oldPath, 0, MAX_ARGS_NUMBER);
+    // strcpy(oldPath, dossier_courant);
+    // oldPath[strlen(dossier_courant)] = '\0';
 
     // On vide la chaine de caractere dossier_courant et on lui donne la valeur de path
-    memset(dossier_courant, 0, MAX_ARGS_NUMBER);
-    strcpy(dossier_courant, realpath);
-    dossier_courant[strlen(realpath)] = '\0';
+    setenv("pwd", realpath, 1);
+    // memset(dossier_courant, 0, MAX_ARGS_NUMBER);
+    // strcpy(dossier_courant, realpath);
+    // dossier_courant[strlen(realpath)] = '\0';
 
     return 0;
 }
 
 
-int cd (char *pathname, char *option, char *ref){
+int cd (char *option, char *ref){
     char *l = "-L"; // Represente l'option -L
     char *p = "-P"; // Represente l'option -P
     char dest[MAX_ARGS_NUMBER] = "";
+    char *pathname = getenv("PWD");
 
 
     if(ref != NULL)
@@ -180,6 +185,7 @@ int cd (char *pathname, char *option, char *ref){
         // Si la ref est "-" dest vaut oldpath 
         else if(strcmp(ref, "-") == 0)
         {   
+            char *oldPath = getenv("OLDPWD");
             if(sprintf(dest, "%s", oldPath) < 0) {
                 perror("sprintf erreur");
                 exit(1);
