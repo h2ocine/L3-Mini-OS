@@ -24,10 +24,12 @@ void formatage_couleur(int last_exit,char *prompt,char *prompt_exit){
         strcat(prompt,cyan);
     }
 }
+
 /*
     Cette fonction raccourcis si il le faut la chaine prompt à 30 caractères 
 */
-char *truncate_prompt(char *prompt, int max_size){
+char *truncate_prompt(char *prompt, int max_size)
+{
     int size = strlen(prompt);
     char *res;
     if(size > max_size)
@@ -42,8 +44,7 @@ char *truncate_prompt(char *prompt, int max_size){
             res[i] = prompt[ind];
         }
         res[max_size] = '\0';
-        return &res[0];
-    }
+    } 
     else
     {
         res = malloc(size + 1);
@@ -56,81 +57,14 @@ char *truncate_prompt(char *prompt, int max_size){
 
 }
 
-
-/*
-    Libere la mémoire de toute les chaines de caractères presente dans s
-*/
-void free_StingArrayArray(char **s,int taille){
-    for(int i = 0; i < taille ; i++)
-        free(s[i]);
-    
-    free(s);
-}
-
-/*
- * Retourne un tableau de chaînes de caractères, chacune d'elle étant une sous-chaîne du paramètre str extraite en utilisant le séparateur separators
-*/
-char**  explode(char *str, const char *separators, int* taille)
-{ 
-    int i = 0;
-    size_t size = 0;
-    char* s = NULL;
-    char** res  = malloc(0);
-    if(res == NULL) 
-        perror("malloc");
-
-    //Cas chaine vide
-    if(strlen(str) == 0)
-    {
-        *taille = 0;
-        return NULL;
-    } 
-
-    
-    
-
-    //Séparer la chaine en plusieurs sous chaines :
-    char * strToken = strtok (str, separators);
-
-    while ( strToken != NULL ) 
-    {
-        
-        // On copie strToken dans une chaine de caractère s (pour avoir utiliser la taille exact)
-        if(!(s = malloc(strlen(strToken) + 1))) 
-            perror("malloc");
-
-        if(snprintf(s, strlen(strToken) + 1, "%s", strToken) < 0)
-        {
-            perror("explode snprintf error ");
-            exit(1);
-        }
-        s[strlen(strToken)] = '\0';
-
-        //On ajoute la chaine de caractere s au tableau res
-        size += sizeof(char *);
-        res = realloc(res, size);
-        if(res == NULL) 
-            perror("realloc");
-        res[i] = s;
-        i++;
-
-        // On demande le token suivant.
-        strToken = strtok ( NULL, separators );
-    }
-    
-    
-    if(!s)  
-        free(s);
-    free(strToken);
-
-    *taille = i;//ici on retourne la taille de res
-    return res;
-}
-
 /*
     main
 */
 int main(void){
+
+    getcwd(dossier_courant, MAX_ARGS_NUMBER);
+
+    strcpy(oldPath, dossier_courant);
 
     char **tab;
     int last_exit = 0;
@@ -139,12 +73,8 @@ int main(void){
     char *blanc = "\033[0m";
     #define TAILLE_PROMPT 47 //7 (rouge ou vert) + 5 (bleu) + 4 (blanc) + 1 ('\0')
 
-    //Initialisation variable d'environnement 
-    //setenv("var_env","255",1);
     while(1){
 
-        /*****************************************************************/
-        /*****************************************************************/
         //affichage du prompt :
         //---------------------
         //recupération du dossier courant 
@@ -217,14 +147,33 @@ int main(void){
         if (taille > 0){
 
             if(strcmp("exit",tab[0]) == 0)
-            {
+            {   
+                char t[MAX_ARGS_NUMBER];
+                strcpy(t, tab[1]);
+                free_StingArrayArray(tab,taille);
+                
                 //Pas besoin de la variable d'environnement ( voir avec adam)
-                last_exit = exits(tab[1],last_exit);
+                last_exit = exits(t,last_exit);
             }
             else if(strcmp("cd",tab[0])==0)
-            {
-                //printf("ca rentre \n");
-                //break;
+            {   
+                char *arg;
+                char *ref;
+                if(taille == 1)
+                {
+                    arg = NULL;
+                }
+                else if(taille == 2)
+                {
+                    arg = NULL;
+                    ref = tab[1];
+                }
+                else
+                {
+                    arg = tab[1];
+                    ref = tab[2];
+                }
+                cd(dossier_courant, arg, ref);
             }
             else if(strcmp("pwd",tab[0]) == 0)
             {
@@ -247,6 +196,8 @@ int main(void){
         /*---------------------------*/
 
     }
-
+    free(dossier_courant);
+    free(oldPath);
+    closedir(dir);
     return 0;
 }
