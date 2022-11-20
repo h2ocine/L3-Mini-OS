@@ -15,7 +15,7 @@ int exits(char *val,int last_exit){
     //On exit sans paramètres
     //exit(atoi(getenv("var_env")));
     //Faire le cas de la variable d'environement
-    printf("ca rentre ici");
+    //printf("ca rentre ici");
     exit(last_exit);
 
 
