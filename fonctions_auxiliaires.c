@@ -27,6 +27,7 @@ void recherche_commande_interne(char ** tab,int *last_exit,int taille)
         if(taille == 1)
         {
             arg = NULL;
+            ref = NULL;//*//
         }
         else if(taille == 2)
         {

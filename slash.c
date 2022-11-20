@@ -3,7 +3,8 @@
 /*
     main
 */
-int main(void){
+int main(void)
+{
 
     getcwd(dossier_courant, MAX_ARGS_NUMBER);
 

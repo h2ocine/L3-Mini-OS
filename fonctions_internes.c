@@ -56,15 +56,16 @@ void truncateString(char *s, int n){
 }
 
 char *realLogiquePath(char *path){
+
     int taille;
     char **tab = explode(path, "/", &taille);
     free(path);
 
     char *res = malloc(4000);
-    sprintf(res, "%s", "/");
+    if(sprintf(res, "%s", "/")<0) {perror("sprintf erreur ");exit(1);}
+
     int *size = calloc(taille, sizeof(int));
-    
-    
+
     for(int i=0; i<taille; i++){
         int len = strlen(res);
         int last_size = pop(size, taille);
@@ -75,19 +76,27 @@ char *realLogiquePath(char *path){
             continue;
 
         // On revient au dossier parent
-        }else if(strcmp(tab[i], "..") == 0){
+        }
+        else if(strcmp(tab[i], "..") == 0)
+        {
             int nb_slash; // Nombre de '/' a supprimer
-            if(i == taille -1){
+            if(i == taille -1)
+            {
                 nb_slash = 2;
-            }else{
+            }
+            else
+            {
                 nb_slash = 1;
             }
             truncateString(res, last_size + nb_slash);
             deleteLast(size, taille);
             
-        }else{
+        }
+        else
+        {
             sprintf(&res[len], "%s", tab[i]);
-            if(i != taille-1) strcat(res, "/");
+            if(i != taille-1) 
+                strcat(res, "/");
             push(size, taille, strlen(tab[i]));
         }
     }
@@ -101,6 +110,7 @@ int cd (char *pathname, char *option, char *ref){
     char *p = "-P";
     char dest[MAX_ARGS_NUMBER];
 
+    //argument = chemin absolue
     if(ref != NULL && ref[0] == '/'){
         chdir(ref);
         setenv("PWD", ref, 1);
@@ -111,21 +121,33 @@ int cd (char *pathname, char *option, char *ref){
     {
         if(strcmp(ref, "-") == 0)
         {
-            sprintf(dest, "%s", oldPath);
+            if(sprintf(dest, "%s", oldPath) < 0) {perror("sprintf erreur ");exit(1);}
+            dest[strlen(oldPath)] = '\0';
         }
-        else{
-            sprintf(dest, "%s", pathname);
-            sprintf(&dest[strlen(dest)], "/");
+        else
+        {
+            if(sprintf(dest, "%s", pathname) < 0) {perror("sprintf erreur ");exit(1);}
+            //sprintf(&dest[strlen(dest)], "%s", "/");
+            dest[strlen(pathname)] = '/';
+            dest[strlen(pathname) + 1] = '\0';
             strcat(dest, ref);
+            dest[strlen(pathname) + 1 + strlen(ref)] = '\0';
         }
-    }else{
-        sprintf(dest, "%s", getenv("HOME"));
     }
+    else
+    {
+        if(sprintf(dest, "%s", getenv("HOME")) < 0) {perror("sprintf erreur ");exit(1);} 
+        dest[strlen(getenv("HOME"))] = '\0';
+    }
+    
 
+    //CAS : -L
     if(option == NULL || strcmp(option, l) == 0)
     {
         char *c = malloc(strlen(dest));
-        sprintf(c, "%s", dest);
+        if(sprintf(c, "%s", dest) < 0) {perror("sprintf erreur ");exit(1);}
+        c[strlen(dest)] = '\0';
+
         char *realpath = realLogiquePath(c);
 
         if(chdir(realpath) < 0)
@@ -135,14 +157,19 @@ int cd (char *pathname, char *option, char *ref){
         setenv("PWD", realpath, 1);
         memset(oldPath, 0, MAX_ARGS_NUMBER);
         strcpy(oldPath, dossier_courant);
+        oldPath[strlen(dossier_courant)] = '\0';
 
         memset(dossier_courant, 0, MAX_ARGS_NUMBER);
         strcpy(dossier_courant, realpath);
+        dossier_courant[strlen(realpath)] = '\0';
     }
+    //CAS : -P 
     else if(strcmp(option, p) == 0) 
     {
         char real[MAX_ARGS_NUMBER];
         realpath(dest, real);
+
+        //CAS : fichier inexistant 
         if(chdir(real) < 0) 
         {
             printf("\033[36mbash: cd: %s: No such file or directory\n", ref);
