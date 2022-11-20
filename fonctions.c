@@ -145,6 +145,13 @@ int cd (char *pathname, char *option, char *ref){
     char *l = "-L";
     char *p = "-P";
     char dest[MAX_ARGS_NUMBER];
+
+    if(ref != NULL && ref[0] == '/'){
+        chdir(ref);
+        setenv("PWD", ref, 1);
+        return 0;
+    }
+
     if(ref != NULL)
     {
         if(strcmp(ref, "-") == 0)
@@ -170,16 +177,12 @@ int cd (char *pathname, char *option, char *ref){
         {
             return 1;
         }
-        //printf("real path = %s\n",realpath);
         setenv("PWD", realpath, 1);
         memset(oldPath, 0, MAX_ARGS_NUMBER);
         strcpy(oldPath, dossier_courant);
 
         memset(dossier_courant, 0, MAX_ARGS_NUMBER);
         strcpy(dossier_courant, realpath);
-        
-        printf("dossier courant = %s\nancier dossier = %s\n",dossier_courant,oldPath);
-               
     }
     else if(strcmp(option, p) == 0)
     {
@@ -211,7 +214,9 @@ int exits(char *val,int last_exit){
 }
 
 
-//fonction pwd : //
+/*
+    PWD
+*/
 
 //write
 int pwd_affichage(char* ref)

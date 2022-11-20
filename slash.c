@@ -162,6 +162,7 @@ int main(void){
                 if(taille == 1)
                 {
                     arg = NULL;
+                    ref = NULL;
                 }
                 else if(taille == 2)
                 {
