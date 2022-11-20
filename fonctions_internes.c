@@ -105,29 +105,94 @@ char *realLogiquePath(char *path){
     return res;
 }
 
-int cd (char *pathname, char *option, char *ref){
-    char *l = "-L";
-    char *p = "-P";
-    char dest[MAX_ARGS_NUMBER];
 
-    //argument = chemin absolue
-    if(ref != NULL && ref[0] == '/'){
-        chdir(ref);
-        setenv("PWD", ref, 1);
-        return 0;
+int cd_physique(char *path, char *ref){
+    char real[MAX_ARGS_NUMBER];
+    realpath(path, real);
+
+    //CAS : fichier inexistant 
+    if(chdir(real) < 0) 
+    {
+        printf("\033[36mbash: cd: %s: No such file or directory\n", ref);
+        return 1;
     }
+    setenv("PWD", real, 1);
+
+    // On vide la chaine de caractere oldPath et on lui donne la valeur de dossier_courant
+    memset(oldPath, 0, MAX_ARGS_NUMBER);
+    strcpy(oldPath, dossier_courant);
+    oldPath[strlen(dossier_courant)] = '\0';
+
+    // On vide la chaine de caractere dossier_courant et on lui donne la valeur de path
+    memset(dossier_courant, 0, MAX_ARGS_NUMBER);
+    strcpy(dossier_courant, real);
+    dossier_courant[strlen(real)] = '\0';
+
+    return 0;
+}
+
+int cd_logique(char *path, char *ref){
+
+    // On cree une copie de path car pour utiliser la fonction explode on a besoin d'une chaine de caractère alouer dynamiquement
+    char *c = malloc(strlen(path));
+    if(sprintf(c, "%s", path) < 0) {
+        perror("sprintf erreur ");
+        exit(1);
+    }
+    c[strlen(path)] = '\0';
+
+    
+    char *realpath = realLogiquePath(c);
+    // On vérifie le chemin physique si le chemin realpath n'a pas de sens(càd qu'il existe)
+    if(chdir(realpath) < 0) return cd_physique(path, ref);
+    setenv("PWD", realpath, 1); // On change la var d'environnement PWD car elle est utiliser dans la commande 
+    
+    // On vide la chaine de caractere oldPath et on lui donne la valeur de dossier_courant
+    memset(oldPath, 0, MAX_ARGS_NUMBER);
+    strcpy(oldPath, dossier_courant);
+    oldPath[strlen(dossier_courant)] = '\0';
+
+    // On vide la chaine de caractere dossier_courant et on lui donne la valeur de path
+    memset(dossier_courant, 0, MAX_ARGS_NUMBER);
+    strcpy(dossier_courant, realpath);
+    dossier_courant[strlen(realpath)] = '\0';
+
+    return 0;
+}
+
+
+int cd (char *pathname, char *option, char *ref){
+    char *l = "-L"; // Represente l'option -L
+    char *p = "-P"; // Represente l'option -P
+    char dest[MAX_ARGS_NUMBER] = "";
+
 
     if(ref != NULL)
-    {
-        if(strcmp(ref, "-") == 0)
-        {
-            if(sprintf(dest, "%s", oldPath) < 0) {perror("sprintf erreur ");exit(1);}
+    {   
+        // Si la ref est un chemin relatif
+        if(ref[0] == '/'){
+            if(sprintf(dest, "%s", ref) < 0) {
+                perror("sprintf erreur ");
+                exit(1);
+            }
+        }
+
+        // Si la ref est "-" dest vaut oldpath 
+        else if(strcmp(ref, "-") == 0)
+        {   
+            if(sprintf(dest, "%s", oldPath) < 0) {
+                perror("sprintf erreur");
+                exit(1);
+            }
             dest[strlen(oldPath)] = '\0';
+            
         }
         else
         {
-            if(sprintf(dest, "%s", pathname) < 0) {perror("sprintf erreur ");exit(1);}
-            //sprintf(&dest[strlen(dest)], "%s", "/");
+            if(sprintf(dest, "%s", pathname) < 0) {
+                perror("sprintf erreur ");
+                exit(1);
+            }
             dest[strlen(pathname)] = '/';
             dest[strlen(pathname) + 1] = '\0';
             strcat(dest, ref);
@@ -139,46 +204,12 @@ int cd (char *pathname, char *option, char *ref){
         if(sprintf(dest, "%s", getenv("HOME")) < 0) {perror("sprintf erreur ");exit(1);} 
         dest[strlen(getenv("HOME"))] = '\0';
     }
-    
 
-    //CAS : -L
-    if(option == NULL || strcmp(option, l) == 0)
-    {
-        char *c = malloc(strlen(dest));
-        if(sprintf(c, "%s", dest) < 0) {perror("sprintf erreur ");exit(1);}
-        c[strlen(dest)] = '\0';
+    // Cas lien logique
+    if(option == NULL || strcmp(option, l) == 0) cd_logique(dest, ref);
+    else if(strcmp(option, p) == 0) cd_physique(dest, ref);
+    else return 1;  // Cas d'une autre option
 
-        char *realpath = realLogiquePath(c);
-
-        if(chdir(realpath) < 0)
-        {
-            return cd(pathname, p, ref);
-        }
-        setenv("PWD", realpath, 1);
-        memset(oldPath, 0, MAX_ARGS_NUMBER);
-        strcpy(oldPath, dossier_courant);
-        oldPath[strlen(dossier_courant)] = '\0';
-
-        memset(dossier_courant, 0, MAX_ARGS_NUMBER);
-        strcpy(dossier_courant, realpath);
-        dossier_courant[strlen(realpath)] = '\0';
-    }
-    //CAS : -P 
-    else if(strcmp(option, p) == 0) 
-    {
-        char real[MAX_ARGS_NUMBER];
-        realpath(dest, real);
-
-        //CAS : fichier inexistant 
-        if(chdir(real) < 0) 
-        {
-            printf("\033[36mbash: cd: %s: No such file or directory\n", ref);
-            return 1;
-        }
-        setenv("PWD", real, 1);
-        strcpy(oldPath, dossier_courant);
-        strcpy(dossier_courant, real);
-    }
     return 0;
 }
 
