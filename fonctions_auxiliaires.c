@@ -3,7 +3,8 @@
 
 
 void free_StingArrayArray(char **s,int taille)
-{
+{   
+    
     for(int i = 0; i < taille ; i++)
         free(s[i]);
     

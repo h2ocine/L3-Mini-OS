@@ -134,7 +134,7 @@ int cd_physique(char *path, char *ref){
 }
 
 int cd_logique(char *path, char *ref){
-
+    printf("path: %s\n", path);
     // On cree une copie de path car pour utiliser la fonction explode on a besoin d'une chaine de caractère alouer dynamiquement
     char *c = malloc(strlen(path));
     if(sprintf(c, "%s", path) < 0) {
@@ -161,6 +161,7 @@ int cd_logique(char *path, char *ref){
     // strcpy(dossier_courant, realpath);
     // dossier_courant[strlen(realpath)] = '\0';
 
+    printf("res: %s\n", realpath);
     return 0;
 }
 
