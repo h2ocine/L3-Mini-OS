@@ -138,8 +138,10 @@ char**  explode(char *str, const char *separators, int* taille)
         //On ajoute la chaine de caractere s au tableau res
         size += 1;
         res = realloc(res, size * sizeof(char *));
+
         if(res == NULL) 
-            perror("realloc");
+            perror("fonction explode : realloc erreur ");
+
         res[i] = s;
         i++;
 
