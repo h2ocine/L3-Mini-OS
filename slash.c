@@ -5,10 +5,7 @@
 */
 int main(void)
 {
-
-    getcwd(dossier_courant, MAX_ARGS_NUMBER);
-
-    strcpy(oldPath, dossier_courant);
+    setenv("OLDPWD", getenv("PWD"), 1);
 
     char **tab;
     int last_exit = 0;
@@ -103,8 +100,5 @@ int main(void)
         /*---------------------------*/
 
     }
-    free(dossier_courant);
-    free(oldPath);
-    closedir(dir);
     return 0;
 }
