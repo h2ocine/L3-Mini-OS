@@ -29,7 +29,7 @@ void recherche_commande_interne(char ** tab,int *last_exit,int taille){
                     arg = tab[1];
                     ref = tab[2];
                 }
-                cd(dossier_courant, arg, ref);
+                *last_exit = cd(dossier_courant, arg, ref);
             }
             else if(strcmp("pwd",tab[0]) == 0)
             {
@@ -191,47 +191,6 @@ int main(void){
             //On cherche si dans notre tableau
             recherche_commande_interne(tab,&last_exit,taille);
 
-<<<<<<< HEAD
-            if(strcmp("exit",tab[0]) == 0)
-            {   
-                char t[MAX_ARGS_NUMBER];
-                strcpy(t, tab[1]);
-                free_StingArrayArray(tab,taille);
-                last_exit = exits(t,last_exit);
-            }
-            else if(strcmp("cd",tab[0])==0)
-            {   
-                char *arg;
-                char *ref;
-                if(taille == 1)
-                {
-                    arg = NULL;
-                    ref = NULL;
-                }
-                else if(taille == 2)
-                {
-                    arg = NULL;
-                    ref = tab[1];
-                }
-                else
-                {
-                    arg = tab[1];
-                    ref = tab[2];
-                }
-                last_exit = cd(dossier_courant, arg, ref);
-            }
-            else if(strcmp("pwd",tab[0]) == 0)
-            {
-                last_exit = pwd(taille,tab);
-            }
-            else
-            {
-                //last exit = 277
-                //chercher les commandes externes
-            }
-        
-=======
->>>>>>> 3fbba8c73a47ae7725fee9f3d330c616c23b876d
         }
         else
         {
