@@ -172,10 +172,10 @@ int cd (char *pathname, char *option, char *ref){
         char *c = malloc(strlen(dest));
         sprintf(c, "%s", dest);
         char *realpath = realLogiquePath(c);
-         
+
         if(chdir(realpath) < 0)
         {
-            return 1;
+            return cd(pathname, p, ref);
         }
         setenv("PWD", realpath, 1);
         memset(oldPath, 0, MAX_ARGS_NUMBER);
@@ -184,17 +184,23 @@ int cd (char *pathname, char *option, char *ref){
         memset(dossier_courant, 0, MAX_ARGS_NUMBER);
         strcpy(dossier_courant, realpath);
     }
-    else if(strcmp(option, p) == 0)
+    else if(strcmp(option, p) == 0) 
     {
         char real[MAX_ARGS_NUMBER];
         realpath(dest, real);
-        if(chdir(real) < 0) return 1;
+        if(chdir(real) < 0) 
+        {
+            printf("\033[36mbash: cd: %s: No such file or directory\n", ref);
+            return 1;
+        }
         setenv("PWD", real, 1);
         strcpy(oldPath, dossier_courant);
         strcpy(dossier_courant, real);
     }
     return 0;
 }
+
+
 
 /*
     EXITS
@@ -206,11 +212,7 @@ int exits(char *val,int last_exit){
         }
     }
     //On exit sans paramètres
-    //exit(atoi(getenv("var_env")));
-    //Faire le cas de la variable d'environement
     exit(last_exit);
-
-
 }
 
 

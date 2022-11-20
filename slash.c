@@ -151,8 +151,6 @@ int main(void){
                 char t[MAX_ARGS_NUMBER];
                 strcpy(t, tab[1]);
                 free_StingArrayArray(tab,taille);
-                
-                //Pas besoin de la variable d'environnement ( voir avec adam)
                 last_exit = exits(t,last_exit);
             }
             else if(strcmp("cd",tab[0])==0)
@@ -174,7 +172,7 @@ int main(void){
                     arg = tab[1];
                     ref = tab[2];
                 }
-                cd(dossier_courant, arg, ref);
+                last_exit = cd(dossier_courant, arg, ref);
             }
             else if(strcmp("pwd",tab[0]) == 0)
             {
