@@ -1,6 +1,48 @@
 #include "fonctions.c"
 
 
+void recherche_commande_interne(char ** tab,int *last_exit,int taille){
+    
+            if(strcmp("exit",tab[0]) == 0)
+            {   
+                char t[MAX_ARGS_NUMBER];
+                strcpy(t, tab[1]);
+                free_StingArrayArray(tab,taille);
+                
+                *last_exit = exits(t,*last_exit);
+            }
+            else if(strcmp("cd",tab[0])==0)
+            {   
+                char *arg;
+                char *ref;
+                if(taille == 1)
+                {
+                    arg = NULL;
+                }
+                else if(taille == 2)
+                {
+                    arg = NULL;
+                    ref = tab[1];
+                }
+                else
+                {
+                    arg = tab[1];
+                    ref = tab[2];
+                }
+                cd(dossier_courant, arg, ref);
+            }
+            else if(strcmp("pwd",tab[0]) == 0)
+            {
+                *last_exit = pwd(taille,tab);
+            }
+            else
+            {
+                //last exit = 277
+                //chercher les commandes externes
+            }
+    
+}
+
 
 void formatage_couleur(int last_exit,char *prompt,char *prompt_exit){
     char *rouge = "\033[0;31m";
@@ -145,46 +187,10 @@ int main(void){
 
         //On traite notre tableau 
         if (taille > 0){
+            
+            //On cherche si dans notre tableau
+            recherche_commande_interne(tab,&last_exit,taille);
 
-            if(strcmp("exit",tab[0]) == 0)
-            {   
-                char t[MAX_ARGS_NUMBER];
-                strcpy(t, tab[1]);
-                free_StingArrayArray(tab,taille);
-                
-                //Pas besoin de la variable d'environnement ( voir avec adam)
-                last_exit = exits(t,last_exit);
-            }
-            else if(strcmp("cd",tab[0])==0)
-            {   
-                char *arg;
-                char *ref;
-                if(taille == 1)
-                {
-                    arg = NULL;
-                }
-                else if(taille == 2)
-                {
-                    arg = NULL;
-                    ref = tab[1];
-                }
-                else
-                {
-                    arg = tab[1];
-                    ref = tab[2];
-                }
-                cd(dossier_courant, arg, ref);
-            }
-            else if(strcmp("pwd",tab[0]) == 0)
-            {
-                last_exit = pwd(taille,tab);
-            }
-            else
-            {
-                //last exit = 277
-                //chercher les commandes externes
-            }
-        
         }
         else
         {
