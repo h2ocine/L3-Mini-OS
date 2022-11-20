@@ -14,7 +14,6 @@ int main(void)
     char *blanc = "\033[0m";
 
     while(1){
-        printf("while\n");
         //affichage du prompt :
         //---------------------
         //recupération du dossier courant 
@@ -55,9 +54,7 @@ int main(void)
         /*****************************************************************/
 
         //lecture de la commande et affichage de p
-        printf("prompt: %s\n len: %ld\n", prompt, strlen(prompt));
         char *ligne = readline(prompt);
-        printf("ok\n");
 
         //Cas du CTRL - D 
         if (ligne == NULL) {

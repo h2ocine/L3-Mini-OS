@@ -109,14 +109,13 @@ char *realLogiquePath(char *path){
 int cd_physique(char *path, char *ref){
     char real[MAX_ARGS_NUMBER];
     realpath(path, real);
-
+    
     //CAS : fichier inexistant 
     if(chdir(real) < 0) 
     {
         printf("\033[36mbash: cd: %s: No such file or directory\n", ref);
         return 1;
     }
-    setenv("PWD", real, 1);
 
     // On vide la chaine de caractere oldPath et on lui donne la valeur de dossier_courant
     setenv("OLDPWD", getenv("PWD"), 1);
@@ -134,7 +133,6 @@ int cd_physique(char *path, char *ref){
 }
 
 int cd_logique(char *path, char *ref){
-    printf("path: %s\n", path);
     // On cree une copie de path car pour utiliser la fonction explode on a besoin d'une chaine de caractère alouer dynamiquement
     char *c = malloc(strlen(path));
     if(sprintf(c, "%s", path) < 0) {
@@ -147,7 +145,6 @@ int cd_logique(char *path, char *ref){
     char *realpath = realLogiquePath(c);
     // On vérifie le chemin physique si le chemin realpath n'a pas de sens(càd qu'il existe)
     if(chdir(realpath) < 0) return cd_physique(path, ref);
-    setenv("PWD", realpath, 1); // On change la var d'environnement PWD car elle est utiliser dans la commande 
     
     // On vide la chaine de caractere oldPath et on lui donne la valeur de dossier_courant
     setenv("OLDPWD", getenv("PWD"), 1);
@@ -156,12 +153,11 @@ int cd_logique(char *path, char *ref){
     // oldPath[strlen(dossier_courant)] = '\0';
 
     // On vide la chaine de caractere dossier_courant et on lui donne la valeur de path
-    setenv("pwd", realpath, 1);
+    setenv("PWD", realpath, 1);
     // memset(dossier_courant, 0, MAX_ARGS_NUMBER);
     // strcpy(dossier_courant, realpath);
     // dossier_courant[strlen(realpath)] = '\0';
 
-    printf("res: %s\n", realpath);
     return 0;
 }
 
