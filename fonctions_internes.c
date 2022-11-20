@@ -1,71 +1,26 @@
-#include "fonctions.h"
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <limits.h>
-#include <stdlib.h>
+#include "fonctions_auxiliaires.c"
 
-void free_StingArrayArray(char **s,int taille){
-    for(int i = 0; i < taille ; i++)
-        free(s[i]);
-    
-    free(s);
-}
-
-char**  explode(char *str, const char *separators, int* taille)
-{
-    int i = 0;
-    int size = 0;
-    char* s = NULL;
-    char** res  = malloc(0);
-    if(res == NULL) 
-        perror("malloc");
-
-    //Cas chaine vide
-    if(strlen(str) == 0)
+/*----------------------------------
+    EXIT
+*---------------------------------*/
+int exits(char *val,int last_exit){
+    if (val != NULL)
     {
-        *taille = 0;
-        return NULL;
-    } 
-
-    //Séparer la chaine en plusieurs sous chaines :
-    char * strToken = strtok (str, separators);
-    while ( strToken != NULL ) 
-    {
-        // On copie strToken dans une chaine de caractère s (pour avoir utiliser la taille exact)
-        if(!(s = malloc(strlen(strToken) + 1))) 
-            perror("malloc");
-        if(snprintf(s, strlen(strToken)+1, "%s", strToken) < 0)
+        if (atoi(val)!= 0)
         {
-            perror("explode snprintf error ");
-            exit(1);
+            exit(atoi(val));
+            //return (atoi(val));
         }
-
-        //On ajoute la chaine de caractere s au tableau res
-        size += 1;
-        res = realloc(res, size * sizeof(char *));
-        if(res == NULL) 
-            perror("realloc");
-        res[i] = s;
-        i++;
-
-        // On demande le token suivant.
-        strToken = strtok ( NULL, separators );
     }
-    
-    if(!s)  
-        free(s);
-    free(strToken);
-
-    *taille = i;//ici on retourne la taille de res
-    return res;
+    //cas exit sans paramètre
+    exit(last_exit);
+    //return(last_exit);
 }
 
 
-/*
+/*----------------------------------
     CD
-*/
+*---------------------------------*/
 int pop(int *tab, int taille){
     for(int i=taille-1; i>= 0 ; i--){
         if(tab[i] != 0){
@@ -201,25 +156,9 @@ int cd (char *pathname, char *option, char *ref){
 }
 
 
-
-/*
-    EXITS
-*/
-int exits(char *val,int last_exit){
-    if (val != NULL){
-        if (atoi(val)!= 0){
-            exit(atoi(val));
-        }
-    }
-    //On exit sans paramètres
-    exit(last_exit);
-}
-
-
-/*
+/*----------------------------------
     PWD
-*/
-
+*---------------------------------*/
 //write
 int pwd_affichage(char* ref)
 {

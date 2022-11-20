@@ -1,0 +1,155 @@
+
+#include "header.h"
+
+
+void free_StingArrayArray(char **s,int taille)
+{
+    for(int i = 0; i < taille ; i++)
+        free(s[i]);
+    
+    free(s);
+}
+
+void recherche_commande_interne(char ** tab,int *last_exit,int taille)
+{
+    if(strcmp("exit",tab[0]) == 0)
+    {   
+        char t[MAX_ARGS_NUMBER];
+        strcpy(t, tab[1]);
+        free_StingArrayArray(tab,taille);
+        
+        *last_exit = exits(t,*last_exit);
+    }
+    else if(strcmp("cd",tab[0])==0)
+    {   
+        char *arg;
+        char *ref;
+        if(taille == 1)
+        {
+            arg = NULL;
+        }
+        else if(taille == 2)
+        {
+            arg = NULL;
+            ref = tab[1];
+        }
+        else
+        {
+            arg = tab[1];
+            ref = tab[2];
+        }
+        *last_exit = cd(dossier_courant, arg, ref);
+    }
+    else if(strcmp("pwd",tab[0]) == 0)
+    {
+        *last_exit = pwd(taille,tab);
+    }
+    else
+    {
+        //last exit = 277
+        //chercher les commandes externes
+    }
+}
+
+void formatage_couleur(int last_exit,char *prompt,char *prompt_exit)
+{
+    char *rouge = "\033[0;31m";
+    char *vert = "\033[0;32m";
+    char *cyan = "\033[36m";
+
+    if(last_exit == 0)
+    {
+        strcpy(prompt,vert);
+        strcat(prompt, "[");
+        strcat(prompt, prompt_exit);
+        strcat(prompt, "]");
+        strcat(prompt,cyan);
+        //Pas d'erreur à la derniere commande 
+    }else if(last_exit == 1)
+    {
+        strcpy(prompt,rouge);
+        strcat(prompt, "[");
+        strcat(prompt, prompt_exit);
+        strcat(prompt, "]");
+        strcat(prompt,cyan);
+    }
+}
+
+//Cette fonction raccourcis si il le faut la chaine prompt à 30 caractères 
+char *truncate_prompt(char *prompt, int max_size)
+{
+    int size = strlen(prompt);
+    char *res;
+    if(size > max_size)
+    {
+        res = malloc(max_size+1);
+        if(res == NULL) 
+            perror("malloc");
+        strcpy(res, "...");
+        for(int i = 3; i < max_size; i++)
+        {
+            int ind = size - max_size + i;
+            res[i] = prompt[ind];
+        }
+        res[max_size] = '\0';
+    } 
+    else
+    {
+        res = malloc(size + 1);
+        if(res == NULL) 
+            perror("malloc");
+        sprintf(res, "%s", prompt);
+        res[size] = '\0';
+    }
+    return res;
+
+}
+
+char**  explode(char *str, const char *separators, int* taille)
+{
+    int i = 0;
+    int size = 0;
+    char* s = NULL;
+    char** res  = malloc(0);
+    if(res == NULL) 
+        perror("malloc");
+
+    //Cas chaine vide
+    if(strlen(str) == 0)
+    {
+        *taille = 0;
+        return NULL;
+    } 
+
+    //Séparer la chaine en plusieurs sous chaines :
+    char * strToken = strtok (str, separators);
+    while ( strToken != NULL ) 
+    {
+        // On copie strToken dans une chaine de caractère s (pour avoir utiliser la taille exact)
+        if(!(s = malloc(strlen(strToken) + 1))) 
+            perror("malloc");
+        if(snprintf(s, strlen(strToken)+1, "%s", strToken) < 0)
+        {
+            perror("explode snprintf error ");
+            exit(1);
+        }
+
+        //On ajoute la chaine de caractere s au tableau res
+        size += 1;
+        res = realloc(res, size * sizeof(char *));
+        if(res == NULL) 
+            perror("realloc");
+        res[i] = s;
+        i++;
+
+        // On demande le token suivant.
+        strToken = strtok ( NULL, separators );
+    }
+    
+    if(!s)  
+        free(s);
+    free(strToken);
+
+    *taille = i;//ici on retourne la taille de res
+    return res;
+}
