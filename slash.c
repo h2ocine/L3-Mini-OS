@@ -4,18 +4,19 @@
 
 void formatage_couleur(int last_exit,char *prompt,char *prompt_exit){
     char *rouge = "\033[0;31m";
-    //char *blanc = "\033[0m";
     char *vert = "\033[0;32m";
     char *cyan = "\033[36m";
 
-    if(last_exit == 0){
+    if(last_exit == 0)
+    {
         strcpy(prompt,vert);
         strcat(prompt, "[");
         strcat(prompt, prompt_exit);
         strcat(prompt, "]");
         strcat(prompt,cyan);
-            //Pas d'erreur à la derniere commande 
-    }else if(last_exit == 1){
+        //Pas d'erreur à la derniere commande 
+    }else if(last_exit == 1)
+    {
         strcpy(prompt,rouge);
         strcat(prompt, "[");
         strcat(prompt, prompt_exit);
@@ -28,9 +29,10 @@ void formatage_couleur(int last_exit,char *prompt,char *prompt_exit){
 */
 char *truncate_prompt(char *prompt, int max_size){
     int size = strlen(prompt);
+    char *res;
     if(size > max_size)
     {
-        char *res = malloc(max_size+1);
+        res = malloc(max_size+1);
         if(res == NULL) 
             perror("malloc");
         strcpy(res, "...");
@@ -42,9 +44,18 @@ char *truncate_prompt(char *prompt, int max_size){
         res[max_size] = '\0';
         return &res[0];
     }
-    return prompt;
+    else
+    {
+        res = malloc(size + 1);
+        if(res == NULL) 
+            perror("malloc");
+        sprintf(res, "%s", prompt);
+        res[size] = '\0';
+    }
+    return res;
 
 }
+
 
 /*
     Libere la mémoire de toute les chaines de caractères presente dans s
@@ -121,86 +132,62 @@ char**  explode(char *str, const char *separators, int* taille)
 */
 int main(void){
 
-    char dossier_courant[MAX_ARGS_NUMBER]; 
-    if(!strcpy(dossier_courant,getenv("PWD")))   
-    {
-        perror("(main) - getenv - Erreur ");
-        exit(1);
-    }
-    //dossier_courant[strlen(dossier_courant)] = '\0';
-
     char **tab;
     int last_exit = 0;
     rl_outstream = stderr;
 
-    // char *rouge = "\033[0;31m";
     char *blanc = "\033[0m";
-    // char *vert = "\033[0;32m";
+    #define TAILLE_PROMPT 47 //7 (rouge ou vert) + 5 (bleu) + 4 (blanc) + 1 ('\0')
 
-    //char *cyan = "\033[36m";
-
-    
     //Initialisation variable d'environnement 
     //setenv("var_env","255",1);
-
-
     while(1){
 
-        //Recupération du dosier prompt
         /*****************************************************************/
         /*****************************************************************/
-        char prompt_exit[2];
+        //affichage du prompt :
+        //---------------------
+        //recupération du dossier courant 
+        char dossier_courant[MAX_ARGS_NUMBER]; 
+        if(!strcpy(dossier_courant,getenv("PWD")))   
+        {
+            perror("(main) - getenv - Erreur ");
+            exit(1);
+        }
 
+        //recupération de la valeur de retour dans prompt_exit
+        //[TODO] : Faire le cas ou la valeur de retour > 9; 
+        char prompt_exit[2];
         prompt_exit[0] = last_exit + '0'; //recuperer le premier caractère
         prompt_exit[1] = '\0'; //fin de la chaine de la valeur de retoure
 
+        //creation du prompt -> il a 30 caractère au maximum + (.)caractère de couleurs
+        char prompt[TAILLE_PROMPT];
 
-        char prompt[33];
-
-        // strcpy(prompt,vert);
-        // strcat(prompt, "[");
-        // strcat(prompt, prompt_exit);
-        // strcat(prompt, "]");
-        // strcat(prompt,blanc);
-
-        //On s'occupe de la couleur du prompt ( [0] && [1])
+        //On ajoute la valeur de retour ([0] ou [1]) et s'occupe de la couleur du prompt
         formatage_couleur(last_exit,prompt,prompt_exit);
 
-        int max_size = 30 - (strlen(prompt_exit) + 2) - 2; // 30 - taille de l'affichage du exit ([0] = 3) - 2 (taille du dollar et espace)
+        //on supprime les carctère en trop du dossier courant et on les remplae par ... avec truncate_prompt
+        int max_size = 30 - (strlen(prompt_exit) + 2 ) - 2; //on set le nombre de carctère max du chemin //-3 ([valeur retour]) -2 $ espace
         char *prompt_dir = truncate_prompt(dossier_courant, max_size);
         
-        
+        //on ajoute le dossier courant dans le prompt
         strcat(prompt, prompt_dir);
-
         free(prompt_dir);
 
-
-        strcat(prompt, "$ ");
-
-        //On met la saisie d'utilisateur en blanc
-
+        //On met la saisie d'utilisateur en blanc en on ajoute le dollar espace
         strcat(prompt,blanc);
+        strcat(prompt, "$ \0");
+        //prompt[strlrn] = '\0';
 
         /*****************************************************************/
-        /*****************************************************************/
-
         //Lecture de la commande (On la récupére dans tab)
         /*****************************************************************/
-        /*****************************************************************/
 
+        //lecture de la commande et affichage de p
         
-        
+        char *ligne = readline(prompt);
 
-        //Formatage couleur prompt
-        char*p = malloc(sizeof(char)*255);
-        if(p== NULL) perror("malloc");
-
-        //formatage_couleur(last_exit,p,prompt);
-        strcat(p, prompt);
-       
-        char *ligne = readline(p);
-
-        
         //Cas du CTRL - D 
         if (ligne == NULL) {
             //On appelle exit sans paramètres 
@@ -208,17 +195,15 @@ int main(void){
             
         } 
 
-        // TODO: On ajoute la dernière commande à l'historique
+        // On ajoute la dernière commande à l'historique
         add_history(ligne);
 
-        
         //On transforme la ligne en tableau (ici on recupere un tableau via la fonction explode qui découpe la ligne en mots)
         const char* delimiter = " ";
         int taille;
 
         tab = explode(ligne,delimiter, &taille); /***************--------------------------*********/
 
-        
         /*****************************************************************/
         /*****************************************************************/
         
@@ -227,7 +212,7 @@ int main(void){
         /*****************************************************************/
         if(taille == 0) 
             continue;
-        
+
         //On traite notre tableau 
         if (taille > 0){
 
@@ -238,7 +223,7 @@ int main(void){
             }
             else if(strcmp("cd",tab[0])==0)
             {
-                printf("ca rentre \n");
+                //printf("ca rentre \n");
                 //break;
             }
             else if(strcmp("pwd",tab[0]) == 0)
@@ -247,8 +232,8 @@ int main(void){
             }
             else
             {
-                last_exit = 10;
-
+                //last exit = 277
+                //chercher les commandes externes
             }
         
         }
@@ -256,10 +241,11 @@ int main(void){
         {
             free(tab);
         }
-        free(p);
         free_StingArrayArray(tab,taille);
-        /*****************************************************************/
-        /*****************************************************************/
+
+
+        /*---------------------------*/
+
     }
 
     return 0;
