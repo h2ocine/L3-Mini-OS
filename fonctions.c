@@ -15,6 +15,7 @@ void free_StingArrayArray(char **s,int taille){
 
 char**  explode(char *str, const char *separators, int* taille)
 { 
+    printf("explode\n");
     int i = 0;
     int size = 0;
     char* s = NULL;
@@ -44,6 +45,8 @@ char**  explode(char *str, const char *separators, int* taille)
 
         //On ajoute la chaine de caractere s au tableau res
         size += 1;
+        printf("size: %d\n", size);
+        printf("res: %p\n", res);   
         res = realloc(res, size * sizeof(char *));
         if(res == NULL) 
             perror("realloc");
@@ -162,7 +165,7 @@ int cd (char *pathname, char *option, char *ref){
         if(chdir(realpath) < 0){
             return 1;
         }
-
+        setenv("PWD", realpath, 1);
         memset(oldPath, 0, MAX_ARGS_NUMBER);
         strcpy(oldPath, dossier_courant);
 
@@ -173,6 +176,7 @@ int cd (char *pathname, char *option, char *ref){
         char real[MAX_ARGS_NUMBER];
         realpath(dest, real);
         if(chdir(real) < 0) return 1;
+        setenv("PWD", real, 1);
         strcpy(oldPath, dossier_courant);
         strcpy(dossier_courant, real);
     }
