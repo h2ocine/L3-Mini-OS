@@ -100,7 +100,7 @@ char *truncate_prompt(char *prompt, int max_size)
         res = malloc(size + 1);
         if(res == NULL) 
             perror("malloc");
-        sprintf(res, "%s", prompt);
+        snprintf(res, strlen(prompt)+1,  "%s", prompt);
         res[size] = '\0';
     }
     return res;

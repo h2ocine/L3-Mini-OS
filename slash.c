@@ -17,12 +17,9 @@ int main(void)
         //affichage du prompt :
         //---------------------
         //recupération du dossier courant 
+        char *cur = getenv("PWD");
         char dossier_courant[MAX_ARGS_NUMBER]; 
-        if(!strcpy(dossier_courant,getenv("PWD")))   
-        {
-            perror("(main) - getenv - Erreur ");
-            exit(1);
-        }
+        if(snprintf(dossier_courant, strlen(cur)+1, "%s", cur)<0) perror("snprintf");
 
         //recupération de la valeur de retour dans prompt_exit
         //[TODO] : Faire le cas ou la valeur de retour > 9; 
@@ -42,6 +39,7 @@ int main(void)
         
         //on ajoute le dossier courant dans le prompt
         strcat(prompt, prompt_dir);
+        printf("prompt: %s\n", prompt_dir);
         free(prompt_dir);
 
         //On met la saisie d'utilisateur en blanc en on ajoute le dollar espace

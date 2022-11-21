@@ -160,17 +160,18 @@ int cd (char *option, char *ref){
     {   
         // Si la ref est un chemin relatif
         if(ref[0] == '/'){
-            if(sprintf(dest, "%s", ref) < 0) {
+            if(snprintf(dest, strlen(ref)+1, "%s", ref) < 0) {
                 perror("sprintf erreur ");
                 exit(1);
             }
+            dest[strlen(ref)] = '\0';
         }
 
         // Si la ref est "-" dest vaut oldpath 
         else if(strcmp(ref, "-") == 0)
         {   
             char *oldPath = getenv("OLDPWD");
-            if(sprintf(dest, "%s", oldPath) < 0) {
+            if(snprintf(dest, strlen(oldPath)+1, "%s", oldPath) < 0) {
                 perror("sprintf erreur");
                 exit(1);
             }
@@ -179,7 +180,7 @@ int cd (char *option, char *ref){
         }
         else
         {
-            if(sprintf(dest, "%s", pathname) < 0) {
+            if(snprintf(dest, strlen(pathname)+1,  "%s", pathname) < 0) {
                 perror("sprintf erreur ");
                 exit(1);
             }
@@ -190,9 +191,10 @@ int cd (char *option, char *ref){
         }
     }
     else
-    {
-        if(sprintf(dest, "%s", getenv("HOME")) < 0) {perror("sprintf erreur ");exit(1);} 
-        dest[strlen(getenv("HOME"))] = '\0';
+    {   
+        char *home = getenv("HOME");
+        if(snprintf(dest, strlen(home)+1, "%s", home) < 0) {perror("sprintf erreur ");exit(1);} 
+        dest[strlen(home)] = '\0';
     }
 
     // Cas lien logique
