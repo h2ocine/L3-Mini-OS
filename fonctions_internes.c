@@ -17,37 +17,6 @@ int exits(char *val,int last_exit){
     //return(last_exit);
 }
 
-
-/*----------------------------------
-    CD
-*---------------------------------*/
-int pop(int *tab, int taille){
-    for(int i=taille-1; i>= 0 ; i--){
-        if(tab[i] != 0){
-            return tab[i];
-        }
-    }
-    return 0;
-}
-
-void deleteLast(int *tab, int taille){
-    for(int i=taille-1; i>= 0 ; i--){
-        if(tab[i] != 0){
-            tab[i] = 0;
-            return;
-        }
-    }
-}
-
-void push(int *tab, int taille, int n){
-    for(int i=0; i<taille; i++){
-        if(tab[i] == 0){
-            tab[i] = n;
-            return;
-        }
-    }
-}
-
 void truncateString(char *s, int n){
     int len = strlen(s);
     for(int i= len-1; i>= len - n; i--){
@@ -55,56 +24,73 @@ void truncateString(char *s, int n){
     }
 }
 
-char *realLogiquePath(char *path){
+char * truncate_str(char *s, char spr){
 
+    int stop = strlen(s);
+
+    for(int i=stop-1; i>=0; i--){
+        stop--;
+        if(s[i] == spr) break;
+    }
+    printf("stop: %ld\n", strlen(s) - stop);
+
+    // printf("resultat: %s\n", res);
+    char *res = malloc(stop + 1);
+    snprintf(res, stop + 1 , "%s", s);
+    res[stop] = '\0';
+    return res;
+}
+
+void videString(char *s){
+    for(int i=0; i<strlen(s); i++){
+        s[i] = '\0';
+    }
+}
+
+char *logiquePath(char *path){
+    if(strlen(path) != 1 && path[strlen(path)-1] == '/') perror("mauvais format");
     int taille;
     char **tab = explode(path, "/", &taille);
     free(path);
 
-    char *res = malloc(4000);
-    if(sprintf(res, "%s", "/")<0) {perror("sprintf erreur ");exit(1);}
-
-    int *size = calloc(taille, sizeof(int));
-
+    char *res = malloc(1);
+    res[0] = '\0';
     for(int i=0; i<taille; i++){
-        int len = strlen(res);
-        int last_size = pop(size, taille);
-
-        // on ignore
         if(strcmp(tab[i], ".") == 0){
-            if(i == taille-1) truncateString(res, 1);
             continue;
 
         // On revient au dossier parent
         }
         else if(strcmp(tab[i], "..") == 0)
-        {
-            int nb_slash; // Nombre de '/' a supprimer
-            if(i == taille -1)
-            {
-                nb_slash = 2;
+        {   
+            if(strlen(res) != 0){
+                char *s = truncate_str(res, '/');
+                videString(res);
+                res = realloc(res, strlen(s) + 1);
+                snprintf(res, strlen(s)+1, "%s", s);
+                res[strlen(s)] = '\0';
+                free(s);
             }
-            else
-            {
-                nb_slash = 1;
-            }
-            truncateString(res, last_size + nb_slash);
-            deleteLast(size, taille);
-            
+
         }
         else
-        {
-            sprintf(&res[len], "%s", tab[i]);
-            if(i != taille-1) 
-                strcat(res, "/");
-            push(size, taille, strlen(tab[i]));
+        {   
+            size_t t = strlen(res) + strlen(tab[i]) + 2;
+            res = realloc(res, t);
+
+            strcat(res, "/");
+            strcat(res, tab[i]);
+            res[strlen(res)] = '\0';
         }
     }
-    free(size);
-    free_StingArrayArray(tab, taille);
+    if(strlen(res) == 0){
+        res = realloc(res, 2);
+        res[0] = '/';
+        res[1] = '\0';
+    }
     return res;
-}
 
+}
 
 int cd_physique(char *path, char *ref){
     char real[MAX_ARGS_NUMBER];
@@ -142,7 +128,7 @@ int cd_logique(char *path, char *ref){
     c[strlen(path)] = '\0';
 
     
-    char *realpath = realLogiquePath(c);
+    char *realpath = logiquePath(c);
     // On vérifie le chemin physique si le chemin realpath n'a pas de sens(càd qu'il existe)
     if(chdir(realpath) < 0) return cd_physique(path, ref);
     
@@ -158,6 +144,7 @@ int cd_logique(char *path, char *ref){
     // strcpy(dossier_courant, realpath);
     // dossier_courant[strlen(realpath)] = '\0';
 
+    free(realpath);
     return 0;
 }
 

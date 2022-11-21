@@ -11,111 +11,142 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-int cd_logique(char *path){
-
-    // On cree une copie de path car pour utiliser la fonction explode on a besoin d'une chaine de caractère alouer dynamiquement
-    char *c = malloc(strlen(path));
-    if(sprintf(c, "%s", dest) < 0) {
-        perror("sprintf erreur ");
-        exit(1);
+void truncateString(char *s, int n){
+    int len = strlen(s);
+    for(int i= len-1; i>= len - n; i--){
+        s[i] = '\0';
     }
-    c[strlen(path)] = '\0';
-
-    
-    char *realpath = realLogiquePath(c);
-    // On vérifie le chemin physique si le chemin realpath n'a pas de sens(càd qu'il existe)
-    if(chdir(realpath) < 0) return cd(pathname, p, ref);
-    setenv("PWD", realpath, 1); // On change la var d'environnement PWD car elle est utiliser dans la commande 
-    
-    // On vide la chaine de caractere oldPath et on lui donne la valeur de dossier_courant
-    memset(oldPath, 0, MAX_ARGS_NUMBER);
-    strcpy(oldPath, dossier_courant);
-    oldPath[strlen(dossier_courant)] = '\0';
-
-    // On vide la chaine de caractere dossier_courant et on lui donne la valeur de path
-    memset(dossier_courant, 0, MAX_ARGS_NUMBER);
-    strcpy(dossier_courant, realpath);
-    dossier_courant[strlen(realpath)] = '\0';
-
-    return 0;
 }
 
-int cd_physique(char *path){
-    char real[MAX_ARGS_NUMBER];
-    realpath(dest, real);
+char**  explode(char *str, const char *separators, int* taille)
+{
+    int i = 0;
+    int size = 0;
+    char* s = NULL;
+    char** res  = malloc(0);
+    if(res == NULL) 
+        perror("malloc");
 
-    //CAS : fichier inexistant 
-    if(chdir(real) < 0) 
+    //Cas chaine vide
+    if(strlen(str) == 0)
     {
-        printf("\033[36mbash: cd: %s: No such file or directory\n", ref);
-        return 1;
-    }
-    setenv("PWD", real, 1);
+        *taille = 0;
+        return NULL;
+    } 
 
-    // On vide la chaine de caractere oldPath et on lui donne la valeur de dossier_courant
-    memset(oldPath, 0, MAX_ARGS_NUMBER);
-    strcpy(oldPath, dossier_courant);
-    oldPath[strlen(dossier_courant)] = '\0';
-
-    // On vide la chaine de caractere dossier_courant et on lui donne la valeur de path
-    memset(dossier_courant, 0, MAX_ARGS_NUMBER);
-    strcpy(dossier_courant, realpath);
-    dossier_courant[strlen(realpath)] = '\0';
-
-    return 0;
-}
-
-int cd (char *pathname, char *option, char *ref){
-    char *l = "-L"; // Represente l'option -L
-    char *p = "-P"; // Represente l'option -P
-    char dest[MAX_ARGS_NUMBER] = "";
-
-
-    if(ref != NULL)
-    {   
-        // Si la ref est un chemin relatif
-        if(ref[0] == '/'){
-            dest = ref;
+    //Séparer la chaine en plusieurs sous chaines :
+    char * strToken = strtok (str, separators);
+    while ( strToken != NULL ) 
+    {
+        // On copie strToken dans une chaine de caractère s (pour avoir utiliser la taille exact)
+        if(!(s = malloc(strlen(strToken) + 1))) 
+            perror("malloc");
+        if(snprintf(s, strlen(strToken)+1, "%s", strToken) < 0)
+        {
+            perror("explode snprintf error ");
+            exit(1);
         }
 
-        // Si la ref est "-" dest vaut oldpath 
-        else if(strcmp(ref, "-") == 0)
+        //On ajoute la chaine de caractere s au tableau res
+        size += 1;
+        res = realloc(res, size * sizeof(char *));
+
+        if(res == NULL) 
+            perror("fonction explode : realloc erreur ");
+
+        res[i] = s;
+        i++;
+
+        // On demande le token suivant.
+        strToken = strtok ( NULL, separators );
+    }
+    
+    if(!s)  
+        free(s);
+    free(strToken);
+
+    *taille = i;//ici on retourne la taille de res
+    return res;
+}
+
+
+char * truncate_str(char *s, char spr){
+
+    int stop = strlen(s);
+
+    for(int i=stop-1; i>=0; i--){
+        stop--;
+        if(s[i] == spr) break;
+    }
+    printf("stop: %ld\n", strlen(s) - stop);
+
+    // printf("resultat: %s\n", res);
+    char *res = malloc(stop + 1);
+    snprintf(res, stop + 1 , "%s", s);
+    res[stop] = '\0';
+    return res;
+}
+
+void videString(char *s){
+    for(int i=0; i<strlen(s); i++){
+        s[i] = '\0';
+    }
+}
+
+char *logiquePath(char *path){
+    if(path[strlen(path)-1] == '/') perror("mauvais format");
+    int taille;
+    char **tab = explode(path, "/", &taille);
+    free(path);
+
+    char *res = malloc(1);
+    res[0] = '\0';
+    for(int i=0; i<taille; i++){
+        if(strcmp(tab[i], ".") == 0){
+            continue;
+
+        // On revient au dossier parent
+        }
+        else if(strcmp(tab[i], "..") == 0)
         {   
-            if(sprintf(dest, "%s", oldPath) < 0) {
-                perror("sprintf erreur");
-                exit(1);
+            if(strlen(res) != 0){
+                char *s = truncate_str(res, '/');
+                videString(res);
+                res = realloc(res, strlen(s) + 1);
+                snprintf(res, strlen(s)+1, "%s", s);
+                res[strlen(s)] = '\0';
+                free(s);
             }
-            dest[strlen(oldPath)] = '\0';
-            
+
         }
         else
-        {
-            if(sprintf(dest, "%s", pathname) < 0) {
-                perror("sprintf erreur ");
-                exit(1);
-            }
-            dest[strlen(pathname)] = '/';
-            dest[strlen(pathname) + 1] = '\0';
-            strcat(dest, ref);
-            dest[strlen(pathname) + 1 + strlen(ref)] = '\0';
+        {   
+            int t = strlen(res) + strlen(tab[i]) + 2;
+            res = realloc(res, strlen(res) + strlen(tab[i]) + 2);
+
+            strcat(res, "/");
+            strcat(res, tab[i]);
+            res[strlen(res)] = '\0';
         }
     }
-    else
-    {
-        if(sprintf(dest, "%s", getenv("HOME")) < 0) {perror("sprintf erreur ");exit(1);} 
-        dest[strlen(getenv("HOME"))] = '\0';
+    if(strlen(res) == 0){
+        res = realloc(res, 2);
+        res[0] = '/';
+        res[1] = '\0';
     }
+    return res;
 
-    // Cas lien logique
-    if(option == NULL || strcmp(option, l) == 0) cd_logique(dest);
-    else if(strcmp(option, p) == 0) cd_physique(dest);
-    else return 1;  // Cas d'une autre option
-
-    return 0;
 }
 
-
 int main(void){
-    
-    
+    char *s = "/home/adam/Cours/L3/SY/projet-systeme/a/b/../../../Test/././../Test/.";
+    char *path = malloc(strlen(s)+1);
+    snprintf(path, strlen(s)+1, "%s", s);
+    path[strlen(s)] = '\0';
+
+    char *real = logiquePath(path);
+
+    printf("real: %s\n", real);
+
+    free(real);
 }
