@@ -15,11 +15,17 @@ void recherche_commande_interne(char ** tab,int *last_exit,int taille)
 {
     if(strcmp("exit",tab[0]) == 0)
     {   
-        char t[MAX_ARGS_NUMBER];
-        strcpy(t, tab[1]);
-        free_StingArrayArray(tab,taille);
+        if(taille>=2){
+            char t[strlen(tab[1])+1];
+            snprintf(t, strlen(tab[1])+1, "%s", tab[1]);
+            t[strlen(tab[1])+1] = '\0';
+            free_StingArrayArray(tab,taille);
+            
+            *last_exit = exits(t,*last_exit);
+        }else{
+            *last_exit = exits(NULL,*last_exit);
+        }
         
-        *last_exit = exits(t,*last_exit);
     }
     else if(strcmp("cd",tab[0])==0)
     {   
@@ -112,9 +118,10 @@ char**  explode(char *str, const char *separators, int* taille)
     int i = 0;
     int size = 0;
     char* s = NULL;
-    char** res  = malloc(0);
+    char** res  = malloc(1);
     if(res == NULL) 
         perror("malloc");
+    res[0] = '\0';
 
     //Cas chaine vide
     if(strlen(str) == 0)
@@ -135,15 +142,16 @@ char**  explode(char *str, const char *separators, int* taille)
             perror("explode snprintf error ");
             exit(1);
         }
-
+        s[strlen(strToken)] = '\0';
         //On ajoute la chaine de caractere s au tableau res
         size += 1;
-        res = realloc(res, size * sizeof(char *));
+        res = realloc(res, size * sizeof(char *)+1);
 
         if(res == NULL) 
             perror("fonction explode : realloc erreur ");
 
         res[i] = s;
+        res[i+1] = '\0';
         i++;
 
         // On demande le token suivant.

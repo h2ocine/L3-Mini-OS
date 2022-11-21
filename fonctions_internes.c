@@ -6,15 +6,16 @@
 int exits(char *val,int last_exit){
     if (val != NULL)
     {
-        if (atoi(val)!= 0)
-        {
-            exit(atoi(val));
-            //return (atoi(val));
+        int n = atoi(val);
+        if (n!= 0)
+        {   
+            printf("n: %d\n", n);
+            exit(n);
         }
     }
     //cas exit sans paramètre
+    printf("n: %d\n", last_exit);
     exit(last_exit);
-    //return(last_exit);
 }
 
 void truncateString(char *s, int n){
@@ -32,7 +33,6 @@ char * truncate_str(char *s, char spr){
         stop--;
         if(s[i] == spr) break;
     }
-    printf("stop: %ld\n", strlen(s) - stop);
 
     // printf("resultat: %s\n", res);
     char *res = malloc(stop + 1);
@@ -99,7 +99,7 @@ int cd_physique(char *path, char *ref){
     //CAS : fichier inexistant 
     if(chdir(real) < 0) 
     {
-        printf("\033[36mbash: cd: %s: No such file or directory\n", ref);
+        printf("\033[36mbash: cd: %s: Aucun fichier ou dossier de ce type\n", ref);
         return 1;
     }
 
@@ -198,9 +198,10 @@ int cd (char *option, char *ref){
     }
 
     // Cas lien logique
-    if(option == NULL || strcmp(option, l) == 0) cd_logique(dest, ref);
-    else if(strcmp(option, p) == 0) cd_physique(dest, ref);
+    if(option == NULL || strcmp(option, l) == 0) return cd_logique(dest, ref);
+    else if(strcmp(option, p) == 0) return cd_physique(dest, ref);
     else return 1;  // Cas d'une autre option
+
 
     return 0;
 }

@@ -39,7 +39,6 @@ int main(void)
         
         //on ajoute le dossier courant dans le prompt
         strcat(prompt, prompt_dir);
-        printf("prompt: %s\n", prompt_dir);
         free(prompt_dir);
 
         //On met la saisie d'utilisateur en blanc en on ajoute le dollar espace
@@ -69,7 +68,6 @@ int main(void)
         int taille;
 
         tab = explode(ligne,delimiter, &taille); /***************--------------------------*********/
-
         /*****************************************************************/
         /*****************************************************************/
         
@@ -84,7 +82,6 @@ int main(void)
             
             //On cherche si dans notre tableau
             recherche_commande_interne(tab,&last_exit,taille);
-
         }
         else
         {
