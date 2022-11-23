@@ -118,10 +118,13 @@ char**  explode(char *str, const char *separators, int* taille)
     int i = 0;
     int size = 0;
     char* s = NULL;
-    char** res  = malloc(1);
+    char** res  = malloc(1*sizeof(char*));
     if(res == NULL) 
         perror("malloc");
-    res[0] = '\0';
+
+            
+    // res[0]  = malloc(1*sizeof(char));
+    // res[0][0] = '\0';
 
     //Cas chaine vide
     if(strlen(str) == 0)
@@ -145,13 +148,13 @@ char**  explode(char *str, const char *separators, int* taille)
         s[strlen(strToken)] = '\0';
         //On ajoute la chaine de caractere s au tableau res
         size += 1;
-        res = realloc(res, size * sizeof(char *)+1);
+        res = realloc(res, size * sizeof(char *) + 1); // +1
 
         if(res == NULL) 
             perror("fonction explode : realloc erreur ");
 
         res[i] = s;
-        res[i+1] = '\0';
+        //res[i+1][] = '\0';
         i++;
 
         // On demande le token suivant.

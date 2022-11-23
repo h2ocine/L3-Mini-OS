@@ -76,11 +76,11 @@ char *logiquePath(char *path){
         else
         {   
             size_t t = strlen(res) + strlen(tab[i]) + 2;
-            res = realloc(res, t);
+            res = realloc(res, t * sizeof(char));
 
             strcat(res, "/");
             strcat(res, tab[i]);
-            res[strlen(res)] = '\0';
+            res[t - 1] = '\0';
         }
     }
     if(strlen(res) == 0){
@@ -120,8 +120,8 @@ int cd_physique(char *path, char *ref){
 
 int cd_logique(char *path, char *ref){
     // On cree une copie de path car pour utiliser la fonction explode on a besoin d'une chaine de caractère alouer dynamiquement
-    char *c = malloc(strlen(path));
-    if(sprintf(c, "%s", path) < 0) {
+    char *c = malloc(strlen(path) + 1);
+    if(snprintf(c, strlen(path) + 1, "%s" , path) < 0) {
         perror("sprintf erreur ");
         exit(1);
     }
@@ -130,7 +130,11 @@ int cd_logique(char *path, char *ref){
     
     char *realpath = logiquePath(c);
     // On vérifie le chemin physique si le chemin realpath n'a pas de sens(càd qu'il existe)
-    if(chdir(realpath) < 0) return cd_physique(path, ref);
+    if(chdir(realpath) < 0) 
+    {
+        free(realpath);
+        return cd_physique(path, ref);
+    }
     
     // On vide la chaine de caractere oldPath et on lui donne la valeur de dossier_courant
     setenv("OLDPWD", getenv("PWD"), 1);
