@@ -43,7 +43,7 @@ int main(void)
 
         //On met la saisie d'utilisateur en blanc en on ajoute le dollar espace
         strcat(prompt,blanc);
-        strcat(prompt, "$ \0");
+        strcat(prompt, "$ ");
         //prompt[strlrn] = '\0';
 
         /*****************************************************************/
@@ -88,6 +88,7 @@ int main(void)
             free(tab);
         }
         free_StingArrayArray(tab,taille);
+        free(ligne);
 
 
         /*---------------------------*/

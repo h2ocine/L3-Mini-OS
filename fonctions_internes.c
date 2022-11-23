@@ -88,6 +88,7 @@ char *logiquePath(char *path){
         res[0] = '/';
         res[1] = '\0';
     }
+    free_StingArrayArray(tab,taille);
     return res;
 
 }

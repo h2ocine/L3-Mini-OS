@@ -118,9 +118,7 @@ char**  explode(char *str, const char *separators, int* taille)
     int i = 0;
     int size = 0;
     char* s = NULL;
-    char** res  = malloc(1*sizeof(char*));
-    if(res == NULL) 
-        perror("malloc");
+    char** res = NULL;
 
             
     // res[0]  = malloc(1*sizeof(char));
@@ -148,7 +146,7 @@ char**  explode(char *str, const char *separators, int* taille)
         s[strlen(strToken)] = '\0';
         //On ajoute la chaine de caractere s au tableau res
         size += 1;
-        res = realloc(res, size * sizeof(char *) + 1); // +1
+        res = realloc(res, size * sizeof(char *)); // +1
 
         if(res == NULL) 
             perror("fonction explode : realloc erreur ");
