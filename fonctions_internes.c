@@ -106,15 +106,9 @@ int cd_physique(char *path, char *ref){
 
     // On vide la chaine de caractere oldPath et on lui donne la valeur de dossier_courant
     setenv("OLDPWD", getenv("PWD"), 1);
-    // memset(oldPath, 0, MAX_ARGS_NUMBER);
-    // strcpy(oldPath, dossier_courant);
-    // oldPath[strlen(dossier_courant)] = '\0';
 
     // On vide la chaine de caractere dossier_courant et on lui donne la valeur de path
     setenv("PWD", real, 1);
-    // memset(dossier_courant, 0, MAX_ARGS_NUMBER);
-    // strcpy(dossier_courant, real);
-    // dossier_courant[strlen(real)] = '\0';
 
     return 0;
 }
@@ -139,15 +133,9 @@ int cd_logique(char *path, char *ref){
     
     // On vide la chaine de caractere oldPath et on lui donne la valeur de dossier_courant
     setenv("OLDPWD", getenv("PWD"), 1);
-    // memset(oldPath, 0, MAX_ARGS_NUMBER);
-    // strcpy(oldPath, dossier_courant);
-    // oldPath[strlen(dossier_courant)] = '\0';
 
     // On vide la chaine de caractere dossier_courant et on lui donne la valeur de path
     setenv("PWD", realpath, 1);
-    // memset(dossier_courant, 0, MAX_ARGS_NUMBER);
-    // strcpy(dossier_courant, realpath);
-    // dossier_courant[strlen(realpath)] = '\0';
 
     free(realpath);
     return 0;
