@@ -78,26 +78,30 @@ void recherche_commande_interne(char ** tab,int *last_exit,int taille)
         }
 
         //Puis on execute la commande
-        execv(arg0,arr);
+        switch(fork()){
+            case -1:
+                exit(1);
+            case 0:
+            if(execvp(arg0, arr) < 0){
+                     exit(EXIT_FAILURE);
+            }
+            free(arg0);
+            free_StingArrayArray(arr,taille);
+            break;
+            default :
+                free(arg0);
+                break; 
+        }
 
-  
+
+        // if(execvp(arg0, arr) < 0){
+        //     exit(EXIT_FAILURE);
+        // }
+
+       
     }
 }
  
-
-/* char *arr le tableau des options à remplir */
-
-/* 
-char **option_commande_externe(char **tab,int taille){
-    char **arr = malloc(sizeof(char*)*taille-1);
-    if(arr == NULL)perror("malloc");
-    for(int i = 1;i<taille-1;i++){
-        arr[i] = tab[i];
-    }
-}
-
-*/
-
 void formatage_couleur(int last_exit,char *prompt,char *prompt_exit)
 {
     char *rouge = "\033[0;31m";
