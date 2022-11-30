@@ -11,6 +11,8 @@ void free_StingArrayArray(char **s,int taille)
     free(s);
 }
 
+
+
 void recherche_commande_interne(char ** tab,int *last_exit,int taille)
 {
     if(strcmp("exit",tab[0]) == 0)
@@ -54,10 +56,47 @@ void recherche_commande_interne(char ** tab,int *last_exit,int taille)
     }
     else
     {
-        //last exit = 277
-        //chercher les commandes externes
+        //Fonction commande externe 
+
+        //On initialise un tableau pour les options
+        char*arr[MAX_ARGS_NUMBER];
+
+        //On complete argument 0
+        char *arg0 = malloc(sizeof(char)*MAX_ARGS_STRLEN);
+        if(arg0 == NULL) perror("malloc"); 
+    
+        strcpy(arg0,"/bin/");
+        strcat(arg0,tab[0]);
+
+        //On complete le premier argument du tableau avec la commande
+        arr[0] = arg0;
+
+        //On remplit le tableau pour les options 
+        for(int i = 1;i<taille;i++){
+            arr[i] = tab[i];
+            //printf(" Element[%d] = %s \n",i,arr[i]);
+        }
+
+        //Puis on execute la commande
+        execv(arg0,arr);
+
+  
     }
 }
+ 
+
+/* char *arr le tableau des options à remplir */
+
+/* 
+char **option_commande_externe(char **tab,int taille){
+    char **arr = malloc(sizeof(char*)*taille-1);
+    if(arr == NULL)perror("malloc");
+    for(int i = 1;i<taille-1;i++){
+        arr[i] = tab[i];
+    }
+}
+
+*/
 
 void formatage_couleur(int last_exit,char *prompt,char *prompt_exit)
 {
