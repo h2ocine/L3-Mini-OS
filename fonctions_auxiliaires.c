@@ -1,15 +1,55 @@
 
 #include "header.h"
+#include <sys/wait.h>
+
 
 
 void free_StingArrayArray(char **s,int taille)
 {   
-    
     for(int i = 0; i < taille ; i++)
         free(s[i]);
     
     free(s);
 }
+
+
+void commande_externe(char **tab,int taille){
+
+        char*arr[MAX_ARGS_NUMBER];
+
+        char *arg0 = malloc(sizeof(char)*MAX_ARGS_STRLEN);
+        if(arg0 == NULL) perror("malloc"); 
+    
+        strcpy(arg0,"usr/bin/");
+        strcat(arg0,tab[0]);
+
+        //On complete le premier argument du tableau avec la commande
+        arr[0] = arg0;
+
+        //On remplit le tableau pour les options 
+        for(int i = 1;i<taille;i++){
+            arr[i] = tab[i];
+            //printf(" Element[%d] = %s \n",i,arr[i]);
+        }
+
+        //Puis on execute la commande
+        switch(fork()){
+            case -1:
+                exit(1);
+            case 0:
+            if(execvp(arg0, arr) < 0){
+                     exit(EXIT_FAILURE);
+            }
+            free(arg0);
+            free_StingArrayArray(arr,taille);
+            break;
+            default :
+                wait(NULL);
+                free(arg0);
+                break; 
+        }
+}
+ 
 
 
 
@@ -56,52 +96,18 @@ void recherche_commande_interne(char ** tab,int *last_exit,int taille)
     }
     else
     {
-        //Fonction commande externe 
+        // //Fonction commande externe 
 
-        //On initialise un tableau pour les options
-        char*arr[MAX_ARGS_NUMBER];
+        // //On initialise un tableau pour les options
+      
 
-        //On complete argument 0
-        char *arg0 = malloc(sizeof(char)*MAX_ARGS_STRLEN);
-        if(arg0 == NULL) perror("malloc"); 
-    
-        strcpy(arg0,"/bin/");
-        strcat(arg0,tab[0]);
-
-        //On complete le premier argument du tableau avec la commande
-        arr[0] = arg0;
-
-        //On remplit le tableau pour les options 
-        for(int i = 1;i<taille;i++){
-            arr[i] = tab[i];
-            //printf(" Element[%d] = %s \n",i,arr[i]);
-        }
-
-        //Puis on execute la commande
-        switch(fork()){
-            case -1:
-                exit(1);
-            case 0:
-            if(execvp(arg0, arr) < 0){
-                     exit(EXIT_FAILURE);
-            }
-            free(arg0);
-            free_StingArrayArray(arr,taille);
-            break;
-            default :
-                free(arg0);
-                break; 
-        }
-
-
-        // if(execvp(arg0, arr) < 0){
-        //     exit(EXIT_FAILURE);
-        // }
+        commande_externe(tab,taille);
 
        
     }
 }
- 
+
+
 void formatage_couleur(int last_exit,char *prompt,char *prompt_exit)
 {
     char *rouge = "\033[0;31m";
