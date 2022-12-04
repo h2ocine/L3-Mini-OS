@@ -3,6 +3,59 @@
 #include <sys/wait.h>
 
 
+char**  explode(char *str, const char *separators, int* taille)
+{
+    int i = 0;
+    int size = 0;
+    char* s = NULL;
+    char** res = NULL;
+
+            
+    // res[0]  = malloc(1*sizeof(char));
+    // res[0][0] = '\0';
+
+    //Cas chaine vide
+    if(strlen(str) == 0)
+    {
+        *taille = 0;
+        return NULL;
+    } 
+
+    //Séparer la chaine en plusieurs sous chaines :
+    char * strToken = strtok (str, separators);
+    while ( strToken != NULL ) 
+    {
+        // On copie strToken dans une chaine de caractère s (pour avoir utiliser la taille exact)
+        if(!(s = malloc(strlen(strToken) + 1))) 
+            perror("malloc");
+        if(snprintf(s, strlen(strToken)+1, "%s", strToken) < 0)
+        {
+            perror("explode snprintf error ");
+            exit(1);
+        }
+        s[strlen(strToken)] = '\0';
+        //On ajoute la chaine de caractere s au tableau res
+        size += 1;
+        res = realloc(res, size * sizeof(char *)); // +1
+
+        if(res == NULL) 
+            perror("fonction explode : realloc erreur ");
+
+        res[i] = s;
+        //res[i+1][] = '\0';
+        i++;
+
+        // On demande le token suivant.
+        strToken = strtok ( NULL, separators );
+    }
+    
+    if(!s)  
+        free(s);
+    free(strToken);
+
+    *taille = i;//ici on retourne la taille de res
+    return res;
+}
 
 void free_StingArrayArray(char **s,int taille)
 {   
@@ -15,13 +68,32 @@ void free_StingArrayArray(char **s,int taille)
 
 void commande_externe(char **tab,int taille){
 
+        //Ca c'est la variable getenvpath ( faut mettre la tienne parceque si tu testes avec getenvpath au bout de la 2 eme iteration la variable getenvpath bug)
+        char pathpath[] = "/home/thibault/anaconda3/bin:/home/thibault/bin:/usr/local/bin:/home/thibault/anaconda3/bin:/home/thibault/bin:/usr/local/bin:/home/thibault/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin ";
+        
+        //J'attribue pathpath à un pointeur pour qu'on puisse utiliser explode
+        char *path = NULL;
+        path = pathpath;
+        //char *path = getenv("PATH");
+
+        int taillarrpath;
+        char**arrpath = explode(path,":",&taillarrpath);
+
+        //on parcout chaque élément de la variable PATH
+        for(int i = 0;i<taillarrpath;i++){
+        
+        //arr correspond à la commande + les options
         char*arr[MAX_ARGS_NUMBER];
 
+        //arg0  = la commande avec son chemin 
         char *arg0 = malloc(sizeof(char)*MAX_ARGS_STRLEN);
         if(arg0 == NULL) perror("malloc"); 
-    
-        strcpy(arg0,"usr/bin/");
+            
+        //On attribue le path à la commande ( faire sprintf)
+        strcpy(arg0,arrpath[i]);
+        strcat(arg0,"/");
         strcat(arg0,tab[0]);
+        
 
         //On complete le premier argument du tableau avec la commande
         arr[0] = arg0;
@@ -37,17 +109,22 @@ void commande_externe(char **tab,int taille){
             case -1:
                 exit(1);
             case 0:
+            //printf("arg0 = %s \n",arg0);
             if(execvp(arg0, arr) < 0){
                      exit(EXIT_FAILURE);
             }
             free(arg0);
             free_StingArrayArray(arr,taille);
-            break;
+        
+            //free(arrpath);
             default :
                 wait(NULL);
                 free(arg0);
-                break; 
+                
         }
+        
+    }
+
 }
  
 
@@ -100,7 +177,7 @@ void recherche_commande_interne(char ** tab,int *last_exit,int taille)
 
         // //On initialise un tableau pour les options
       
-
+       
         commande_externe(tab,taille);
 
        
@@ -162,56 +239,3 @@ char *truncate_prompt(char *prompt, int max_size)
 
 }
 
-char**  explode(char *str, const char *separators, int* taille)
-{
-    int i = 0;
-    int size = 0;
-    char* s = NULL;
-    char** res = NULL;
-
-            
-    // res[0]  = malloc(1*sizeof(char));
-    // res[0][0] = '\0';
-
-    //Cas chaine vide
-    if(strlen(str) == 0)
-    {
-        *taille = 0;
-        return NULL;
-    } 
-
-    //Séparer la chaine en plusieurs sous chaines :
-    char * strToken = strtok (str, separators);
-    while ( strToken != NULL ) 
-    {
-        // On copie strToken dans une chaine de caractère s (pour avoir utiliser la taille exact)
-        if(!(s = malloc(strlen(strToken) + 1))) 
-            perror("malloc");
-        if(snprintf(s, strlen(strToken)+1, "%s", strToken) < 0)
-        {
-            perror("explode snprintf error ");
-            exit(1);
-        }
-        s[strlen(strToken)] = '\0';
-        //On ajoute la chaine de caractere s au tableau res
-        size += 1;
-        res = realloc(res, size * sizeof(char *)); // +1
-
-        if(res == NULL) 
-            perror("fonction explode : realloc erreur ");
-
-        res[i] = s;
-        //res[i+1][] = '\0';
-        i++;
-
-        // On demande le token suivant.
-        strToken = strtok ( NULL, separators );
-    }
-    
-    if(!s)  
-        free(s);
-    free(strToken);
-
-    *taille = i;//ici on retourne la taille de res
-    return res;
-}
