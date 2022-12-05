@@ -94,27 +94,36 @@ int main(void)
             else if (strcmp("true", tab[0]) == 0)
             {
                 last_exit = 0;
-            }else{
+            }
+            else
+            {
+                //On vérifie la présence de true ou de false dans une commande du type .../.../true ou .../.../false
                 int newtaille;
-                char **tabslash = explode(ligne,"/",&newtaille);
-                for(int i = 0;i<newtaille;i++){
-                    if(strcmp(tabslash[i],"true")==0){
+                //On initialise un tableau de String séparé de tout les délimiteurs
+                char **tabvaleurprompt = explode(ligne, "/,;,", &newtaille);
+                for (int i = 0; i < newtaille; i++)
+                {
+                    if (strcmp(tabvaleurprompt[i], "true") == 0)
+                    {
                         last_exit = 0;
-                    }else if(strcmp(tabslash[i],"false")==0){
+                    }
+                    else if (strcmp(tabvaleurprompt[i], "false") == 0)
+                    {
                         last_exit = 1;
                     }
                 }
-                free_StingArrayArray(tabslash,newtaille);
+                free_StingArrayArray(tabvaleurprompt, newtaille);
             }
-        }else{
-                free(tab);
-            }
-           
-            free_StingArrayArray(tab, taille);
-            free(ligne);
-    
-            /*---------------------------*/
         }
-        return 0;
+        else
+        {
+            free(tab);
+        }
+
+        free_StingArrayArray(tab, taille);
+        free(ligne);
+
+        /*---------------------------*/
+    }
+    return 0;
 }
-    
