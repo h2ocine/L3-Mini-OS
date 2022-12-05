@@ -6,12 +6,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-void free_StingArrayArray(char **s, int taille)
-{
-
-<<<<<<< HEAD
-    for (int i = 0; i < taille; i++)
-=======
 
 char**  explode(char *str, const char *separators, int* taille)
 {
@@ -70,15 +64,11 @@ char**  explode(char *str, const char *separators, int* taille)
 void free_StingArrayArray(char **s,int taille)
 {   
     for(int i = 0; i < taille ; i++)
->>>>>>> a73232c71716bf68c72abe66497aa10f9863932b
         free(s[i]);
 
     free(s);
 }
 
-<<<<<<< HEAD
-void recherche_commande_interne(char **tab, int *last_exit, int taille)
-=======
 
 // void commande_externe(char **tab,int taille){
 
@@ -231,7 +221,6 @@ void commande_externe(char **tab, int taille)
 
 
 void recherche_commande_interne(char ** tab,int *last_exit,int taille)
->>>>>>> a73232c71716bf68c72abe66497aa10f9863932b
 {
     if (strcmp("exit", tab[0]) == 0)
     {
@@ -276,56 +265,6 @@ void recherche_commande_interne(char ** tab,int *last_exit,int taille)
     }
     else
     {
-<<<<<<< HEAD
-        // Fonction commande externe
-
-        // On initialise un tableau pour les options
-        char *arr[MAX_ARGS_NUMBER];
-
-        // On complete argument 0
-        char *arg0 = malloc(sizeof(char) * MAX_ARGS_STRLEN);
-        if (arg0 == NULL)
-            perror("malloc");
-
-        strcpy(arg0, "/bin/");
-        strcat(arg0, tab[0]);
-
-        // On complete le premier argument du tableau avec la commande
-        arr[0] = arg0;
-
-        // On remplit le tableau pour les options
-        for (int i = 1; i < taille; i++)
-        {
-            arr[i] = tab[i];
-            // printf(" Element[%d] = %s \n",i,arr[i]);
-        }
-
-        // Puis on execute la commande
-        switch (fork())
-        {
-        case -1:
-            exit(1);
-        case 0:
-            if (execvp(arg0, arr) < 0)
-            {
-                exit(EXIT_FAILURE);
-            }
-            free(arg0);
-            free_StingArrayArray(arr, taille);
-            break;
-        default:
-            free(arg0);
-            break;
-        }
-
-        // if(execvp(arg0, arr) < 0){
-        //     exit(EXIT_FAILURE);
-        // }
-    }
-}
-
-void formatage_couleur(int last_exit, char *prompt, char *prompt_exit)
-=======
         // //Fonction commande externe 
 
         // //On initialise un tableau pour les options
@@ -339,7 +278,6 @@ void formatage_couleur(int last_exit, char *prompt, char *prompt_exit)
 
 
 void formatage_couleur(int last_exit,char *prompt,char *prompt_exit)
->>>>>>> a73232c71716bf68c72abe66497aa10f9863932b
 {
     char *rouge = "\033[0;31m";
     char *vert = "\033[0;32m";
@@ -393,58 +331,3 @@ char *truncate_prompt(char *prompt, int max_size)
     return res;
 }
 
-<<<<<<< HEAD
-char **explode(char *str, const char *separators, int *taille)
-{
-    int i = 0;
-    int size = 0;
-    char *s = NULL;
-    char **res = NULL;
-
-    // res[0]  = malloc(1*sizeof(char));
-    // res[0][0] = '\0';
-
-    // Cas chaine vide
-    if (strlen(str) == 0)
-    {
-        *taille = 0;
-        return NULL;
-    }
-
-    // Séparer la chaine en plusieurs sous chaines :
-    char *strToken = strtok(str, separators);
-    while (strToken != NULL)
-    {
-        // On copie strToken dans une chaine de caractère s (pour avoir utiliser la taille exact)
-        if (!(s = malloc(strlen(strToken) + 1)))
-            perror("malloc");
-        if (snprintf(s, strlen(strToken) + 1, "%s", strToken) < 0)
-        {
-            perror("explode snprintf error ");
-            exit(1);
-        }
-        s[strlen(strToken)] = '\0';
-        // On ajoute la chaine de caractere s au tableau res
-        size += 1;
-        res = realloc(res, size * sizeof(char *)); // +1
-
-        if (res == NULL)
-            perror("fonction explode : realloc erreur ");
-
-        res[i] = s;
-        // res[i+1][] = '\0';
-        i++;
-
-        // On demande le token suivant.
-        strToken = strtok(NULL, separators);
-    }
-
-    if (!s)
-        free(s);
-    free(strToken);
-
-    *taille = i; // ici on retourne la taille de res
-    return res;
-}
-=======
->>>>>>> a73232c71716bf68c72abe66497aa10f9863932b
