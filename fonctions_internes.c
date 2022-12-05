@@ -6,16 +6,19 @@
 int exits(char *val,int last_exit){
     if (val != NULL)
     {
+        if((*val) == '0') exit(0);
         int n = atoi(val);
         if (n!= 0)
         {   
             printf("n: %d\n", n);
             exit(n);
         }
-    }
-    //cas exit sans paramètre
-    printf("n: %d\n", last_exit);
+    }else{
+    // printf("ça exit sans paramètres \n");
+    // printf("n: %d\n", last_exit);
     exit(last_exit);
+    }
+    return 1;
 }
 
 void truncateString(char *s, int n){

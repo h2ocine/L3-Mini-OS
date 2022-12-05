@@ -212,14 +212,7 @@ void recherche_commande_interne(char ** tab,int *last_exit,int taille)
     }
     else
     {
-        // //Fonction commande externe 
-
-        // //On initialise un tableau pour les options
-      
-       
         commande_externe(tab,taille);
-
-       
     }
 }
 
