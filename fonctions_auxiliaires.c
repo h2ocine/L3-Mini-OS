@@ -1,6 +1,11 @@
 
 #include "header.h"
 #include <sys/wait.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 
 
 char**  explode(char *str, const char *separators, int* taille)
@@ -66,65 +71,151 @@ void free_StingArrayArray(char **s,int taille)
 }
 
 
-void commande_externe(char **tab,int taille){
+// void commande_externe(char **tab,int taille){
 
-        //Ca c'est la variable getenvpath ( faut mettre la tienne parceque si tu testes avec getenvpath au bout de la 2 eme iteration la variable getenvpath bug)
-        char pathpath[] = "/home/thibault/anaconda3/bin:/home/thibault/bin:/usr/local/bin:/home/thibault/anaconda3/bin:/home/thibault/bin:/usr/local/bin:/home/thibault/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin ";
+//         //Ca c'est la variable getenvpath ( faut mettre la tienne parceque si tu testes avec getenvpath au bout de la 2 eme iteration la variable getenvpath bug)
+//         char pathpath[] = "/home/thibault/anaconda3/bin:/home/thibault/bin:/usr/local/bin:/home/thibault/anaconda3/bin:/home/thibault/bin:/usr/local/bin:/home/thibault/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin ";
         
-        //J'attribue pathpath à un pointeur pour qu'on puisse utiliser explode
-        char *path = NULL;
-        path = pathpath;
-        //char *path = getenv("PATH");
+//         //J'attribue pathpath à un pointeur pour qu'on puisse utiliser explode
+//         char *path = NULL;
+//         path = pathpath;
+//         //char *path = getenv("PATH");
 
-        int taillarrpath;
-        char**arrpath = explode(path,":",&taillarrpath);
+//         int taillarrpath;
+//         char**arrpath = explode(path,":",&taillarrpath);
 
-        //on parcout chaque élément de la variable PATH
-        for(int i = 0;i<taillarrpath;i++){
+//         //on parcout chaque élément de la variable PATH
+//         for(int i = 0;i<taillarrpath;i++){
         
-        //arr correspond à la commande + les options
-        char*arr[MAX_ARGS_NUMBER];
+//         //arr correspond à la commande + les options
+//         char*arr[MAX_ARGS_NUMBER];
 
-        //arg0  = la commande avec son chemin 
-        char *arg0 = malloc(sizeof(char)*MAX_ARGS_STRLEN);
-        if(arg0 == NULL) perror("malloc"); 
+//         //arg0  = la commande avec son chemin 
+//         char *arg0 = malloc(sizeof(char)*MAX_ARGS_STRLEN);
+//         if(arg0 == NULL) perror("malloc"); 
             
-        //On attribue le path à la commande ( faire sprintf)
-        strcpy(arg0,arrpath[i]);
-        strcat(arg0,"/");
-        strcat(arg0,tab[0]);
+//         //On attribue le path à la commande ( faire sprintf)
+//         strcpy(arg0,arrpath[i]);
+//         strcat(arg0,"/");
+//         strcat(arg0,tab[0]);
         
 
-        //On complete le premier argument du tableau avec la commande
-        arr[0] = arg0;
+//         //On complete le premier argument du tableau avec la commande
+//         arr[0] = arg0;
 
-        //On remplit le tableau pour les options 
-        for(int i = 1;i<taille;i++){
-            arr[i] = tab[i];
-            //printf(" Element[%d] = %s \n",i,arr[i]);
-        }
+//         //On remplit le tableau pour les options 
+//         for(int i = 1;i<taille;i++){
+//             arr[i] = tab[i];
+//             //printf(" Element[%d] = %s \n",i,arr[i]);
+//         }
 
-        //Puis on execute la commande
-        switch(fork()){
+//         //Puis on execute la commande
+//         switch(fork()){
+//             case -1:
+//                 exit(1);
+//             case 0:
+//             //printf("arg0 = %s \n",arg0);
+//             if(execvp(arg0, arr) < 0){
+//                      exit(EXIT_FAILURE);
+//             }
+//             free(arg0);
+//             free_StingArrayArray(arr,taille);
+        
+//             //free(arrpath);
+//             default :
+//                 wait(NULL);
+//                 free(arg0);
+                
+//         }
+        
+//     }
+
+// }
+
+void commande_externe(char **tab, int taille)
+{
+
+    // Ca c'est la variable getenvpath ( faut mettre la tienne parceque si tu testes avec getenvpath au bout de la 2 eme iteration la variable getenvpath bug)
+    
+    char *pathpath = getenv("PATH");
+
+    char *path = malloc(strlen(pathpath)+1);
+    snprintf(path, strlen(pathpath)+1, "%s", pathpath);
+    path[strlen(pathpath)] = '\0';
+
+    int taillarrpath;
+    char **arrpath = explode(path, ":", &taillarrpath); // execvp("/usr/bin/ls", ["/usr/bin/ls", "-l", "chemin"])
+    free(path);
+
+    // on parcout chaque élément de la variable PATH
+    for (int i = 0; i < taillarrpath; i++)
+    {
+
+        // arr correspond à la commande + les options
+        char **arr = malloc(taille + 1);
+
+        // arg0  = la commande avec son chemin
+        char *arg0 = malloc(strlen(arrpath[i])+ 1 + /* taille du '/' */ + strlen(tab[0]) + 1);
+        if (arg0 == NULL)
+            perror("malloc");
+
+        strncpy(arg0, arrpath[i], strlen(arrpath[i]));
+
+        char slash = '/';
+        arg0[strlen(arrpath[i])] = slash;
+        strncat(arg0, tab[0], strlen(tab[0]));
+
+        
+
+        int n;
+        if((n = open(arg0, O_RDONLY)) < 0){
+            close(n);
+            continue;
+        }else{
+            // On complete le premier argument du tableau avec la commande
+            arr[0] = malloc(strlen(arg0)+1);
+            strncpy(arr[0], arg0, strlen(arg0));
+
+            // On remplit le tableau pour les options
+            for (int i = 1; i < taille; i++)
+            {
+                arr[i] = malloc(strlen(tab[i])+1);
+                strncpy(arr[i], tab[i], strlen(tab[i]));
+                // printf(" Element[%d] = %s \n",i,arr[i]);
+            }
+            arr[taille] = NULL;
+            char cpyArg0[MAX_ARGS_NUMBER];
+
+            strncpy(cpyArg0, arg0, strlen(arg0));
+
+                // char *cpyArr[MAX_ARGS_NUMBER];
+                // for(int g=0; g<taille+1; g++) cpyArr[g] = arr[g];
+                // free(arg0);
+                // printf("ok\n");
+                // free_StingArrayArray(arr, taille);
+
+            // Puis on execute la commande
+            switch (fork())
+            {
             case -1:
                 exit(1);
             case 0:
-            //printf("arg0 = %s \n",arg0);
-            if(execvp(arg0, arr) < 0){
-                     exit(EXIT_FAILURE);
-            }
-            free(arg0);
-            free_StingArrayArray(arr,taille);
-        
-            //free(arrpath);
-            default :
-                wait(NULL);
-                free(arg0);
                 
-        }
-        
-    }
+                
 
+                if (execvp(arg0, arr) < 0)
+                {   
+                    exit(EXIT_FAILURE);
+                }
+
+            // free(arrpath);
+            default:
+                wait(NULL);
+                return;
+            }
+
+        }
+    }
 }
  
 
