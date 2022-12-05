@@ -215,6 +215,20 @@ void commande_externe(char **tab, int taille)
     }
 }
 
+void cherche_true_false(int *last_exit, char **tabvaleurprompt,int newtaille){
+    for (int i = 0; i < newtaille; i++)
+    {
+        if (strcmp(tabvaleurprompt[i], "true") == 0)
+        {
+            *last_exit = 0;
+        }
+        else if (strcmp(tabvaleurprompt[i], "false") == 0)
+        {
+            *last_exit = 1;
+        }
+    }
+}
+
 void recherche_commande_interne(char **tab, int *last_exit, int taille)
 {
     if (strcmp("exit", tab[0]) == 0)
