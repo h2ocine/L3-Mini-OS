@@ -5,6 +5,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <sys/types.h>
+#include <dirent.h>
+
 
 
 
@@ -70,156 +73,101 @@ void free_StingArrayArray(char **s,int taille)
     free(s);
 }
 
+int isIn(char *path, char *fic){
+    DIR *dir = opendir(path);
+    struct dirent *entry;
 
-// void commande_externe(char **tab,int taille){
-
-//         //Ca c'est la variable getenvpath ( faut mettre la tienne parceque si tu testes avec getenvpath au bout de la 2 eme iteration la variable getenvpath bug)
-//         char pathpath[] = "/home/thibault/anaconda3/bin:/home/thibault/bin:/usr/local/bin:/home/thibault/anaconda3/bin:/home/thibault/bin:/usr/local/bin:/home/thibault/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin ";
-        
-//         //J'attribue pathpath à un pointeur pour qu'on puisse utiliser explode
-//         char *path = NULL;
-//         path = pathpath;
-//         //char *path = getenv("PATH");
-
-//         int taillarrpath;
-//         char**arrpath = explode(path,":",&taillarrpath);
-
-//         //on parcout chaque élément de la variable PATH
-//         for(int i = 0;i<taillarrpath;i++){
-        
-//         //arr correspond à la commande + les options
-//         char*arr[MAX_ARGS_NUMBER];
-
-//         //arg0  = la commande avec son chemin 
-//         char *arg0 = malloc(sizeof(char)*MAX_ARGS_STRLEN);
-//         if(arg0 == NULL) perror("malloc"); 
-            
-//         //On attribue le path à la commande ( faire sprintf)
-//         strcpy(arg0,arrpath[i]);
-//         strcat(arg0,"/");
-//         strcat(arg0,tab[0]);
-        
-
-//         //On complete le premier argument du tableau avec la commande
-//         arr[0] = arg0;
-
-//         //On remplit le tableau pour les options 
-//         for(int i = 1;i<taille;i++){
-//             arr[i] = tab[i];
-//             //printf(" Element[%d] = %s \n",i,arr[i]);
-//         }
-
-//         //Puis on execute la commande
-//         switch(fork()){
-//             case -1:
-//                 exit(1);
-//             case 0:
-//             //printf("arg0 = %s \n",arg0);
-//             if(execvp(arg0, arr) < 0){
-//                      exit(EXIT_FAILURE);
-//             }
-//             free(arg0);
-//             free_StingArrayArray(arr,taille);
-        
-//             //free(arrpath);
-//             default :
-//                 wait(NULL);
-//                 free(arg0);
-                
-//         }
-        
-//     }
-
-// }
-
-void commande_externe(char **tab, int taille)
-{
-
-    // Ca c'est la variable getenvpath ( faut mettre la tienne parceque si tu testes avec getenvpath au bout de la 2 eme iteration la variable getenvpath bug)
-    
-    char *pathpath = getenv("PATH");
-
-    char *path = malloc(strlen(pathpath)+1);
-    snprintf(path, strlen(pathpath)+1, "%s", pathpath);
-    path[strlen(pathpath)] = '\0';
-
-    int taillarrpath;
-    char **arrpath = explode(path, ":", &taillarrpath); // execvp("/usr/bin/ls", ["/usr/bin/ls", "-l", "chemin"])
-    free(path);
-
-    // on parcout chaque élément de la variable PATH
-    for (int i = 0; i < taillarrpath; i++)
-    {
-
-        // arr correspond à la commande + les options
-        char **arr = malloc(taille + 1);
-
-        // arg0  = la commande avec son chemin
-        char *arg0 = malloc(strlen(arrpath[i])+ 1 + /* taille du '/' */ + strlen(tab[0]) + 1);
-        if (arg0 == NULL)
-            perror("malloc");
-
-        strncpy(arg0, arrpath[i], strlen(arrpath[i]));
-
-        char slash = '/';
-        arg0[strlen(arrpath[i])] = slash;
-        strncat(arg0, tab[0], strlen(tab[0]));
-
-        
-
-        int n;
-        if((n = open(arg0, O_RDONLY)) < 0){
-            close(n);
-            continue;
-        }else{
-            // On complete le premier argument du tableau avec la commande
-            arr[0] = malloc(strlen(arg0)+1);
-            strncpy(arr[0], arg0, strlen(arg0));
-
-            // On remplit le tableau pour les options
-            for (int i = 1; i < taille; i++)
-            {
-                arr[i] = malloc(strlen(tab[i])+1);
-                strncpy(arr[i], tab[i], strlen(tab[i]));
-                // printf(" Element[%d] = %s \n",i,arr[i]);
-            }
-            arr[taille] = NULL;
-            char cpyArg0[MAX_ARGS_NUMBER];
-
-            strncpy(cpyArg0, arg0, strlen(arg0));
-
-                // char *cpyArr[MAX_ARGS_NUMBER];
-                // for(int g=0; g<taille+1; g++) cpyArr[g] = arr[g];
-                // free(arg0);
-                // printf("ok\n");
-                // free_StingArrayArray(arr, taille);
-
-            // Puis on execute la commande
-            switch (fork())
-            {
-            case -1:
-                exit(1);
-            case 0:
-                
-                
-
-                if (execvp(arg0, arr) < 0)
-                {   
-                    exit(EXIT_FAILURE);
-                }
-
-            // free(arrpath);
-            default:
-                wait(NULL);
-                return;
-            }
-
+    while((entry = readdir(dir))){
+        if(strcmp(entry->d_name, fic) == 0){
+            closedir(dir);
+            return 1;
         }
+        
     }
+    closedir(dir);
+    return 0;
+    
 }
  
 
+void execCMD(char *cmd, char **args){
+    pid_t pid = fork();
+    if(pid == -1){
+        perror("fork");
+    }else if(pid != 0){
+        wait(NULL);
+    }else{
+        execvp(cmd, args);
+    }
 
+}
+
+
+void commande_externe(char **tab, int taille)
+{   
+    // On recupere la variable d'environnement path et on lui cree une copie (car si on la modifie la var d'env se modifie)
+    char *envPath = getenv("PATH");
+    size_t taille_envPath = strlen(envPath);
+
+    // Creation de la copie
+    char *path = malloc(taille_envPath + 1);
+    snprintf(path, taille_envPath + 1, "%s", envPath);
+    path[taille_envPath] = '\0';
+
+
+    // On decoupe la variable path avec le separateur ":"
+    int taillarrpath;
+    char **pathDecoupe = explode(path, ":", &taillarrpath); 
+    free(path); 
+
+    // on parcout chaque élément de la variable PATH
+    for (int i = 0; i < taillarrpath; i++)
+    {   
+        // On verifie si chaque chemin du tableau pathDecoup a un fichier de nom la commande ecrite par l'utilisateur (tab[0])
+        // Si non on essaye avec un autre chemin
+        if(isIn(pathDecoupe[i],tab[0]) == 0)
+            continue;
+        else
+        {   
+            size_t taille_elem = strlen(pathDecoupe[i]);
+
+            // On cree un tableau de chaine de caratere pour la fonction exec qui doit ressembler à ça pour l'exemple "ls -l path" -> [/usr/bin/ls, -l, path, NULL]
+            // Taille + 1 car le dernier element doit etre NULL
+            char **arguments_exec = malloc((taille + 1) * sizeof(char *)); 
+
+            
+            char *cmd = malloc(taille_elem + 1 + /* taille du '/' */ + strlen(tab[0]) + 1);
+            if (cmd == NULL) perror("malloc");
+            snprintf(cmd, taille_elem+1, "%s", pathDecoupe[i]);
+            cmd[taille_elem] = '\0';
+
+            //equivalent de strcat(arg0,tab[0]) : 
+            cmd[taille_elem] = '/';
+            snprintf(&cmd[taille_elem +1], strlen(tab[0])+1, "%s", tab[0]);
+            int t = taille_elem + 1 + strlen(tab[0]);
+            cmd[t] = '\0';
+
+            // On complete le premier argument du tableau avec la commande
+            arguments_exec[0] = malloc(strlen(cmd) + 1); //---------------------->fuite mem
+            snprintf(arguments_exec[0],strlen(cmd)+1, "%s", cmd);
+            arguments_exec[0][strlen(cmd)] = '\0';
+
+
+            // On remplit le tableau pour les options
+            for (int i = 1; i < taille; i++)
+            {   
+                arguments_exec[i] = malloc(strlen(tab[i]) + 1);
+                snprintf(arguments_exec[i],strlen(tab[i])+1, "%s", tab[i]);
+            }
+            arguments_exec[taille] = NULL;
+
+            execCMD(cmd, arguments_exec);
+            free(cmd);
+            free_StingArrayArray(arguments_exec, taille);
+            return ;
+        }
+    }
+}
 
 void recherche_commande_interne(char ** tab,int *last_exit,int taille)
 {
@@ -274,6 +222,7 @@ void recherche_commande_interne(char ** tab,int *last_exit,int taille)
        
     }
 }
+
 
 
 void formatage_couleur(int last_exit,char *prompt,char *prompt_exit)
