@@ -7,14 +7,11 @@ int exits(char *val,int last_exit){
     if (val != NULL)
     {
         int n = atoi(val);
-        if (n!= 0)
-        {   
-            printf("n: %d\n", n);
-            exit(n);
-        }
+        printf("n: %d\n", n);
+        exit(n);
     }
     //cas exit sans paramètre
-    printf("n: %d\n", last_exit);
+    //printf("n: %d\n", last_exit);
     exit(last_exit);
 }
 
