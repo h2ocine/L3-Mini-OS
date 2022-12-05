@@ -85,35 +85,19 @@ int main(void)
 
             // On cherche si dans notre tableau
             recherche_commande_interne(tab, &last_exit, taille);
-
             // On verifie si il y a présence de true ou false
-            if (strcmp("false", tab[0]) == 0)
-            {
-                last_exit = 1;
-            }
-            else if (strcmp("true", tab[0]) == 0)
-            {
-                last_exit = 0;
-            }
-            else
-            {
-                //On vérifie la présence de true ou de false dans une commande du type .../.../true ou .../.../false
-                int newtaille;
-                //On initialise un tableau de String séparé de tout les délimiteurs
-                char **tabvaleurprompt = explode(ligne, "/,;,", &newtaille);
-                for (int i = 0; i < newtaille; i++)
-                {
-                    if (strcmp(tabvaleurprompt[i], "true") == 0)
-                    {
-                        last_exit = 0;
-                    }
-                    else if (strcmp(tabvaleurprompt[i], "false") == 0)
-                    {
-                        last_exit = 1;
-                    }
-                }
-                free_StingArrayArray(tabvaleurprompt, newtaille);
-            }
+
+            // On vérifie la présence de true ou de false dans une commande du type .../.../true ou .../.../false
+            int newtaille;
+
+            // On initialise un tableau de String séparé de tout les délimiteurs
+            char **tabvaleurprompt = explode(ligne, "/,;,", &newtaille);
+
+            //On parcourt le tableau pour chercher la présence de true ou false 
+            cherche_true_false(&last_exit,tabvaleurprompt,newtaille);
+         
+            //On free le tableau
+            free_StingArrayArray(tabvaleurprompt, newtaille);
         }
         else
         {
