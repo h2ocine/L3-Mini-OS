@@ -286,7 +286,7 @@ int pwd(int argc, char **argv)
                 return pwd_physique(ref);
             // Cas paramètre faux
             else
-                return 1;
+                return 110;
         }
     }
 }

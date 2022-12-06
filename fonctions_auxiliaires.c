@@ -86,8 +86,9 @@ int isIn(char *path, char *fic)
     return 0;
 }
 
-void execCMD(char *cmd, char **args)
+void execCMD(char *cmd, char **args,int *last_exit)
 {
+    int status;
     pid_t pid = fork();
     if (pid == -1)
     {
@@ -95,7 +96,13 @@ void execCMD(char *cmd, char **args)
     }
     else if (pid != 0)
     {
-        wait(NULL);
+        waitpid(pid,&status,0);
+        //wait(NULL);
+        if (WIFEXITED(status))
+        {
+            *last_exit = WEXITSTATUS(status);
+            //printf("exited normally with status %d\n", *last_exit);
+        }
     }
     else
     {
@@ -103,7 +110,7 @@ void execCMD(char *cmd, char **args)
     }
 }
 
-void commande_externe(char **tab, int taille)
+void commande_externe(char **tab, int taille,int *last_exit)
 {
 
     char pre[3];
@@ -145,7 +152,7 @@ void commande_externe(char **tab, int taille)
                 snprintf(arguments_exec[i], strlen(tab[i]) + 1, "%s", tab[i]);
             }
             arguments_exec[taille] = NULL;
-            execCMD(cpyPwd, arguments_exec);
+            execCMD(cpyPwd, arguments_exec,last_exit);
             free_StingArrayArray(arguments_exec, taille);
         }
     }
@@ -206,11 +213,25 @@ void commande_externe(char **tab, int taille)
                 }
                 arguments_exec[taille] = NULL;
 
-                execCMD(cmd, arguments_exec);
+                execCMD(cmd, arguments_exec,last_exit);
                 free(cmd);
                 free_StingArrayArray(arguments_exec, taille);
                 return;
             }
+        }
+    }
+}
+void cherche_true_false(int *last_exit, char **tabvaleurprompt, int newtaille)
+{
+    for (int i = 0; i < newtaille; i++)
+    {
+        if (strcmp(tabvaleurprompt[i], "true") == 0)
+        {
+            *last_exit = 0;
+        }
+        else if (strcmp(tabvaleurprompt[i], "false") == 0)
+        {
+            *last_exit = 1;
         }
     }
 }
@@ -260,7 +281,7 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
     }
     else
     {
-        commande_externe(tab, taille);
+        commande_externe(tab, taille,last_exit);
     }
 }
 
@@ -273,18 +294,18 @@ void formatage_couleur(int last_exit, char *prompt, char *prompt_exit)
     if (last_exit == 0)
     {
         strcpy(prompt, vert);
-        strcat(prompt, "[");
         strcat(prompt, prompt_exit);
-        strcat(prompt, "]");
         strcat(prompt, cyan);
-        // Pas d'erreur à la derniere commande
     }
     else if (last_exit == 1)
     {
         strcpy(prompt, rouge);
-        strcat(prompt, "[");
         strcat(prompt, prompt_exit);
-        strcat(prompt, "]");
+        strcat(prompt, cyan);
+    }
+    else{
+        strcpy(prompt, rouge);
+        strcat(prompt, prompt_exit);
         strcat(prompt, cyan);
     }
 }
