@@ -25,15 +25,6 @@ int exits(char *val, int last_exit)
     return 1;
 }
 
-void truncateString(char *s, int n)
-{
-    int len = strlen(s);
-    for (int i = len - 1; i >= len - n; i--)
-    {
-        s[i] = '\0';
-    }
-}
-
 char *truncate_str(char *s, char spr)
 {
 

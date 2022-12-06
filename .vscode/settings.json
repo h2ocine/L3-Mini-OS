@@ -4,7 +4,14 @@
         "slash.h": "c",
         "stdlib.h": "c",
         "history.h": "c",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "header.h": "c",
+        "util.h": "c",
+        "cmdint.h": "c",
+        "cdaux.h": "c",
+        "prompt.h": "c",
+        "cmdext.h": "c",
+        "string.h": "c"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }
