@@ -96,7 +96,8 @@ void execCMD(char *cmd, char **args,int *last_exit)
     }
     else if (pid != 0)
     {
-        wait(&status);
+        waitpid(pid,&status,0);
+        //wait(NULL);
         if (WIFEXITED(status))
         {
             *last_exit = WEXITSTATUS(status);
@@ -220,7 +221,6 @@ void commande_externe(char **tab, int taille,int *last_exit)
         }
     }
 }
-
 void cherche_true_false(int *last_exit, char **tabvaleurprompt, int newtaille)
 {
     for (int i = 0; i < newtaille; i++)
@@ -294,18 +294,23 @@ void formatage_couleur(int last_exit, char *prompt, char *prompt_exit)
     if (last_exit == 0)
     {
         strcpy(prompt, vert);
-        strcat(prompt, "[");
+        //strcat(prompt, "[");
         strcat(prompt, prompt_exit);
-        strcat(prompt, "]");
+        //strcat(prompt, "]");
         strcat(prompt, cyan);
         // Pas d'erreur à la derniere commande
     }
     else if (last_exit == 1)
     {
         strcpy(prompt, rouge);
-        strcat(prompt, "[");
+        //strcat(prompt, "[");
         strcat(prompt, prompt_exit);
-        strcat(prompt, "]");
+        //strcat(prompt, "]");
+        strcat(prompt, cyan);
+    }
+    else{
+        strcpy(prompt, rouge);
+        strcat(prompt, prompt_exit);
         strcat(prompt, cyan);
     }
 }

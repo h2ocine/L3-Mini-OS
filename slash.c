@@ -25,18 +25,45 @@ int main(void)
 
         // recupération de la valeur de retour dans prompt_exit
         //[TODO] : Faire le cas ou la valeur de retour > 9;
-        char prompt_exit[2];
-        prompt_exit[0] = last_exit + '0'; // recuperer le premier caractère
-        prompt_exit[1] = '\0';            // fin de la chaine de la valeur de retoure
+
+        //On convertit last_exit en chaine de caractères pour compter sa taille
+        char last_exit_tab[30];
+        sprintf(last_exit_tab,"%d",last_exit);
+
+        // printf("Valeur de exit tab = %s \n",last_exit_tab);
+        // printf("Longueur de la last_exit = %ld \n",strlen(last_exit_tab));
+
+        //On crée un char_prompt_exit variable en fonctione de la longueur de last_exit
+
+        char *prompt_exit_variable = malloc(strlen(last_exit_tab));
+        if(prompt_exit_variable == NULL) perror("malloc");
+        strcpy(prompt_exit_variable,last_exit_tab);
+        // printf("Valeur du last_exit variable = %s et longueur de last_exit variable = %ld \n",prompt_exit_variable,strlen(prompt_exit_variable));
+
+
+        // on crée le tableau final du prompt_exit avec le [...]
+        char *prompt_exit_final = malloc(strlen(last_exit_tab)+3);
+        strcpy(prompt_exit_final,"[");
+        strcat(prompt_exit_final,prompt_exit_variable);
+        strcat(prompt_exit_final+strlen(prompt_exit_variable)+1,"]");
+
+        printf("Valeur du promp_final_variable = %s \n et longueur finale = %ld \n",prompt_exit_final,strlen(prompt_exit_final));
+
+     
+        // char prompt_exit[2];
+        // prompt_exit[0] = last_exit + '0'; // recuperer le premier caractère
+        // prompt_exit[1] = '\0';            // fin de la chaine de la valeur de retoure
 
         // creation du prompt -> il a 30 caractère au maximum + (.)caractère de couleurs
         char prompt[TAILLE_PROMPT];
 
+        //if(strlen(prompt_exit_variable))
+
         // On ajoute la valeur de retour ([0] ou [1]) et s'occupe de la couleur du prompt
-        formatage_couleur(last_exit, prompt, prompt_exit);
+        formatage_couleur(last_exit, prompt, prompt_exit_final);
 
         // on supprime les carctère en trop du dossier courant et on les remplae par ... avec truncate_prompt
-        int max_size = 30 - (strlen(prompt_exit) + 2) - 2; // on set le nombre de carctère max du chemin //-3 ([valeur retour]) -2 $ espace
+        int max_size = 30 - (strlen(prompt_exit_final) + 2) - 2; // on set le nombre de carctère max du chemin //-3 ([valeur retour]) -2 $ espace
         char *prompt_dir = truncate_prompt(dossier_courant, max_size);
 
         // on ajoute le dossier courant dans le prompt
@@ -106,6 +133,8 @@ int main(void)
 
         free_StingArrayArray(tab, taille);
         free(ligne);
+        free(prompt_exit_variable);
+        free(prompt_exit_final);
 
         /*---------------------------*/
     }

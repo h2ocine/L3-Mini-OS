@@ -16,7 +16,7 @@
 
 #define MAX_ARGS_NUMBER 4096
 #define MAX_ARGS_STRLEN 4096
-#define TAILLE_PROMPT 47 //7 (rouge ou vert) + 5 (bleu) + 4 (blanc) + 1 ('\0')
+#define TAILLE_PROMPT 49 //7 (rouge ou vert) + 5 (bleu) + 4 (blanc) + 1 ('\0')
 
 /**
  * 
