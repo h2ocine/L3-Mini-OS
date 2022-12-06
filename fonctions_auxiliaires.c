@@ -101,7 +101,7 @@ void execCMD(char *cmd, char **args,int *last_exit)
         if (WIFEXITED(status))
         {
             *last_exit = WEXITSTATUS(status);
-            printf("exited normally with status %d\n", *last_exit);
+            //printf("exited normally with status %d\n", *last_exit);
         }
     }
     else
@@ -294,18 +294,13 @@ void formatage_couleur(int last_exit, char *prompt, char *prompt_exit)
     if (last_exit == 0)
     {
         strcpy(prompt, vert);
-        //strcat(prompt, "[");
         strcat(prompt, prompt_exit);
-        //strcat(prompt, "]");
         strcat(prompt, cyan);
-        // Pas d'erreur à la derniere commande
     }
     else if (last_exit == 1)
     {
         strcpy(prompt, rouge);
-        //strcat(prompt, "[");
         strcat(prompt, prompt_exit);
-        //strcat(prompt, "]");
         strcat(prompt, cyan);
     }
     else{
