@@ -117,6 +117,60 @@ int pwd(int argc, char **argv)
 
 void recherche_commande_interne(char **tab, int *last_exit, int taille)
 {
+    if(taille > 0)
+    {
+        int taille_malloc_argument_commande = 0;
+        for(int i = 0; i < taille - 1; i++)
+        {
+            taille_malloc_argument_commande = taille_malloc_argument_commande + strlen(tab[i]) + 1;
+        }
+        
+        char* path = "";
+        char* argument_commande = "";
+
+        path = malloc(strlen(tab[taille-1]) + 1);
+        argument_commande = malloc(taille_malloc_argument_commande);
+
+        path[0] = '\0';
+        argument_commande[0] = '\0';
+        
+        printf("[TEST]path = %s\n",path);
+        printf("[TEST]argument_commande = %s\n",argument_commande);
+
+        //set path
+        strncpy(path,tab[taille-1],strlen(tab[taille-1]));
+        path[strlen(tab[taille-1])] = '\0';
+
+        //set argument_commande
+        int strlen_argument_commande = 0;
+        for(int i = 0; i < taille - 1; i++)
+        {
+            strncat(argument_commande,tab[i],strlen(tab[i]));
+            strlen_argument_commande = strlen_argument_commande + strlen(tab[i]) + 1;
+                
+            if(i == taille - 2)
+                continue;
+            
+            argument_commande[strlen_argument_commande - 1] = ' ';
+            argument_commande[strlen_argument_commande + 1] = '\0';
+        }
+        
+        printf("path = %s\n",path);
+        printf("argument_commande = %s\n",argument_commande);
+
+        if(joker_1(path,argument_commande) == 1)
+        {
+            printf("joker1\n");
+            free(path);
+            free(argument_commande);
+            return;
+        }
+        
+        printf("ne rentre pas dans joker1\n");
+        free(path);
+        free(argument_commande);
+    }
+
     if (strcmp("exit", tab[0]) == 0)
     {
         if (taille >= 2)

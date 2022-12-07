@@ -5,7 +5,8 @@
 #include "../header/cdaux.h"
 #include "../header/pwdaux.h"
 #include "../header/util.h"
-#include "../header/cmdext.h"  
+#include "../header/cmdext.h"
+#include "joker.h"  
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

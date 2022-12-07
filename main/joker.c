@@ -1,4 +1,4 @@
-#include "header.c"
+#include "../header/joker.h"
 
 char is_valid(char *chaine)
 {
@@ -147,7 +147,7 @@ int joker_1(char* path, char* argument_commande)
             arguments[strlen_arguments + 1 + strlen(pathtobalise) + strlen(parcours->d_name)] = '\0';
         }
     }
-    closedir(parcours);
+    closedir(repertoir);
     free(balise);
     free(pathtobalise);
 

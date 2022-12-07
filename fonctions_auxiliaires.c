@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+
 char **explode(char *str, const char *separators, int *taille)
 {
     int i = 0;
@@ -237,7 +238,28 @@ void cherche_true_false(int *last_exit, char **tabvaleurprompt, int newtaille)
 }
 
 void recherche_commande_interne(char **tab, int *last_exit, int taille)
-{
+{   
+    if(taille > 0)
+    {
+        char* path = malloc(MAX_ARGS_NUMBER);
+        char* argument_commande = malloc(MAX_ARGS_NUMBER);
+
+        strncpy(path,tab[taille-1],strlen(tab[taille]));
+
+        //argument_commande ="";
+        for(int i = 0; i < taille - 2; i++)
+            strncat(argument_commande,tab[i],strlen(tab[taille]));
+
+        printf("path = %s\n",path);
+        printf("argument_commande = %s",argument_commande);
+
+        if(joker_1(path,argument_commande) == 1)
+            return;
+        
+        free(path);
+        free(argument_commande);
+    }
+
     if (strcmp("exit", tab[0]) == 0)
     {
         if (taille >= 2)
