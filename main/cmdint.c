@@ -119,17 +119,17 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
 {
     if(taille > 0)
     {
-        int taille_malloc_argument_commande = 0;
+        int taille_malloc_argument_commande = 1;
         for(int i = 0; i < taille - 1; i++)
         {
             taille_malloc_argument_commande = taille_malloc_argument_commande + strlen(tab[i]) + 1;
         }
         
-        char* path = "";
-        char* argument_commande = "";
+        // char* path = "";
+        // char* argument_commande = "";
 
-        path = malloc(strlen(tab[taille-1]) + 1);
-        argument_commande = malloc(taille_malloc_argument_commande);
+        char * path = malloc(strlen(tab[taille-1]) + 1);
+        char* argument_commande = malloc(taille_malloc_argument_commande);
 
         path[0] = '\0';
         argument_commande[0] = '\0';
@@ -152,7 +152,7 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
                 continue;
             
             argument_commande[strlen_argument_commande - 1] = ' ';
-            argument_commande[strlen_argument_commande + 1] = '\0';
+            argument_commande[strlen_argument_commande] = '\0';
         }
         
         printf("path = %s\n",path);

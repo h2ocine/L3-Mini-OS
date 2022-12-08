@@ -108,7 +108,7 @@ char *get_pathtobalise(char *path)
 
 // retourne 0 en cas d'echec (path non valide); 1 sinon
 // char path[] = "a/*.c";
-// char argument_commande[] = "ls -a -l";
+// char argument_commande[] = "ls -a -l"; 
 int joker_1(char* path, char* argument_commande)
 {
     char *balise = get_balise(path);
