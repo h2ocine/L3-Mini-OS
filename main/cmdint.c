@@ -158,13 +158,13 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
         printf("path = %s\n",path);
         printf("argument_commande = %s\n",argument_commande);
 
-        if(joker_1(path,argument_commande) == 1)
-        {
-            printf("joker1\n");
-            free(path);
-            free(argument_commande);
-            return;
-        }
+        // if(joker_1(path,argument_commande) == 1)
+        // {
+        //     printf("joker1\n");
+        //     free(path);
+        //     free(argument_commande);
+        //     return;
+        // }
         
         printf("ne rentre pas dans joker1\n");
         free(path);

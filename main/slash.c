@@ -2,6 +2,7 @@
 #include "../header/prompt.h"
 #include "../header/cmdext.h"
 #include "../header/cmdint.h"
+#include "../header/joker.h"
 #include <stdlib.h>
 
 #include <readline/readline.h>

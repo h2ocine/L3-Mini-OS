@@ -1,12 +1,8 @@
-#include <stdio.h>
 #include "util.h"
-#include "cmdext.h"
-#include <dirent.h>
 
-char is_valid(char *chaine);
-char *get_postfix(char *chaine);
-int is_postfix(char *chaine, char *pre);
-int nombre_mot_char(char *chaine, char separator);
-char *get_balise(char *path);
-char *get_pathtobalise(char *path);
-int joker_1(char* path, char* argument_commande);
+// renvoie sous forme de tableau le liste des fichiers dans path selon l'input et met la taille du tableau dans $taille;
+// * -> represente tout les fichers, *.c -> tout les fichers ayant pour suffixe .c, a* -> tout les fichiers commancant par a ...
+char **trans(char *path, char *input, int *taille);
+
+// renvoie un tableau de tout les fichiers selon les jokers input en partant du fichier racine dos
+char ** all_joker_fic(char *input ,char *dos, int *t);

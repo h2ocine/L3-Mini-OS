@@ -1,168 +1,139 @@
 #include "../header/joker.h"
 
-char is_valid(char *chaine)
-{
-    if (chaine == NULL)
-        return 0;
+char **trans(char *path, char *input, int *taille){
+    if(strchr(input, '*') == NULL){
+        char **res = malloc(sizeof(char *));
+        
+        char *cpy;
+        cpy = malloc(strlen(input)+1);
+        snprintf(cpy, strlen(input)+1, "%s", input);
 
-    if (chaine[0] == '*')
-        return 1;
+        res[0] = cpy;
+        *taille = 1;
+        return res;
+    }
+   
+    int t;
+    // On commence par separer le chemin
+    char **tab = explode(input, "*", &t);
+    
+    
+    // cas où input = "*"
+    if(t == 0){
+        return all_fic(path, taille);
 
-    return 0;
-}
-
-char *get_postfix(char *chaine)
-{
-    char *resultat = malloc(1);
-    resultat[0] = '\0';
-    for (int i = 0; i < strlen(chaine); i++)
-    {
-        if (chaine[i] == '*')
-        {
-            if (i + 1 == strlen(chaine))
-                return resultat;
-
-            resultat = (char *)realloc(resultat, strlen(chaine) - i);
-            for (int j = i + 1; j < strlen(chaine); j++)
-            {
-                resultat[j - (i + 1)] = chaine[j];
-            }
-            resultat[strlen(chaine)] = '\0';
+    }else if(t != 2){
+        char *pre = malloc(strlen(tab[0])+1);
+        snprintf(pre, strlen(tab[0])+1, "%s", tab[0]);
+        pre[strlen(tab[0])] = '\0';
+        
+        if(input[0] == '*'){
+            return end_with(path, pre, taille);
+        }else{ 
+            char **res = begin_with(path, pre, taille);
+            return res;
         }
+    }else{
+        char *pre = malloc(strlen(tab[0])+1);
+        snprintf(pre, strlen(tab[0])+1, "%s", tab[0]);
+        pre[strlen(tab[0])] = '\0';
+
+        char *post = malloc(strlen(tab[1])+1);
+        snprintf(post, strlen(tab[1])+1, "%s", tab[1]);
+        post[strlen(tab[1])] = '\0';
+
+        return begin_end_with(path, pre, post, taille);
     }
-    return resultat;
-}
-
-// // verifie si pre est postfix de chaine (1 si oui; 0 sinon)
-int is_postfix(char *chaine, char *pre)
-{
-    if (strcmp(pre, "") == 0)
-        return 1;
-
-    if (strlen(pre) > strlen(chaine))
-        return 0;
-
-    if (chaine[0] == '.')
-        return 0;
-
-    int index_pre = strlen(pre) - 1;
-    int index_chaine = strlen(chaine) - 1;
-    while (index_pre >= 0)
-    {
-        if (pre[index_pre] != chaine[index_chaine])
-            return 0;
-
-        index_pre--;
-        index_chaine--;
-    }
-    return 1;
-}
-
-int nombre_mot_char(char *chaine, char separator)
-{
-    if (strlen(chaine) == 0)
-        return 0;
-
-    int resultat = 1;
-    for (int i = 0; i < strlen(chaine); i++)
-        if (chaine[i] == 0)
-            resultat++;
-
-    return resultat;
-}
-
-//ne pas oublier de free qu'on on utlise get_balise
-char *get_balise(char *path)
-{
-    int index = -1;
-    for (int i = 0; i < strlen(path); i++)
-        if (path[i] == '/')
-            index = i;
-
-    char *balise = malloc(strlen(path) - index + 1);
-
-    for (int j = index + 1; j < strlen(path); j++)
-        balise[j - (index + 1)] = path[j];
-
-    balise[strlen(path) - (index + 1)] = '\0';
-    return balise;
     
 }
 
-//ne pas oublier de free qu'on on utlise get_pathtobalise
-char *get_pathtobalise(char *path)
-{
-    int index;
-    for (int i = 0; i < strlen(path); i++)
-        if (path[i] == '/')
-            index = i;
+char ** all_joker_fic(char *input ,char *dos, int *t){
+    int size_tab;
+    // On commence par separer le input 
+    char **tab = explode(input, "/", &size_tab);
+    char *cpyDos;
+    if(dos[strlen(dos)-1] != '/'){
+        cpyDos = malloc(strlen(dos) + 2);
+        snprintf(cpyDos, strlen(dos)+1, "%s", dos);
 
-    char *pathtobalise = malloc(index + 1 + 1);
+        cpyDos[strlen(dos)] = '/';
+        cpyDos[strlen(dos)+1] = '\0';
+    }else{
+        cpyDos = malloc(strlen(dos)+1);
+        snprintf(cpyDos, strlen(dos)+1, "%s", dos);
+        cpyDos[strlen(dos)] = '\0';
+    }
 
-    for (int i = 0; i < index + 1; i++)
-        pathtobalise[i] = path[i];
+    int size_pos = 0;
+    char **possibilite = trans(cpyDos, tab[0], &size_pos);
+    
+    char **res = NULL;
+    int size_res = 0;
 
-    pathtobalise[index + 1] = '\0';
-    return pathtobalise;
-}
+    // Dans le cas où l'on doit chercher dans le dossier dos
+    if(size_tab == 1){
+        *t = 0;
+        res = trans(cpyDos, input, t);
+        free_StingArrayArray(possibilite, size_pos);
+        free_StingArrayArray(tab, size_tab);
+        res = add_start(res, *t, cpyDos);
+        return res;
+    }
+    
 
-// retourne 0 en cas d'echec (path non valide); 1 sinon
-// char path[] = "a/*.c";
-// char argument_commande[] = "ls -a -l"; 
-int joker_1(char* path, char* argument_commande)
-{
-    char *balise = get_balise(path);
-    char *pathtobalise = get_pathtobalise(path);
+    for(int i=0; i<size_pos; i++){
+        // Nouveau chemin
+        char *newDos;
+        if(dos[strlen(cpyDos)-1] != '/'){
+            newDos = malloc(strlen(cpyDos) + strlen(possibilite[i]) + 1);
+            snprintf(newDos, strlen(cpyDos)+1, "%s", cpyDos);
+            newDos[strlen(cpyDos)] = '\0';
+            strncat(newDos, possibilite[i], strlen(possibilite[i]));
+        }else{
+            newDos = malloc(strlen(cpyDos) + strlen(possibilite[i]) + 1);
+            snprintf(newDos, strlen(cpyDos)+1, "%s", cpyDos);
+            newDos[strlen(cpyDos)] = '\0';
 
-    // initialiser arguments avec commande + argument_commande
-    char *arguments = malloc(4000);
-    strncpy(arguments, argument_commande, strlen(argument_commande));
-    arguments[strlen(argument_commande) + 1] = '\0';
-
-    if (!is_valid(balise))
-        return 0;
-
-    DIR *repertoir;
-    if(strcmp(pathtobalise,"") == 0)
-        repertoir = opendir(".");
-    else    
-        repertoir = opendir(pathtobalise);
+            strncat(newDos, possibilite[i], strlen(possibilite[i]));  
+        }
         
-    struct dirent *parcours;
-    int boolean = 0;
-    while ((parcours = readdir(repertoir)))
-    {
-        if (is_postfix(parcours->d_name, get_postfix(balise)) == 1)
-        {
-            boolean = 1;
-            // ajouter le nom du fichier dans arguments
-            int strlen_arguments = strlen(arguments);
-            arguments[strlen_arguments] = ' ';
-            arguments[strlen_arguments + 1] = '\0';
 
-            strncat(arguments, pathtobalise, strlen(pathtobalise));
-            arguments[strlen_arguments + 1 + strlen(pathtobalise)] = '\0';
+        // Nouveau input
+        char *newInput = NULL;
+        size_t size_newInput = 0;
+        for(int j=1; j<size_tab; j++){
+            if(j != size_tab-1){
+                size_newInput += strlen(tab[j]) + 1 /* pour le '/' */;
+            }else{
+                size_newInput += strlen(tab[j]);
+            }
             
-            strncat(arguments, parcours->d_name, strlen(parcours->d_name));
-            arguments[strlen_arguments + 1 + strlen(pathtobalise) + strlen(parcours->d_name)] = '\0';
+            newInput = realloc(newInput, size_newInput + 1);
+
+            if(j == 1){
+                snprintf(newInput, strlen(tab[j])+1, "%s", tab[j]);
+                if(j != size_tab-1){
+                    newInput[strlen(tab[j])] = '/';
+                    newInput[strlen(tab[j])+1] = '\0';
+                }else{ 
+                    newInput[strlen(tab[j])] = '\0';
+                }
+                
+            }else{
+                strncat(newInput,tab[j], strlen(tab[j]));
+                if(j != size_tab-1) newInput[size_newInput] = '/';
+            }
+        }  
+        
+        // On regarde tout les resultats possible depuis une la possibilite possibilite[i]
+        int size_jok;   // nombre de possibilite
+        char **jok = all_joker_fic(newInput, newDos, &size_jok);
+        if(jok != NULL){
+            int tmp;
+            res = cat_tabs(res, size_res, jok, size_jok, &tmp);  
+            size_res = tmp;
         }
     }
-    closedir(repertoir);
-    free(balise);
-    free(pathtobalise);
-
-    if (boolean)
-    {
-        int nbmot = nombre_mot_char(arguments, ' ');
-        char **tmp = explode(arguments, " ", &nbmot);
-        tmp[nbmot] = NULL;
-        
-        free(arguments);
-        execCMD(tmp[0], tmp);
-        free_StingArrayArray(tmp, nbmot - 1);
-    }
-    else
-        free(arguments);
-
-    return 1;
+    *t = size_res;
+    return res;
 }
