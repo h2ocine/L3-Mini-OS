@@ -1,5 +1,43 @@
 #include "../header/util.h"
 
+char *supString(char *s, char *sup){
+    int size_sup = strlen(sup);
+
+    // prefixe de s
+    char *pre = malloc(size_sup+1);
+    snprintf(pre, size_sup+1, "%s", s);
+    pre[size_sup] = '\0';
+
+    if(strcmp(pre, sup) == 0){
+        free(pre);
+        size_t len = strlen(s) - size_sup;
+        char *res = malloc(len+1);
+        snprintf(res, len + 1, "%s", &s[0+size_sup]);
+        
+        return res;
+    }
+    free(pre);
+
+    char *cpy = malloc(strlen(s)+1);
+    snprintf(cpy, strlen(s)+1, "%s", s);
+    cpy[strlen(s)] = '\0';
+
+    return cpy;
+}
+
+// int main(void){
+//     char *sup = "./";
+
+//     char *p = "./a/b";
+//     char *path = malloc(strlen(p)+1);
+//     snprintf(path, strlen(p)+1, "%s", p);
+
+//     char *res = supString(path, sup);
+//     free(path);
+
+//     printf("%s\n", res);
+//     free(res);
+// }
 
 char *truncate_str(char *s, char spr)
 {

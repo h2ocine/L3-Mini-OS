@@ -6,6 +6,8 @@
 #include <dirent.h>
 #include <stdlib.h>
 
+char *supString(char *s, char *sup);
+
 /**
  *  raccourci une chaine de caractere jusqua la premiere occurence (comprise) d'un caractere donné
  */

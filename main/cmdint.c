@@ -170,10 +170,12 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
             //     printf("joker_paths[%d] = %s\n", i, joker_paths[i]);
 
             // executer les fichiers
-            execution_jokers(commande, index_debut_fichiers, joker_paths, taille - index_debut_fichiers);
-
-            printf("fin exec");
-
+            if(execution_jokers(commande, index_debut_fichiers, joker_paths, taille - index_debut_fichiers) == 1)
+            {
+                free_StingArrayArray(joker_paths, taille - index_debut_fichiers);
+                free_StingArrayArray(commande, index_debut_fichiers);
+                return;
+            }
             free_StingArrayArray(joker_paths, taille - index_debut_fichiers);
         }
         free_StingArrayArray(commande, index_debut_fichiers);
