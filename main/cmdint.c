@@ -1,4 +1,5 @@
 #include "../header/cmdint.h"
+#include "../header/joker.h"
 
 #define MAX_ARGS_NUMBER 4096
 #define MAX_ARGS_STRLEN 4096
@@ -117,58 +118,65 @@ int pwd(int argc, char **argv)
 
 void recherche_commande_interne(char **tab, int *last_exit, int taille)
 {
-    if(taille > 0)
+    if (taille > 1)
     {
-        int taille_malloc_argument_commande = 1;
-        for(int i = 0; i < taille - 1; i++)
+        // set commande (commande avec ses arguments)
+        // initialiser commande avec la commande de base
+        char **commande = malloc(sizeof(char *) * 1);
+        commande[0] = malloc(strlen(tab[0]) + 1);
+        strncpy(commande[0], tab[0], strlen(tab[0]));
+        commande[0][strlen(tab[0])] = '\0';
+        // ajouter les arguments de la arguments de la commande
+        int index_debut_fichiers = -1;
+        for (int i = 1; i < taille; i++)
         {
-            taille_malloc_argument_commande = taille_malloc_argument_commande + strlen(tab[i]) + 1;
+            if (tab[i][0] != '-')
+            {
+                index_debut_fichiers = i;
+                break;
+            }
+            commande = realloc(commande, sizeof(char *) * (i + 1));
+            commande[i] = malloc(strlen(tab[i]) + 1);
+            strncpy(commande[i], tab[i], strlen(tab[i]));
+            commande[i][strlen(tab[i])] = '\0';
         }
-        
-        // char* path = "";
-        // char* argument_commande = "";
 
-        char * path = malloc(strlen(tab[taille-1]) + 1);
-        char* argument_commande = malloc(taille_malloc_argument_commande);
+        // printf("affichage commande : taille debut fichier = %d\n", index_debut_fichiers);
+        // for (int i = 0; i < index_debut_fichiers; i++)
+        //     printf("commande[%d] = %s\n", i, commande[i]);
 
-        path[0] = '\0';
-        argument_commande[0] = '\0';
-        
-        printf("[TEST]path = %s\n",path);
-        printf("[TEST]argument_commande = %s\n",argument_commande);
-
-        //set path
-        strncpy(path,tab[taille-1],strlen(tab[taille-1]));
-        path[strlen(tab[taille-1])] = '\0';
-
-        //set argument_commande
-        int strlen_argument_commande = 0;
-        for(int i = 0; i < taille - 1; i++)
+        // set les joker_paths
+        if (index_debut_fichiers != -1) // commande sans fichiers (sans paths) donc pas de jokers
         {
-            strncat(argument_commande,tab[i],strlen(tab[i]));
-            strlen_argument_commande = strlen_argument_commande + strlen(tab[i]) + 1;
-                
-            if(i == taille - 2)
-                continue;
-            
-            argument_commande[strlen_argument_commande - 1] = ' ';
-            argument_commande[strlen_argument_commande] = '\0';
-        }
-        
-        printf("path = %s\n",path);
-        printf("argument_commande = %s\n",argument_commande);
+            // initialiser joker_paths avec le premier path
+            char **joker_paths = malloc(1 * sizeof(char *));
+            size_t length = strlen(tab[index_debut_fichiers]);
+            joker_paths[0] = malloc(length + 1);
+            strncpy(joker_paths[0], tab[index_debut_fichiers], length);
+            joker_paths[0][length] = '\0';
 
-        // if(joker_1(path,argument_commande) == 1)
-        // {
-        //     printf("joker1\n");
-        //     free(path);
-        //     free(argument_commande);
-        //     return;
-        // }
-        
-        printf("ne rentre pas dans joker1\n");
-        free(path);
-        free(argument_commande);
+            // ajouter les autres fichiers
+            for (int i = index_debut_fichiers + 1; i < taille; i++)
+            {
+                joker_paths = realloc(joker_paths, sizeof(char *) * (i - index_debut_fichiers + 1));
+                length = strlen(tab[i]);
+                joker_paths[i - index_debut_fichiers] = malloc(length + 1);
+                strncpy(joker_paths[i - index_debut_fichiers], tab[i], length);
+                joker_paths[i - index_debut_fichiers][length] = '\0';
+            }
+
+            // printf("affichage joker_paths\n");
+            // for (int i = 0; i < taille - index_debut_fichiers; i++)
+            //     printf("joker_paths[%d] = %s\n", i, joker_paths[i]);
+
+            // executer les fichiers
+            execution_jokers(commande, index_debut_fichiers, joker_paths, taille - index_debut_fichiers);
+
+            printf("fin exec");
+
+            free_StingArrayArray(joker_paths, taille - index_debut_fichiers);
+        }
+        free_StingArrayArray(commande, index_debut_fichiers);
     }
 
     if (strcmp("exit", tab[0]) == 0)

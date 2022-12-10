@@ -19,7 +19,6 @@ void execCMD(char *cmd, char **args)
 
 void commande_externe(char **tab, int taille)
 {
-
     char pre[3];
     snprintf(pre, 3, "%s", tab[0]);
     pre[2] = '\0';
