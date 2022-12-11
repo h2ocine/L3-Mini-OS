@@ -101,7 +101,7 @@ int isIn(char *path, char *fic)
 }
 
 char **explode(char *str, const char *separators, int *taille)
-{
+{   
     int i = 0;
     int size = 0;
     char *s = NULL;
@@ -211,9 +211,12 @@ char **add_start(char **tab, int taille, char *s)
     for (int i = 0; i < taille; i++)
     {
         res[i] = malloc(strlen(tab[i]) + strlen(s) + 1);
-        snprintf(res[i], strlen(s) + 1, "%s", s);
-        res[i][strlen(s)] = '\0';
-        strncat(res[i], tab[i], strlen(tab[i]));
+        strncpy(res[i], s, strlen(s)+1);
+
+        char *cpy = malloc(strlen(tab[i])+1);
+        strncpy(cpy, tab[i], strlen(tab[i])+1);
+
+        strncat(res[i], cpy, strlen(cpy));
     }
     return res;
 }
@@ -377,20 +380,23 @@ char *with_slash(char *path)
         new[strlen(path) + 1] = '\0';
         return new;
     }
-    return path;
+    char *cpy = malloc(strlen(path)+1);
+    strncpy(cpy, path, strlen(path)+1);
+    return cpy;
 }
 
 char **cat_tabs(char **tab1, int taille1, char **tab2, int taille2, int *taille)
-{
+{   
     char **res = malloc(sizeof(char *) * (taille1 + taille2));
+    
     for (int i = 0; i < taille1; i++)
-    {
+    {   
         res[i] = malloc(strlen(tab1[i]) + 1);
         snprintf(res[i], strlen(tab1[i]) + 1, "%s", tab1[i]);
         res[i][strlen(tab1[i])] = '\0';
     }
     for (int j = 0; j < taille2; j++)
-    {
+    {   
         res[j + taille1] = malloc(strlen(tab2[j]) + 1);
         snprintf(res[j + taille1], strlen(tab2[j]) + 1, "%s", tab2[j]);
         res[j + taille1][strlen(tab2[j])] = '\0';
@@ -399,3 +405,24 @@ char **cat_tabs(char **tab1, int taille1, char **tab2, int taille2, int *taille)
     *taille = taille1 + taille2;
     return res;
 }
+
+char *truncate_start(char *s, int n){
+    size_t size =((strlen(s) - n) < 0)? 0 : strlen(s) - n;
+    char *res = malloc(size + 1);
+
+    for(int i=0; i<size; i++){
+        res[i] = s[i+n];
+    }
+    res[size] = '\0';
+    return res;
+}
+
+char **delete_pre(char **tab, int taille, char *pre){
+    char **res = malloc(sizeof(char *) * taille);
+
+    for(int i=0; i<taille; i++){
+        res[i] = supString(tab[i], pre);
+    }
+    return res;
+}
+

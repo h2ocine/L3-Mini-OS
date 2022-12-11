@@ -8,6 +8,7 @@
 
 char **copie_tab(char **tab, int taille);
 
+// renvoie une chaine de caractere sans le prefixe sup si il existe sinon une copie de s
 char *supString(char *s, char *sup);
 
 /**
@@ -68,3 +69,9 @@ char *with_slash(char *path);
 
 // renvoie un nouveau tableau resultant de l'ajout de tout les éléments de tab1 puis l'ajout de tout les éléments de tab2
 char **cat_tabs(char **tab1, int taille1, char **tab2, int taille2, int *taille);
+
+// renvoie une chaine de caractère sans les n premiers charactere
+char *truncate_start(char *s, int n);
+
+// renvoie un tableau former des elements de tab sans le prefixe pre; ex: ["./a", "./b/c", "./m"] "./" -> ["a", "b/c", "m"]
+char **delete_pre(char **tab, int taille, char *pre);

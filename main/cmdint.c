@@ -145,6 +145,7 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
     }
 
     int size_all_joker;
+    
     char **all_joker = all(all_path, size_path, ".", &size_all_joker);
     free_StingArrayArray(all_path,size_path);
 
@@ -196,6 +197,7 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
             arg = tab[1];
             ref = tab[2];
         }
+
         *last_exit = cd(arg, ref);
     }
     else if (strcmp("pwd", tab[0]) == 0)
@@ -212,7 +214,7 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
 
         // tab[0]
         commande[0] = malloc(strlen(tab[0]) + 1);
-        strncpy(commande[0], tab[0], strlen(tab[0]));
+        strncpy(commande[0], tab[0], strlen(tab[0])+1);
         commande[0][strlen(tab[0])] = '\0';
 
         for (int h = 1; h < taille; h++)
@@ -225,7 +227,7 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
 
             commande = realloc(commande, sizeof(char *) * size_cmd);
             commande[h] = malloc(strlen(tab[h]) + 1);
-            strncpy(commande[h], tab[h], strlen(tab[h]));
+            strncpy(commande[h], tab[h], strlen(tab[h])+1);
             commande[h][strlen(tab[h])] = '\0';
         }
 
@@ -234,6 +236,7 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
         free_StingArrayArray(all_joker, size_all_joker);
         free_StingArrayArray(commande, size_cmd);
 
+        if(!(size_path != 0 && size_all_joker == 0))
         commande_externe(all, t);
     }
 }
