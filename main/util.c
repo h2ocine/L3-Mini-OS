@@ -375,7 +375,12 @@ char **all_fic(char *path, int *taille)
 }
 
 char *with_slash(char *path)
-{
+{   
+    if(strlen(path) == 0){
+        char *res = malloc(1);
+        res[0] = '\0';
+        return res;
+    }
     if (path[strlen(path) - 1] != '/')
     {
         char *new = malloc(strlen(path) + 2);

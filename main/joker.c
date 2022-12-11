@@ -144,12 +144,15 @@ char **all_joker_fic(char *input, char *dos, int *t){
     char **tab = explode(cpyInput, "/", &size_tab);
     free(cpyInput);
 
+    
     // On cree une copie du dossier et on lui ajoute un slash à la fin si il n'y en a pas
     char *cpyDos = with_slash(dos);
 
+    if(strlen(dos) == 0) dos = "./";
+
     // On chercher toute les possibilites avec l'input dans dos
     int size_pos = 0;
-    char **possibilite = trans(cpyDos, tab[0], &size_pos);
+    char **possibilite = trans(dos, tab[0], &size_pos);
 
     char **res = NULL;
     int size_res = 0;
@@ -164,10 +167,10 @@ char **all_joker_fic(char *input, char *dos, int *t){
         free_StingArrayArray(possibilite, size_pos);
         free(cpyDos);
 
-        char **res_withoutPre = delete_pre(res, size_res, "./");
-        free_StingArrayArray(res, size_res);
+        // char **res_withoutPre = delete_pre(res, size_res, "./");
+        // free_StingArrayArray(res, size_res);
 
-        return res_withoutPre;
+        return res;
     }
     
     for (int i = 0; i < size_pos; i++)
@@ -207,13 +210,13 @@ char **all_joker_fic(char *input, char *dos, int *t){
     *t = size_res;
 
     // On supprimer tout les "./" de res
-    char **res_withoutPre = delete_pre(res, size_res, "./");
-    free_StingArrayArray(res, size_res);
-    return res_withoutPre;
+    // char **res_withoutPre = delete_pre(res, size_res, "./");
+    // free_StingArrayArray(res, size_res);
+    return res;
 }
 
 char **all(char **input, int size_input, char *dos, int *taille)
-{     
+{      
     char **res = NULL;
     int size_res = 0;
 

@@ -146,7 +146,7 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
 
     int size_all_joker;
     
-    char **all_joker = all(all_path, size_path, ".", &size_all_joker);
+    char **all_joker = all(all_path, size_path, "", &size_all_joker);
     free_StingArrayArray(all_path,size_path);
 
     if (strcmp("exit", tab[0]) == 0)
