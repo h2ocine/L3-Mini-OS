@@ -2,8 +2,7 @@
 
 char *logiquePath(char *path)
 {
-    if (strlen(path) != 1 && path[strlen(path) - 1] == '/')
-        perror("mauvais format");
+
     int taille;
     char **tab = explode(path, "/", &taille);
     free(path);

@@ -7,7 +7,5 @@ char **trans(char *path, char *input, int *taille);
 // renvoie un tableau de tout les fichiers selon les jokers input en partant du fichier racine dos
 char ** all_joker_fic(char *input ,char *dos, int *t);
 
-int execution_joker(char **commande, int taille_commande, char *joker_path);
-
-int execution_jokers(char **commande, int taille_commande, char **joker_paths, int taille_paths);
+char **all(char **input, int size_input, char *dos, int *taille);
 

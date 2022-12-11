@@ -5,7 +5,7 @@
 #define MAX_ARGS_STRLEN 4096
 
 int exits(char *val, int last_exit)
-{
+{   
     if (val != NULL)
     {
         if ((*val) == '0')
@@ -115,76 +115,44 @@ int pwd(int argc, char **argv)
         }
     }
 }
+char **ajoute_debut_tab(char **tab, int size_tab, char *s){
+    char **res = malloc(size_tab + 1);
+    res[0] = s;
+
+    for(int i=1; i<size_tab+1; i++){
+        res[i] = tab[i-1];
+    }
+    return res;
+}
 
 void recherche_commande_interne(char **tab, int *last_exit, int taille)
 {
-    if (taille > 1)
-    {
-        // set commande (commande avec ses arguments)
-        // initialiser commande avec la commande de base
-        char **commande = malloc(sizeof(char *) * 1);
-        commande[0] = malloc(strlen(tab[0]) + 1);
-        strncpy(commande[0], tab[0], strlen(tab[0]));
-        commande[0][strlen(tab[0])] = '\0';
-        // ajouter les arguments de la arguments de la commande
-        int index_debut_fichiers = -1;
-        for (int i = 1; i < taille; i++)
-        {
-            if (tab[i][0] != '-')
-            {
-                index_debut_fichiers = i;
-                break;
+        // On met tout les chemins mentionnées par l'utilisateur dans un tableau; ls * *.c -> ["*", "*.c"]
+        char **all_path = NULL;
+        int size_path = 0;
+        for(int i=1; i<taille; i++){
+            if(tab[i][0] != '-'){
+                size_path ++;
+                all_path = realloc(all_path, sizeof(char *) * size_path);
+                all_path[size_path-1] = malloc(strlen(tab[i])+1);
+                snprintf(all_path[size_path-1], strlen(tab[i])+1, "%s", tab[i]);
+                all_path[size_path-1][strlen(tab[i])] = '\0';
             }
-            commande = realloc(commande, sizeof(char *) * (i + 1));
-            commande[i] = malloc(strlen(tab[i]) + 1);
-            strncpy(commande[i], tab[i], strlen(tab[i]));
-            commande[i][strlen(tab[i])] = '\0';
         }
 
-        // printf("affichage commande : taille debut fichier = %d\n", index_debut_fichiers);
-        // for (int i = 0; i < index_debut_fichiers; i++)
-        //     printf("commande[%d] = %s\n", i, commande[i]);
+        int size_all_joker;
+        char **all_joker = all(all_path, size_path, ".", &size_all_joker);
+        
 
-        // set les joker_paths
-        if (index_debut_fichiers != -1) // commande sans fichiers (sans paths) donc pas de jokers
-        {
-            // initialiser joker_paths avec le premier path
-            char **joker_paths = malloc(1 * sizeof(char *));
-            size_t length = strlen(tab[index_debut_fichiers]);
-            joker_paths[0] = malloc(length + 1);
-            strncpy(joker_paths[0], tab[index_debut_fichiers], length);
-            joker_paths[0][length] = '\0';
-
-            // ajouter les autres fichiers
-            for (int i = index_debut_fichiers + 1; i < taille; i++)
-            {
-                joker_paths = realloc(joker_paths, sizeof(char *) * (i - index_debut_fichiers + 1));
-                length = strlen(tab[i]);
-                joker_paths[i - index_debut_fichiers] = malloc(length + 1);
-                strncpy(joker_paths[i - index_debut_fichiers], tab[i], length);
-                joker_paths[i - index_debut_fichiers][length] = '\0';
-            }
-
-            // printf("affichage joker_paths\n");
-            // for (int i = 0; i < taille - index_debut_fichiers; i++)
-            //     printf("joker_paths[%d] = %s\n", i, joker_paths[i]);
-
-            // executer les fichiers
-            if(execution_jokers(commande, index_debut_fichiers, joker_paths, taille - index_debut_fichiers) == 1)
-            {
-                free_StingArrayArray(joker_paths, taille - index_debut_fichiers);
-                free_StingArrayArray(commande, index_debut_fichiers);
-                return;
-            }
-            free_StingArrayArray(joker_paths, taille - index_debut_fichiers);
-        }
-        free_StingArrayArray(commande, index_debut_fichiers);
-    }
 
     if (strcmp("exit", tab[0]) == 0)
     {
         if (taille >= 2)
-        {
+        {   
+            if(size_all_joker > 1){
+                printf("Erreur dans exit\n");
+                return;
+            }
             char t[strlen(tab[1]) + 1];
             snprintf(t, strlen(tab[1]) + 1, "%s", tab[1]);
             t[strlen(tab[1]) + 1] = '\0';
@@ -198,7 +166,12 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
         }
     }
     else if (strcmp("cd", tab[0]) == 0)
-    {
+    {   
+        if(size_all_joker > 1){
+                printf("Erreur dans exit\n");
+                return;
+        }
+        
         char *arg;
         char *ref;
         if (taille == 1)
@@ -219,11 +192,43 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
         *last_exit = cd(arg, ref);
     }
     else if (strcmp("pwd", tab[0]) == 0)
-    {
+    {   
         *last_exit = pwd(taille, tab);
     }
     else
     {
-        commande_externe(tab, taille);
+        // set commande (commande avec ses arguments)
+        // initialiser commande avec la commande de base
+
+        char **commande = malloc(sizeof(char *) * 1);
+        int size_cmd = 1;
+
+        // tab[0]
+        commande[0] = malloc(strlen(tab[0]) + 1);
+        strncpy(commande[0], tab[0], strlen(tab[0]));
+        commande[0][strlen(tab[0])] = '\0';
+
+
+        for (int h = 1; h < taille; h++)
+        {   
+            if (tab[h][0] != '-')
+            {
+                break;
+            }
+            size_cmd++;
+
+            commande = realloc(commande, sizeof(char *) * size_cmd);
+            commande[h] = malloc(strlen(tab[h]) + 1);
+            strncpy(commande[h], tab[h], strlen(tab[h]));
+            commande[h][strlen(tab[h])] = '\0';
+        }
+        
+
+        int t;
+        char **all = cat_tabs(commande, size_cmd, all_joker, size_all_joker, &t);
+        free_StingArrayArray(commande, size_cmd);
+
+        commande_externe(all, t); 
     }
 }
+

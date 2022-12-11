@@ -167,62 +167,16 @@ char **all_joker_fic(char *input, char *dos, int *t)
     return res;
 }
 
-int execution_joker(char **commande, int taille_commande, char *joker_path)
-{
-    // recuperer tout les fichiers a executer de joker_path
-    int taille_fichiers;
+char **all(char **input, int size_input, char *dos, int *taille){
+    char **res = NULL;
+    int size_res = 0;
 
-    char **fichiers = all_joker_fic(joker_path, ".", &taille_fichiers);
-
-    if(taille_fichiers == 0)
-        return 0;
-
-    // creation d'un tableau tab_exec qui contiendra [commmande_sans_arguments, argument_commande1, .., fichier1, .., NULL]
-    char **tab_exec = malloc(sizeof(char *) * (taille_commande + taille_fichiers + 1));
-    // insertion de la commande
-    for (int i = 0; i < taille_commande; i++)
-    {
-        // insertition de la commande_sans_arguments ou un argument de la commande dans tab_exec
-        tab_exec[i] = malloc(strlen(commande[i]) + 1);
-        strncpy(tab_exec[i], commande[i], strlen(commande[i]));
-        tab_exec[i][strlen(commande[i])] = '\0';
+    for(int i=0; i<size_input; i++){
+        int size_jok;
+        char **jok = all_joker_fic(input[i], dos, &size_jok);
+        res = cat_tabs(res, size_res, jok, size_jok, &size_res);
+        free_StingArrayArray(jok, size_jok);
     }
-    // insertion des fichiers
-    for (int j = 0; j < taille_fichiers; j++)
-    {
-        // insertition d'un fichier
-        // tab_exec[taille_commande + j] = malloc(strlen(fichiers[j]) + 1);
-        // strncpy(tab_exec[taille_commande + j], fichiers[j], strlen(fichiers[j]));
-        // tab_exec[taille_commande + j][strlen(fichiers[j])] = '\0';
-
-        tab_exec[taille_commande + j] = malloc(strlen(fichiers[j]) + 1 - 2);
-        strncpy(tab_exec[taille_commande + j], supString(fichiers[j],"./"), strlen(fichiers[j]) - 2);
-        tab_exec[taille_commande + j][strlen(fichiers[j]) - 2] = '\0';
-    }
-    // on ajoute le NULL a la fin
-    tab_exec[taille_commande + taille_fichiers] = NULL;
-
-    // printf("affichage de ce qu'on va donner en argument a execCMD\n");
-    // for (int i = 0; i <= taille_commande + taille_fichiers; i++)
-    //     printf("tab_exec[%d] = %s\n", i, tab_exec[i]);
-
-    // on execute la commande
-    execCMD(tab_exec[0], tab_exec);
-
-    // on free tout le reste
-    free_StingArrayArray(fichiers, taille_fichiers);
-    free_StingArrayArray(tab_exec, taille_commande + taille_fichiers + 1); //+1 pour le NULL ??
-
-    return 1;
-}
-
-int execution_jokers(char **commande, int taille_commande, char **joker_paths, int taille_paths)
-{
-    int val_retour = 0;
-    for (int i = 0; i < taille_paths; i++)
-    {
-        if(execution_joker(commande, taille_commande, joker_paths[i]) == 1) 
-            val_retour = 1;
-    }
-    return val_retour;
+    *taille = size_res;
+    return res;
 }
