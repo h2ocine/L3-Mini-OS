@@ -86,6 +86,7 @@ void videString(char *s)
 int isIn(char *path, char *fic)
 {
     DIR *dir = opendir(path);
+    if (dir == NULL) return 0;
     struct dirent *entry;
 
     while ((entry = readdir(dir)))
