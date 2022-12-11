@@ -233,7 +233,6 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
 
         int t;
         char **all = cat_tabs(commande, size_cmd, all_joker, size_all_joker, &t);
-        free_StingArrayArray(all_joker, size_all_joker);
         free_StingArrayArray(commande, size_cmd);
 
         if(!(size_path != 0 && size_all_joker == 0))
