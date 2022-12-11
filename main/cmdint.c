@@ -233,10 +233,63 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
 
         int t;
         char **all = cat_tabs(commande, size_cmd, all_joker, size_all_joker, &t);
-        free_StingArrayArray(commande, size_cmd);
 
-        if(!(size_path != 0 && size_all_joker == 0))
-        commande_externe(all, t);
+        if(strcmp(tab[0], "echo") == 0){
+            char **echo = NULL;
+            int size_echo = 0;
+
+            for(int e=0; e<size_all_joker; e++){
+                char *path = truncate_str(all_joker[e], '/'); 
+                
+                char *fich = truncate_start(all_joker[e], strlen(path)+1);
+
+                if(isIn(path, fich) == 1){
+                    size_echo ++;
+                    echo = realloc(echo, sizeof(char *) * size_echo);
+                    echo[size_echo-1] = malloc(strlen(all_joker[e])+1);
+                    strncpy(echo[size_echo-1], all_joker[e], strlen(all_joker[e])+1);
+                }
+
+                free(path);
+                free(fich);
+            }
+
+            
+            char **tab_echo = NULL;
+            int size_tab_echo = 0;
+
+            if(size_echo != 0){ 
+                int size_final;
+                char **final = cat_tabs(commande, size_cmd, echo, size_echo, &size_final);
+                commande_externe(final, size_final);
+                
+                free_StingArrayArray(final, size_final);
+            }else{
+                
+
+                for(int s=1; s<taille; s++){
+                    size_tab_echo++;
+                    tab_echo = realloc(tab_echo, sizeof(char *)*size_tab_echo);
+                    tab_echo[size_tab_echo-1] = malloc(strlen(tab[s])+1);
+                    strncpy(tab_echo[size_tab_echo-1], tab[s], strlen(tab[s])+1);;
+                }
+
+                int size_final;
+                char **final = cat_tabs(commande, size_cmd, tab_echo, size_tab_echo, &size_final);
+                commande_externe(final, size_final);
+            }
+            
+
+            free_StingArrayArray(echo, size_echo);
+            free_StingArrayArray(tab_echo, size_tab_echo);
+        }else{
+
+            if(!(size_path != 0 && size_all_joker == 0))
+            commande_externe(all, t);
+        }
+
+        free_StingArrayArray(commande, size_cmd);
     }
+    
     free_StingArrayArray(all_joker, size_all_joker);
 }

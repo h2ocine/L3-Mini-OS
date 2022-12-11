@@ -89,6 +89,8 @@ int isIn(char *path, char *fic)
     if (dir == NULL) return 0;
     struct dirent *entry;
 
+    if(dir == NULL) return 0;
+
     while ((entry = readdir(dir)))
     {
         if (strcmp(entry->d_name, fic) == 0)

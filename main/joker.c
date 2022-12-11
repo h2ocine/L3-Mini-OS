@@ -213,7 +213,7 @@ char **all_joker_fic(char *input, char *dos, int *t){
 }
 
 char **all(char **input, int size_input, char *dos, int *taille)
-{   
+{     
     char **res = NULL;
     int size_res = 0;
 
