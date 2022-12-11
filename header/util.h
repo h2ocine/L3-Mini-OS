@@ -6,6 +6,8 @@
 #include <dirent.h>
 #include <stdlib.h>
 
+char **copie_tab(char **tab, int taille);
+
 char *supString(char *s, char *sup);
 
 /**

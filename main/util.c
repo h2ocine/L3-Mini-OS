@@ -1,25 +1,39 @@
 #include "../header/util.h"
 
-char *supString(char *s, char *sup){
+char **copie_tab(char **tab, int taille)
+{
+    char **cpy = malloc(taille * sizeof(char *));
+    for (int i = 0; i < taille; i++)
+    {
+        cpy[i] = malloc(strlen(tab[i]) + 1);
+        snprintf(cpy[i], strlen(tab[i]) + 1, "%s", tab[i]);
+        cpy[i][strlen(tab[i])] = '\0';
+    }
+    return cpy;
+}
+
+char *supString(char *s, char *sup)
+{
     int size_sup = strlen(sup);
 
     // prefixe de s
-    char *pre = malloc(size_sup+1);
-    snprintf(pre, size_sup+1, "%s", s);
+    char *pre = malloc(size_sup + 1);
+    snprintf(pre, size_sup + 1, "%s", s);
     pre[size_sup] = '\0';
 
-    if(strcmp(pre, sup) == 0){
+    if (strcmp(pre, sup) == 0)
+    {
         free(pre);
         size_t len = strlen(s) - size_sup;
-        char *res = malloc(len+1);
-        snprintf(res, len + 1, "%s", &s[0+size_sup]);
-        
+        char *res = malloc(len + 1);
+        snprintf(res, len + 1, "%s", &s[0 + size_sup]);
+
         return res;
     }
     free(pre);
 
-    char *cpy = malloc(strlen(s)+1);
-    snprintf(cpy, strlen(s)+1, "%s", s);
+    char *cpy = malloc(strlen(s) + 1);
+    snprintf(cpy, strlen(s) + 1, "%s", s);
     cpy[strlen(s)] = '\0';
 
     return cpy;
@@ -52,9 +66,11 @@ char *truncate_str(char *s, char spr)
     }
 
     char *res = malloc(stop + 1);
-    if(res == NULL) perror("malloc");
+    if (res == NULL)
+        perror("malloc");
 
-    if(snprintf(res, stop + 1, "%s", s) < 0) perror("snprintf");
+    if (snprintf(res, stop + 1, "%s", s) < 0)
+        perror("snprintf");
     res[stop] = '\0';
     return res;
 }
@@ -142,149 +158,158 @@ void free_StingArrayArray(char **s, int taille)
     free(s);
 }
 
-void affiche_mat(char **tab, int taille){
-    for(int i=0; i<taille; i++){
+void affiche_mat(char **tab, int taille)
+{
+    for (int i = 0; i < taille; i++)
+    {
         printf("tab[%d]: %s\n", i, tab[i]);
     }
 }
 
-char ** double_tab(char **tab, int taille){
-    affiche_mat(tab, taille);
-    char ** res = malloc(sizeof(char *) * (taille*2));
-    if(res == NULL) perror("malloc");
-    int i;
-    
-    for(i=0; i<taille; i++){
-        char *cpy = malloc(strlen(tab[i])+1);
-        snprintf(cpy, strlen(tab[i]), "%s", tab[i]);
-        cpy[strlen(tab[i])] = '\0';
+// char **double_tab(char **tab, int taille)
+// {
+//     affiche_mat(tab, taille);
+//     char **res = malloc(sizeof(char *) * (taille * 2));
+//     if (res == NULL)
+//         perror("malloc");
+//     int i;
 
-        char *cpy2 = malloc(strlen(tab[i])+1);
-        snprintf(cpy2, strlen(tab[i]), "%s", tab[i]);
-        cpy2[strlen(tab[i])] = '\0';
+//     for (i = 0; i < taille; i++)
+//     {
+//         char *cpy = malloc(strlen(tab[i]) + 1);
+//         snprintf(cpy, strlen(tab[i]), "%s", tab[i]);
+//         cpy[strlen(tab[i])] = '\0';
 
-        res[i] = cpy;
-        res[i + taille] = cpy2;
-    }
-    return res;
+//         char *cpy2 = malloc(strlen(tab[i]) + 1);
+//         snprintf(cpy2, strlen(tab[i]), "%s", tab[i]);
+//         cpy2[strlen(tab[i])] = '\0';
 
-}
+//         res[i] = cpy;
+//         res[i + taille] = cpy2;
+//     }
+//     return res;
+// }
 
-char ** add_last(char **tab, int taille, char *s){
+char **add_last(char **tab, int taille, char *s)
+{
     char **res = malloc(sizeof(char *) * taille);
 
-    for(int i=0; i<taille; i++){
-        char *cpy = malloc(strlen(tab[i]) + strlen(s) +1);
-        snprintf(cpy, strlen(tab[i])+1, "%s", tab[i]);
-        strncat(cpy, s, strlen(s));
-        cpy[strlen(tab[i]) + strlen(s)] = '\0';
-
-        res[i] = cpy;
+    for (int i = 0; i < taille; i++)
+    {
+        res[i] = malloc(strlen(tab[i]) + strlen(s) + 1);
+        snprintf(res[i], strlen(tab[i]) + 1, "%s", tab[i]);
+        strncat(res[i], s, strlen(s));
+        res[i][strlen(tab[i]) + strlen(s)] = '\0';
     }
 
     return res;
 }
 
-char **add_start(char **tab, int taille, char *s){
+char **add_start(char **tab, int taille, char *s)
+{
     char **res = malloc(sizeof(char *) * taille);
-    for(int i=0; i<taille; i++){
-        char *cpy = malloc(strlen(tab[i]) + strlen(s) +1);
-        snprintf(cpy, strlen(s)+1, "%s", s);
-        cpy[strlen(s)] = '\0';
-        strncat(cpy, tab[i], strlen(tab[i]));
-    
-        res[i] = cpy;
+    for (int i = 0; i < taille; i++)
+    {
+        res[i] = malloc(strlen(tab[i]) + strlen(s) + 1);
+        snprintf(res[i], strlen(s) + 1, "%s", s);
+        res[i][strlen(s)] = '\0';
+        strncat(res[i], tab[i], strlen(tab[i]));
     }
-
     return res;
 }
 
-char **begin_with(char *path, char *pre, int *taille){
+char **begin_with(char *path, char *pre, int *taille)
+{
     char **res = NULL;
     int res_size = 0;
-    
+
     size_t size_pre = strlen(pre);
 
     DIR *dir = opendir(path);
     struct dirent *entry;
 
-    if(dir == NULL){
+    if (dir == NULL)
+    {
         taille = 0;
         return NULL;
-    } 
+    }
 
     while ((entry = readdir(dir)))
-    {   
-        
-        char *pre_entry = malloc(strlen(pre)+1);
-        snprintf(pre_entry, size_pre+1, "%s", entry->d_name);
+    {
+        char *pre_entry = malloc(strlen(pre) + 1);
+        snprintf(pre_entry, size_pre + 1, "%s", entry->d_name);
         pre_entry[size_pre] = '\0';
 
-        if(strcmp(pre_entry, pre) == 0){
+        if (strcmp(pre_entry, pre) == 0)
+        {
             size_t size_entry = strlen(entry->d_name);
 
             res_size++;
             res = realloc(res, sizeof(char *) * res_size);
-            res[res_size-1] = malloc(size_entry +1);
-            snprintf(res[res_size-1], size_entry+1, "%s", entry->d_name);
-            res[res_size-1][size_entry] = '\0';
+            res[res_size - 1] = malloc(size_entry + 1);
+            snprintf(res[res_size - 1], size_entry + 1, "%s", entry->d_name);
+            res[res_size - 1][size_entry] = '\0';
         }
+        free(pre_entry);
     }
     closedir(dir);
     *taille = res_size;
     return res;
-
 }
 
-char **end_with(char *path, char *post, int *taille){
+char **end_with(char *path, char *post, int *taille)
+{
     char **res = NULL;
     int res_size = 0;
-    
+
     size_t size_post = strlen(post);
     DIR *dir = opendir(path);
     struct dirent *entry;
-    if(dir == NULL){
+    if (dir == NULL)
+    {
         taille = 0;
         return NULL;
-    } 
+    }
 
     while ((entry = readdir(dir)))
-    {   
+    {
         size_t size_entry = strlen(entry->d_name);
-        char *post_entry = malloc(size_post+1);
-        snprintf(post_entry, size_post+1, "%s", &entry->d_name[size_entry-size_post]);
+        char *post_entry = malloc(size_post + 1);
+        snprintf(post_entry, size_post + 1, "%s", &entry->d_name[size_entry - size_post]);
         post_entry[size_post] = '\0';
 
-        if(strcmp(post_entry, post) == 0){
-
+        if (strcmp(post_entry, post) == 0)
+        {
             res_size++;
             res = realloc(res, sizeof(char *) * res_size);
-            res[res_size-1] = malloc(size_entry +1);
-            snprintf(res[res_size-1], size_entry+1, "%s", entry->d_name);
-            res[res_size-1][size_entry] = '\0';
+            res[res_size - 1] = malloc(size_entry + 1);
+            snprintf(res[res_size - 1], size_entry + 1, "%s", entry->d_name);
+            res[res_size - 1][size_entry] = '\0';
         }
+        free(post_entry);
     }
     closedir(dir);
     *taille = res_size;
     return res;
-
 }
 
-char **inter(char **tab1, int taille1, char **tab2, int taille2, int *taille){
+char **inter(char **tab1, int taille1, char **tab2, int taille2, int *taille)
+{
     char **res = NULL;
     int size_res = 0;
 
-    for(int i=0; i<taille1; i++){
-        for(int j=0; j<taille2; j++){
-            if(strcmp(tab1[i], tab2[j]) == 0){
+    for (int i = 0; i < taille1; i++)
+    {
+        for (int j = 0; j < taille2; j++)
+        {
+            if (strcmp(tab1[i], tab2[j]) == 0)
+            {
                 size_res++;
                 res = realloc(res, sizeof(char *) * size_res);
 
-                char *cpy = malloc(strlen(tab1[i]) +1);
-                snprintf(cpy, strlen(tab1[i])+1, "%s", tab1[i]);
-                cpy[strlen(tab1[i])] = '\0';
-
-                res[size_res-1] = cpy;
+                res[size_res - 1] = malloc(strlen(tab1[i]) + 1);
+                snprintf(res[size_res - 1], strlen(tab1[i]) + 1, "%s", tab1[i]);
+                res[size_res - 1][strlen(tab1[i])] = '\0';
                 break;
             }
         }
@@ -293,7 +318,8 @@ char **inter(char **tab1, int taille1, char **tab2, int taille2, int *taille){
     return res;
 }
 
-char **begin_end_with(char *path, char *pre, char *post, int *taille){
+char **begin_end_with(char *path, char *pre, char *post, int *taille)
+{
     int taille1;
     char **tabPre = begin_with(path, pre, &taille1);
 
@@ -304,67 +330,72 @@ char **begin_end_with(char *path, char *pre, char *post, int *taille){
 
     free_StingArrayArray(tabPre, taille1);
     free_StingArrayArray(tabPost, taille2);
-    
-    return res;
 
+    return res;
 }
 
-char **all_fic(char *path, int *taille){
+char **all_fic(char *path, int *taille)
+{
 
     char **res = NULL;
     size_t size_res = 0;
     DIR *dir = opendir(path);
     struct dirent *entry;
 
-    if(dir == NULL) return res;
-    
-    while((entry = readdir(dir))){
-        if(entry->d_name[0] == '.') continue;
-        size_res ++;
-        res = realloc(res, size_res * sizeof(char *));
-        res[size_res-1] = malloc(strlen(entry->d_name)+1);
+    if (dir == NULL)
+        return res;
 
-        if(size_res == 1){
-            snprintf(res[0], strlen(entry->d_name)+1, "%s", entry->d_name);
+    while ((entry = readdir(dir)))
+    {
+        if (entry->d_name[0] == '.')
+            continue;
+        size_res++;
+        res = realloc(res, size_res * sizeof(char *));
+        res[size_res - 1] = malloc(strlen(entry->d_name) + 1);
+
+        if (size_res == 1)
+        {
+            snprintf(res[0], strlen(entry->d_name) + 1, "%s", entry->d_name);
             res[0][strlen(entry->d_name)] = '\0';
-        }else{
-            snprintf(res[size_res - 1], strlen(entry->d_name)+1,"%s", entry->d_name);
+        }
+        else
+        {
+            snprintf(res[size_res - 1], strlen(entry->d_name) + 1, "%s", entry->d_name);
         }
     }
     *taille = size_res;
     return res;
 }
 
-char *with_slash(char *path){
-    if(path[strlen(path)-1] != '/'){
-        char *new = malloc(strlen(path)+2);
-        snprintf(new, strlen(path)+1, "%s", path);
+char *with_slash(char *path)
+{
+    if (path[strlen(path) - 1] != '/')
+    {
+        char *new = malloc(strlen(path) + 2);
+        snprintf(new, strlen(path) + 1, "%s", path);
         new[strlen(path)] = '/';
-        new[strlen(path)+1] = '\0';
+        new[strlen(path) + 1] = '\0';
         return new;
     }
     return path;
 }
 
-char **cat_tabs(char **tab1, int taille1, char **tab2, int taille2, int *taille){
+char **cat_tabs(char **tab1, int taille1, char **tab2, int taille2, int *taille)
+{
     char **res = malloc(sizeof(char *) * (taille1 + taille2));
-    for(int i=0; i<taille1; i++){
-        char *cpy = malloc(strlen(tab1[i]) +1);
-        snprintf(cpy, strlen(tab1[i])+1, "%s", tab1[i]);
-        cpy[strlen(tab1[i])] = '\0';
-    
-        res[i] = cpy;
+    for (int i = 0; i < taille1; i++)
+    {
+        res[i] = malloc(strlen(tab1[i]) + 1);
+        snprintf(res[i], strlen(tab1[i]) + 1, "%s", tab1[i]);
+        res[i][strlen(tab1[i])] = '\0';
+    }
+    for (int j = 0; j < taille2; j++)
+    {
+        res[j + taille1] = malloc(strlen(tab2[j]) + 1);
+        snprintf(res[j + taille1], strlen(tab2[j]) + 1, "%s", tab2[j]);
+        res[j + taille1][strlen(tab2[j])] = '\0';
     }
 
-    for(int j=0; j<taille2; j++){
-        char *cpy = malloc(strlen(tab2[j]) +1);
-        snprintf(cpy, strlen(tab2[j])+1, "%s", tab2[j]);
-        cpy[strlen(tab2[j])] = '\0';
-
-        res[j + taille1] = cpy;
-    }
-    
     *taille = taille1 + taille2;
     return res;
-
 }

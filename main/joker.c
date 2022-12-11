@@ -7,11 +7,10 @@ char **trans(char *path, char *input, int *taille)
     {
         char **res = malloc(sizeof(char *));
 
-        char *cpy = malloc(strlen(input) + 1);
-        snprintf(cpy, strlen(input) + 1, "%s", input);
-        cpy[strlen(input)] = '\0';
+        res[0] = malloc(strlen(input) + 1);
+        snprintf(res[0], strlen(input) + 1, "%s", input);
+        res[0][strlen(input)] = '\0';
 
-        res[0] = cpy;
         *taille = 1;
         return res;
     }
@@ -23,6 +22,7 @@ char **trans(char *path, char *input, int *taille)
     // cas où input = "*"
     if (t == 0)
     {
+        free_StingArrayArray(tab,t);
         return all_fic(path, taille);
     }
     else if (t != 2)
@@ -33,11 +33,16 @@ char **trans(char *path, char *input, int *taille)
 
         if (input[0] == '*')
         {
-            return end_with(path, pre, taille);
+            free_StingArrayArray(tab,t);
+            char** resultat =  end_with(path, pre, taille);
+            free(pre);
+            return resultat;
         }
         else
         {
             char **res = begin_with(path, pre, taille);
+            free_StingArrayArray(tab,t);
+            free(pre);
             return res;
         }
     }
@@ -51,7 +56,11 @@ char **trans(char *path, char *input, int *taille)
         snprintf(post, strlen(tab[1]) + 1, "%s", tab[1]);
         post[strlen(tab[1])] = '\0';
 
-        return begin_end_with(path, pre, post, taille);
+        free_StingArrayArray(tab,t);
+
+        char** resultat =  begin_end_with(path, pre, post, taille);
+        free(pre);
+        return resultat;
     }
 }
 
@@ -87,11 +96,16 @@ char **all_joker_fic(char *input, char *dos, int *t)
     // Dans le cas où l'on doit chercher dans le dossier dos
     if (size_tab == 1)
     {
-        *t = 0;
-        res = trans(cpyDos, input, t);
+        //*t = 0;
+        res = trans(cpyDos, input, &size_res);
         free_StingArrayArray(possibilite, size_pos);
         free_StingArrayArray(tab, size_tab);
-        res = add_start(res, *t, cpyDos);
+
+        char** copy_res = copie_tab(res, size_res);
+        free_StingArrayArray(res,size_res);
+        res = add_start(copy_res, *t, cpyDos);
+
+        free_StingArrayArray(copy_res,size_res);
         free(cpyDos);
         return res;
     }
