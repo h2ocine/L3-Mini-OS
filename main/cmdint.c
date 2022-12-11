@@ -5,7 +5,7 @@
 #define MAX_ARGS_STRLEN 4096
 
 int exits(char *val, int last_exit)
-{   
+{
     if (val != NULL)
     {
         if ((*val) == '0')
@@ -115,42 +115,47 @@ int pwd(int argc, char **argv)
         }
     }
 }
-char **ajoute_debut_tab(char **tab, int size_tab, char *s){
+char **ajoute_debut_tab(char **tab, int size_tab, char *s)
+{
     char **res = malloc(size_tab + 1);
     res[0] = s;
 
-    for(int i=1; i<size_tab+1; i++){
-        res[i] = tab[i-1];
+    for (int i = 1; i < size_tab + 1; i++)
+    {
+        res[i] = tab[i - 1];
     }
     return res;
 }
 
 void recherche_commande_interne(char **tab, int *last_exit, int taille)
 {
-        // On met tout les chemins mentionnées par l'utilisateur dans un tableau; ls * *.c -> ["*", "*.c"]
-        char **all_path = NULL;
-        int size_path = 0;
-        for(int i=1; i<taille; i++){
-            if(tab[i][0] != '-'){
-                size_path ++;
-                all_path = realloc(all_path, sizeof(char *) * size_path);
-                all_path[size_path-1] = malloc(strlen(tab[i])+1);
-                snprintf(all_path[size_path-1], strlen(tab[i])+1, "%s", tab[i]);
-                all_path[size_path-1][strlen(tab[i])] = '\0';
-            }
+    // On met tout les chemins mentionnées par l'utilisateur dans un tableau; ls * *.c -> ["*", "*.c"]
+    char **all_path = NULL;
+    int size_path = 0;
+    for (int i = 1; i < taille; i++)
+    {
+        if (tab[i][0] != '-')
+        {
+            size_path++;
+            all_path = realloc(all_path, sizeof(char *) * size_path);
+            all_path[size_path - 1] = malloc(strlen(tab[i]) + 1);
+            snprintf(all_path[size_path - 1], strlen(tab[i]) + 1, "%s", tab[i]);
+            all_path[size_path - 1][strlen(tab[i])] = '\0';
         }
+    }
 
-        int size_all_joker;
-        char **all_joker = all(all_path, size_path, ".", &size_all_joker);
-        
-
+    int size_all_joker;
+    char **all_joker = all(all_path, size_path, ".", &size_all_joker);
+    free_StingArrayArray(all_path,size_path);
 
     if (strcmp("exit", tab[0]) == 0)
     {
         if (taille >= 2)
-        {   
-            if(size_all_joker > 1){
+        {
+            if (size_all_joker > 1)
+            {
                 printf("Erreur dans exit\n");
+                free_StingArrayArray(all_joker, size_all_joker);
                 return;
             }
             char t[strlen(tab[1]) + 1];
@@ -166,12 +171,14 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
         }
     }
     else if (strcmp("cd", tab[0]) == 0)
-    {   
-        if(size_all_joker > 1){
-                printf("Erreur dans exit\n");
-                return;
+    {
+        if (size_all_joker > 1)
+        {
+            printf("Erreur dans exit\n");
+            free_StingArrayArray(all_joker, size_all_joker);
+            return;
         }
-        
+
         char *arg;
         char *ref;
         if (taille == 1)
@@ -192,7 +199,7 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
         *last_exit = cd(arg, ref);
     }
     else if (strcmp("pwd", tab[0]) == 0)
-    {   
+    {
         *last_exit = pwd(taille, tab);
     }
     else
@@ -208,9 +215,8 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
         strncpy(commande[0], tab[0], strlen(tab[0]));
         commande[0][strlen(tab[0])] = '\0';
 
-
         for (int h = 1; h < taille; h++)
-        {   
+        {
             if (tab[h][0] != '-')
             {
                 break;
@@ -222,13 +228,12 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
             strncpy(commande[h], tab[h], strlen(tab[h]));
             commande[h][strlen(tab[h])] = '\0';
         }
-        
 
         int t;
         char **all = cat_tabs(commande, size_cmd, all_joker, size_all_joker, &t);
+        free_StingArrayArray(all_joker, size_all_joker);
         free_StingArrayArray(commande, size_cmd);
 
-        commande_externe(all, t); 
+        commande_externe(all, t);
     }
 }
-

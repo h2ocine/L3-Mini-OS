@@ -7,9 +7,9 @@ char **trans(char *path, char *input, int *taille)
     {
         char **res = malloc(sizeof(char *));
 
-        char *cpy;
-        cpy = malloc(strlen(input) + 1);
+        char *cpy = malloc(strlen(input) + 1);
         snprintf(cpy, strlen(input) + 1, "%s", input);
+        cpy[strlen(input)] = '\0';
 
         res[0] = cpy;
         *taille = 1;
@@ -92,13 +92,14 @@ char **all_joker_fic(char *input, char *dos, int *t)
         free_StingArrayArray(possibilite, size_pos);
         free_StingArrayArray(tab, size_tab);
         res = add_start(res, *t, cpyDos);
+        free(cpyDos);
         return res;
     }
 
     for (int i = 0; i < size_pos; i++)
     {
         // Nouveau chemin
-        char *newDos;
+        char *newDos = NULL;
         if (dos[strlen(cpyDos) - 1] != '/')
         {
             newDos = malloc(strlen(cpyDos) + strlen(possibilite[i]) + 1);
@@ -114,9 +115,11 @@ char **all_joker_fic(char *input, char *dos, int *t)
 
             strncat(newDos, possibilite[i], strlen(possibilite[i]));
         }
+        free(cpyDos);
 
         // Nouveau input
-        char *newInput = NULL;
+        char *newInput = malloc(1);
+        newInput[0] = '\0';
         size_t size_newInput = 0;
         for (int j = 1; j < size_tab; j++)
         {
@@ -155,26 +158,65 @@ char **all_joker_fic(char *input, char *dos, int *t)
         // On regarde tout les resultats possible depuis une la possibilite possibilite[i]
         int size_jok; // nombre de possibilite
         char **jok = all_joker_fic(newInput, newDos, &size_jok);
+        free(newInput);
+        free(newDos);
         if (jok != NULL)
         {
             int tmp;
-            res = cat_tabs(res, size_res, jok, size_jok, &tmp);
+
+            char **cpy = malloc(size_res * sizeof(char *));
+            int taille_cpy = 0;
+            for (int j = 0; j < size_res; j++)
+            {
+                size_t taille_resj = strlen(res[j]);
+                cpy[j] = malloc(taille_resj + 1);
+                strncpy(cpy[j], res[j], taille_resj);
+                cpy[taille_resj] = '\0';
+                taille_cpy++;
+            }
+            res = cat_tabs(cpy, size_res, jok, size_jok, &tmp);
+            free_StingArrayArray(cpy, taille_cpy);
+
             size_res = tmp;
         }
+        free_StingArrayArray(jok, size_jok);
     }
     *t = size_res;
     // printf("(fonction all_joker_fic) input a la fin : %s\n", input);
+    free_StingArrayArray(possibilite, size_pos);
+    free_StingArrayArray(tab, size_tab);
     return res;
 }
 
-char **all(char **input, int size_input, char *dos, int *taille){
+char **all(char **input, int size_input, char *dos, int *taille)
+{
     char **res = NULL;
     int size_res = 0;
 
-    for(int i=0; i<size_input; i++){
+    for (int i = 0; i < size_input; i++)
+    {
         int size_jok;
         char **jok = all_joker_fic(input[i], dos, &size_jok);
-        res = cat_tabs(res, size_res, jok, size_jok, &size_res);
+
+        char **cpy = malloc(size_res * sizeof(char *));
+        int taille_cpy = 0;
+        for (int j = 0; j < size_res; j++)
+        {
+            size_t taille_resj = strlen(res[j]);
+            cpy[j] = malloc(taille_resj + 1);
+            strncpy(cpy[j], res[j], taille_resj);
+            cpy[taille_resj] = '\0';
+            taille_cpy++;
+        }
+
+        // for(int j = 0; j < size_res; j++)
+        // {
+        //     printf("%s\n",cpy[j]);
+        // }
+
+        res = cat_tabs(cpy, size_res, jok, size_jok, &size_res);
+
+        free_StingArrayArray(cpy, taille_cpy);
         free_StingArrayArray(jok, size_jok);
     }
     *taille = size_res;

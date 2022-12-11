@@ -363,7 +363,7 @@ char **cat_tabs(char **tab1, int taille1, char **tab2, int taille2, int *taille)
 
         res[j + taille1] = cpy;
     }
-   
+    
     *taille = taille1 + taille2;
     return res;
 
