@@ -217,6 +217,7 @@ char **add_start(char **tab, int taille, char *s)
         strncpy(cpy, tab[i], strlen(tab[i])+1);
 
         strncat(res[i], cpy, strlen(cpy));
+        free(cpy);
     }
     return res;
 }

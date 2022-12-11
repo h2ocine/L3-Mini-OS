@@ -239,4 +239,5 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
         if(!(size_path != 0 && size_all_joker == 0))
         commande_externe(all, t);
     }
+    free_StingArrayArray(all_joker, size_all_joker);
 }
