@@ -81,8 +81,11 @@ void commande_externe(char **tab, int taille,int *last_exit)
             arguments_exec[taille] = NULL;
             execCMD(cpyPwd, arguments_exec,last_exit);
             free_StingArrayArray(arguments_exec, taille);
+        }else{
+            *last_exit = 127;
+            //printf("bash: ./%s: Aucun fichier ou dossier de ce type \n",sep[0]);
         }
-        //*last_exit = 127;
+        
         free(cpyPwd);
 
         free_StingArrayArray(sep, t);
