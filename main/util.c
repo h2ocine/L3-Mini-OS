@@ -435,3 +435,16 @@ char **delete_pre(char **tab, int taille, char *pre){
     return res;
 }
 
+char *good_path(char *path){
+    char *res = malloc(1);
+    int ind = 0;
+
+    for(int i=0; i<strlen(path); i++){
+        if(i != strlen(path)-1 && path[i] == '/' && path[i+1] == '/') continue;
+        ind++;
+        res = realloc(res, ind+1);
+        res[ind-1] = path[i];
+    }
+    res[ind] = '\0';
+    return res;
+}

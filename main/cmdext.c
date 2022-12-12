@@ -1,19 +1,31 @@
 #include "../header/cmdext.h"
 
 void execCMD(char *cmd, char **args)
-{
+{   
     pid_t pid = fork();
     if (pid == -1)
     {
         perror("fork");
     }
     else if (pid != 0)
-    {
-        wait(NULL);
+    {   
+        int status;
+        wait(&status);
+
     }
     else
     {
-        execvp(cmd, args);
+        if(execvp(cmd, args) < 0){
+            if(errno == EACCES){
+                printf("bash: %s: Permission non accordée\n", cmd);
+            }else if(errno == ENOENT){
+                if(strchr(cmd, '/') != NULL){
+                    printf("%s : commande introuvable\n", cmd);
+                }else{
+                    printf("bash: .%s: Aucun fichier ou dossier de ce type\n", cmd);
+                }
+            }
+        }   
     }
 }
 
@@ -51,7 +63,9 @@ void commande_externe(char **tab, int taille)
             strncat(cpyPwd, sep[t - 1], strlen(sep[t - 1]));
 
             char **arguments_exec = malloc((taille + 1) * sizeof(char *));
-            arguments_exec[0] = cpyPwd;
+            // arguments_exec[0] = cpyPwd;
+            arguments_exec[0] = malloc(strlen(cpyPwd)+1);
+            strncpy(arguments_exec[0], cpyPwd, strlen(cpyPwd)+1);
             for (int i = 1; i < taille; i++)
             {
                 arguments_exec[i] = malloc(strlen(tab[i]) + 1);
@@ -61,6 +75,9 @@ void commande_externe(char **tab, int taille)
             execCMD(cpyPwd, arguments_exec);
             free_StingArrayArray(arguments_exec, taille);
         }
+        free(cpyPwd);
+
+        free_StingArrayArray(sep, t);
     }
     else
     {
@@ -84,8 +101,9 @@ void commande_externe(char **tab, int taille)
         {
             // On verifie si chaque chemin du tableau pathDecoup a un fichier de nom la commande ecrite par l'utilisateur (tab[0])
             // Si non on essaye avec un autre chemin
-            if (isIn(pathDecoupe[i], tab[0]) == 0)
+            if (isIn(pathDecoupe[i], tab[0]) == 0){
                 continue;
+            }
             else
             {
                 size_t taille_elem = strlen(pathDecoupe[i]);
@@ -118,12 +136,13 @@ void commande_externe(char **tab, int taille)
                     snprintf(arguments_exec[i], strlen(tab[i]) + 1, "%s", tab[i]);
                 }
                 arguments_exec[taille] = NULL;
-
                 execCMD(cmd, arguments_exec);
                 free(cmd);
                 free_StingArrayArray(arguments_exec, taille);
+                free_StingArrayArray(pathDecoupe, taillarrpath);
                 return;
             }
         }
+        free_StingArrayArray(pathDecoupe, taillarrpath);
     }
 }

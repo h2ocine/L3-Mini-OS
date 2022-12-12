@@ -75,3 +75,6 @@ char *truncate_start(char *s, int n);
 
 // renvoie un tableau former des elements de tab sans le prefixe pre; ex: ["./a", "./b/c", "./m"] "./" -> ["a", "b/c", "m"]
 char **delete_pre(char **tab, int taille, char *pre);
+
+// Enleve tout les slash en trop; /tmp//a/b//c/// -> /tmp/a/b/c
+char *good_path(char *path);

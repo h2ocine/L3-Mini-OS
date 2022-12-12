@@ -5,7 +5,7 @@
 #define MAX_ARGS_STRLEN 4096
 
 int exits(char *val, int last_exit)
-{
+{   
     if (val != NULL)
     {
         if ((*val) == '0')
@@ -13,7 +13,6 @@ int exits(char *val, int last_exit)
         int n = atoi(val);
         if (n != 0)
         {
-            printf("n: %d\n", n);
             exit(n);
         }
     }
@@ -145,7 +144,7 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
     }
 
     int size_all_joker;
-    
+  
     char **all_joker = all(all_path, size_path, "", &size_all_joker);
     free_StingArrayArray(all_path,size_path);
 
@@ -167,7 +166,8 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
             *last_exit = exits(t, *last_exit);
         }
         else
-        {
+        {   
+            free_StingArrayArray(all_joker, size_all_joker);
             *last_exit = exits(NULL, *last_exit);
         }
     }
@@ -289,6 +289,7 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
         }
 
         free_StingArrayArray(commande, size_cmd);
+        free_StingArrayArray(all, t);
     }
     
     free_StingArrayArray(all_joker, size_all_joker);

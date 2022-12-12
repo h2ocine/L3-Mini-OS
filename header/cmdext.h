@@ -9,6 +9,7 @@
 #include "../header/util.h"
 #include <sys/wait.h>
 #include <stdlib.h>
+#include <errno.h>
 
 void execCMD(char *cmd, char **args);
 
