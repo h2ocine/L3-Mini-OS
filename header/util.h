@@ -78,3 +78,5 @@ char **delete_pre(char **tab, int taille, char *pre);
 
 // Enleve tout les slash en trop; /tmp//a/b//c/// -> /tmp/a/b/c
 char *good_path(char *path);
+
+void cherche_true_false(int *last_exit, char **tabvaleurprompt, int newtaille);

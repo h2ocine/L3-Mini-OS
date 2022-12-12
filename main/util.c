@@ -448,3 +448,19 @@ char *good_path(char *path){
     res[ind] = '\0';
     return res;
 }
+
+
+void cherche_true_false(int *last_exit, char **tabvaleurprompt, int newtaille)
+{
+    for (int i = 0; i < newtaille; i++)
+    {
+        if (strcmp(tabvaleurprompt[i], "true") == 0)
+        {
+            *last_exit = 0;
+        }
+        else if (strcmp(tabvaleurprompt[i], "false") == 0)
+        {
+            *last_exit = 1;
+        }  
+    }
+}

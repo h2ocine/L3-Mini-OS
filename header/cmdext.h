@@ -11,6 +11,6 @@
 #include <stdlib.h>
 #include <errno.h>
 
-void execCMD(char *cmd, char **args);
+void execCMD(char *cmd, char **args,int *last_exit);
 
-void commande_externe(char **tab, int taille);
+void commande_externe(char **tab, int taille,int *last_exit);

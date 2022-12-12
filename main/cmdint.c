@@ -131,6 +131,7 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
     // On met tout les chemins mentionnées par l'utilisateur dans un tableau; ls * *.c -> ["*", "*.c"]
     char **all_path = NULL;
     int size_path = 0;
+    //printf(" ca rentre \n");
     for (int i = 1; i < taille; i++)
     {
         if (tab[i][0] != '-')
@@ -261,7 +262,7 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
             if(size_echo != 0){ 
                 int size_final;
                 char **final = cat_tabs(commande, size_cmd, echo, size_echo, &size_final);
-                commande_externe(final, size_final);
+                commande_externe(final, size_final,last_exit);
                 
                 free_StingArrayArray(final, size_final);
             }else{
@@ -276,7 +277,7 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
 
                 int size_final;
                 char **final = cat_tabs(commande, size_cmd, tab_echo, size_tab_echo, &size_final);
-                commande_externe(final, size_final);
+                commande_externe(final, size_final,last_exit);
             }
             
 
@@ -285,7 +286,7 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
         }else{
 
             if(!(size_path != 0 && size_all_joker == 0))
-            commande_externe(all, t);
+            commande_externe(all, t,last_exit);
         }
 
         free_StingArrayArray(commande, size_cmd);

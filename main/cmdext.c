@@ -1,20 +1,25 @@
 #include "../header/cmdext.h"
 
-void execCMD(char *cmd, char **args)
+void execCMD(char *cmd, char **args,int *last_exit)
 {   
+    int status;
     pid_t pid = fork();
     if (pid == -1)
     {
         perror("fork");
     }
     else if (pid != 0)
-    {   
-        int status;
-        wait(&status);
-
+    {  
+        waitpid(pid,&status,0);
+         if (WIFEXITED(status))
+        {
+            *last_exit = WEXITSTATUS(status);
+            //printf("exited normally with status %d\n", *last_exit);
+        }
     }
     else
     {
+
         if(execvp(cmd, args) < 0){
             if(errno == EACCES){
                 printf("bash: %s: Permission non accordée\n", cmd);
@@ -29,14 +34,16 @@ void execCMD(char *cmd, char **args)
     }
 }
 
-void commande_externe(char **tab, int taille)
+void commande_externe(char **tab, int taille,int *last_exit)
 {
+    //printf("ca rentre \n");
     char pre[3];
     snprintf(pre, 3, "%s", tab[0]);
     pre[2] = '\0';
 
     if (strcmp(pre, "./") == 0)
     {
+        //printf(" ca rentre\n");
         int t;
         char **sep = explode(tab[0], "/", &t);
 
@@ -72,16 +79,17 @@ void commande_externe(char **tab, int taille)
                 snprintf(arguments_exec[i], strlen(tab[i]) + 1, "%s", tab[i]);
             }
             arguments_exec[taille] = NULL;
-            execCMD(cpyPwd, arguments_exec);
+            execCMD(cpyPwd, arguments_exec,last_exit);
             free_StingArrayArray(arguments_exec, taille);
         }
+        //*last_exit = 127;
         free(cpyPwd);
 
         free_StingArrayArray(sep, t);
     }
     else
     {
-
+        //printf("ca rentre \n");
         // On recupere la variable d'environnement path et on lui cree une copie (car si on la modifie la var d'env se modifie)
         char *envPath = getenv("PATH");
         size_t taille_envPath = strlen(envPath);
@@ -99,9 +107,10 @@ void commande_externe(char **tab, int taille)
         // on parcout chaque élément de la variable PATH
         for (int i = 0; i < taillarrpath; i++)
         {
-            // On verifie si chaque chemin du tableau pathDecoup a un fichier de nom la commande ecrite par l'utilisateur (tab[0])
+            // On verifie si chaque chemin du tabl eau pathDecoup a un fichier de nom la commande ecrite par l'utilisateur (tab[0])
             // Si non on essaye avec un autre chemin
             if (isIn(pathDecoupe[i], tab[0]) == 0){
+                //printf("Encore \n");
                 continue;
             }
             else
@@ -136,13 +145,15 @@ void commande_externe(char **tab, int taille)
                     snprintf(arguments_exec[i], strlen(tab[i]) + 1, "%s", tab[i]);
                 }
                 arguments_exec[taille] = NULL;
-                execCMD(cmd, arguments_exec);
+                execCMD(cmd, arguments_exec,last_exit);
                 free(cmd);
                 free_StingArrayArray(arguments_exec, taille);
                 free_StingArrayArray(pathDecoupe, taillarrpath);
                 return;
             }
         }
+        *last_exit = 127;
         free_StingArrayArray(pathDecoupe, taillarrpath);
     }
+    
 }
