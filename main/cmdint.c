@@ -163,7 +163,8 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
             snprintf(t, strlen(tab[1]) + 1, "%s", tab[1]);
             t[strlen(tab[1]) + 1] = '\0';
             free_StingArrayArray(tab, taille);
-
+            
+            free_StingArrayArray(all_joker, size_all_joker);
             *last_exit = exits(t, *last_exit);
         }
         else

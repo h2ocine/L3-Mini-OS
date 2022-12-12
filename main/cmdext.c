@@ -3,6 +3,7 @@
 void execCMD(char *cmd, char **args,int *last_exit)
 {   
     int status;
+    int t = 0;  
     pid_t pid = fork();
     if (pid == -1)
     {
@@ -10,26 +11,16 @@ void execCMD(char *cmd, char **args,int *last_exit)
     }
     else if (pid != 0)
     {  
-        waitpid(pid,&status,0);
-         if (WIFEXITED(status))
-        {
-            *last_exit = WEXITSTATUS(status);
-            //printf("exited normally with status %d\n", *last_exit);
-        }
+        waitpid(pid,last_exit, 0);
+        //  if (WIFEXITED(status))
+        // {
+        //     *last_exit = WEXITSTATUS(status);
+        // }
     }
     else
     {
-
         if(execvp(cmd, args) < 0){
-            if(errno == EACCES){
-                printf("bash: %s: Permission non accordée\n", cmd);
-            }else if(errno == ENOENT){
-                if(strchr(cmd, '/') != NULL){
-                    printf("%s : commande introuvable\n", cmd);
-                }else{
-                    printf("bash: .%s: Aucun fichier ou dossier de ce type\n", cmd);
-                }
-            }
+            exit(WEXITSTATUS(t));
         }   
     }
 }
