@@ -12,15 +12,14 @@ void execCMD(char *cmd, char **args,int *last_exit)
     else if (pid != 0)
     {  
         waitpid(pid,last_exit, 0);
-        //  if (WIFEXITED(status))
-        // {
-        //     *last_exit = WEXITSTATUS(status);
-        // }
+         if (WIFEXITED(status))
+        {
+            *last_exit = WEXITSTATUS(status);
+        }
     }
     else
     {
         if(execvp(cmd, args) < 0){
-            exit(WEXITSTATUS(t));
         }   
     }
 }
