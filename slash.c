@@ -2,6 +2,7 @@
 #include "header/prompt.h"
 #include "header/cmdext.h"
 #include "header/cmdint.h"
+#include "header/redirections.h"
 #include <stdlib.h>
 
 #include <readline/readline.h>
@@ -129,6 +130,7 @@ int main(void)
             int bool = 0;
             // On cherche si dans notre tableau
             if (bool == 0){
+                check_redirection(tab,taille);
                 recherche_commande_interne(tab, &last_exit, taille);
                 bool = 1;
 
