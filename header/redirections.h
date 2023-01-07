@@ -27,5 +27,5 @@ char **explode_redirection(char **tab, int taille);
 void whichExec(char *cmd, char **args, int *last_exit, char *typeredirection,char *fic);
 
 //fonction pour la redirection sortie standard vers un fichier , ex ls -l > test.txt
-void execSORTIE(char *cmd, char **args, int *last_exit, char *fic);
+void redirect_cmd_output(char *cmd, char **args, int *last_exit, char *fic);
 

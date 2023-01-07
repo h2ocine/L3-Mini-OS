@@ -4,16 +4,66 @@
 #include "../header/cmdext.h"
 #include "../header/cmdint.h"
 
+#include <stdlib.h>
 
+const char *redirections[] = {">", "<", ">|", ">>", "2>", "2>|", "2>>"};
 
-void execSORTIE(char *cmd, char **args, int *last_exit, char *fic)
+void good_flags_descriptor(char *typeredirection, int *flags, int *descriptor)
 {
+    if (strcmp(typeredirection, ">") == 0)
+    {
+        *flags = O_WRONLY | O_CREAT | O_EXCL;
+        *descriptor = STDOUT_FILENO;
+    }
+    else if (strcmp(typeredirection, "<") == 0)
+    {
+        *flags = O_RDONLY;
+        *descriptor = STDIN_FILENO;
+    }
+    else if (strcmp(typeredirection, ">|") == 0)
+    {
+        *flags = O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW;
+        *descriptor = STDOUT_FILENO;
+    }
+    else if (strcmp(typeredirection, ">>") == 0)
+    {
+        *flags = O_APPEND | O_CREAT | O_WRONLY | O_NOFOLLOW;
+        *descriptor = STDOUT_FILENO;
+    }
+    else if (strcmp(typeredirection, "2>") == 0)
+    {
+        *flags = O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW ;
+        * descriptor = STDERR_FILENO;
+    }
+    else if (strcmp(typeredirection, "2>|") == 0)
+    {
+        *flags = O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW;
+        *descriptor = STDERR_FILENO;
+    }
+    else if (strcmp(typeredirection, "2>>") == 0)
+    {
+        *flags = O_APPEND | O_CREAT | O_WRONLY | O_NOFOLLOW;
+        *descriptor = STDERR_FILENO;
+    }
+}
+
+void redirect_cmd(char *cmd, char **args, int *last_exit, char *fic, char *typeredirection)
+{
+    // Pas oublier de free apres
+    int *flags = malloc(sizeof(int) * 100);
+    int *descriptor = malloc(sizeof(int) * 100);
+
+    good_flags_descriptor(typeredirection, flags, descriptor);
+
     int status;
     int t = 0;
+
+    // Crée un processus fils
     pid_t pid = fork();
     if (pid == -1)
     {
-        perror("fork");
+        perror("Erreur lors de la création du processus fils");
+        exit(1);
     }
     else if (pid != 0)
     {
@@ -21,36 +71,25 @@ void execSORTIE(char *cmd, char **args, int *last_exit, char *fic)
     }
     else
     {
-        
-        /*
-        Pour les tubes nommés il faut revérifier
+        // Dans le processus fils :
+        // Redirige l'entrée standard de la commande vers le fichier ou le tube nommé
+        int fd = open(fic, *flags, 0644);
 
-        if (mknod(fic, S_IFIFO | 0644, 0) == -1) {
-            perror("Erreur lors de la création du tube nommé");
-            exit(1);
-        }
-         */
-
-        int fd = open(fic, O_WRONLY | O_CREAT | O_EXCL, 0644);
         if (fd == -1)
         {
             perror("Erreur lors de l'ouverture du fichier ou du tube nommé");
             exit(1);
         }
-
-        // Redirige la sortie standard de la commande "cmd" vers le descripteur de fichier ouvert
-        if (dup2(fd, STDOUT_FILENO) == -1)
+        if (dup2(fd, *descriptor) == -1)
         {
-            perror("Erreur lors de la redirection de la sortie standard de la commande");
+            perror("Erreur lors de la redirection de l'entrée standard de la commande");
             exit(1);
         }
-
-        // Ferme le descripteur de fichier (il reste redirigé vers la sortie standard de la commande)
-        if (close(fd) == -1)
-        {
-            perror("Erreur lors de la fermeture du descripteur de fichier");
-            exit(1);
-        }
+        // Ferme le descripteur de fichier
+        close(fd);
+        free(flags);
+        free(descriptor);
+        // Exécute la commande
 
         if (execvp(cmd, args) < 0)
         {
@@ -58,44 +97,6 @@ void execSORTIE(char *cmd, char **args, int *last_exit, char *fic)
         }
     }
 }
-
-void whichExec(char *cmd, char **args, int *last_exit, char *typeredirection,char *fic)
-{
- 
-        if (strcmp(typeredirection, "<") == 0)
-        {
-            printf("a \n");
-        }
-        else if (strcmp(typeredirection, ">") == 0)
-        {
-            // redirect_cmd_output(tab, tab[taille-1], last_exit, taille);
-            execSORTIE(cmd,args,last_exit,fic);        
-        }
-        else if (strcmp(typeredirection, ">|") == 0)
-        {
-            printf("redirection sortie standard avec ecrasement \n");
-        }
-        else if (strcmp(typeredirection, ">>") == 0)
-        {
-            printf("redirection sortie standard en en concatenation \n");
-        
-        }
-        else if (strcmp(typeredirection, "2>") == 0)
-        {
-            printf("redirection de la sortie erreur standard sans ecrasement ");
-        }
-        else if (strcmp(typeredirection, "2>>") == 0)
-        {
-            printf("redirection sortie erreur standard en concatenation \n");
-          
-        }
-        else if (strcmp(typeredirection, "|") == 0)
-        {
-            printf("redirection de la sortie standard de cmd1 et l'entrée standard cm2 tube \n");
-        }
-    }
-
-
 
 void decoupe_commande(char **tab, int taille, int *last_exit, char *fic, char *typeredirection)
 {
@@ -165,8 +166,9 @@ void decoupe_commande(char **tab, int taille, int *last_exit, char *fic, char *t
             }
 
             arguments_exec[taille] = NULL;
-            //Verifie quel type d'exec il va falloir cela depend du type de la redirection
-            whichExec(cmd,arguments_exec,last_exit,typeredirection,fic);
+            // Verifie quel type d'exec il va falloir cela depend du type de la redirection
+            // whichExec(cmd, arguments_exec, last_exit, typeredirection, fic);
+            redirect_cmd(cmd, arguments_exec, last_exit, fic, typeredirection);
 
             free(cmd);
             free_StingArrayArray(arguments_exec, taille);
@@ -195,51 +197,22 @@ char **explode_redirection(char **tab, int taille)
     return newtab;
 }
 
+
 // Fonction qui va dispatcher les différents cas
 int check_redirection(char **tab, int taille, int *last_exit)
 {
-    // Initialisation du nouveau tableau
-    char **tab_clean = explode_redirection(tab, taille);
-    int taille_tabclean = taille - 2;
-
+    // Initialisation du nouveau tableau 
     for (int i = 0; i < taille; i++)
     {
-        if (strcmp(tab[i], "<") == 0)
+        for (int j = 0; j < 7; j++)
         {
-            return 1;
-        }
-        else if (strcmp(tab[i], ">") == 0)
-        {
-            printf("ca rentre au bon endroit \n");
-            // redirect_cmd_output(tab, tab[taille-1], last_exit, taille);
-            decoupe_commande(tab_clean, taille_tabclean, last_exit,tab[taille-1],">");
-            return 1;
-        }
-        else if (strcmp(tab[i], ">|") == 0)
-        {
-            printf("redirection sortie standard avec ecrasement \n");
-            return 1;
-        }
-        else if (strcmp(tab[i], ">>") == 0)
-        {
-            printf("redirection sortie standard en en concatenation \n");
-            return 1;
-        }
-        else if (strcmp(tab[i], "2>") == 0)
-        {
-            printf("redirection de la sortie erreur standard sans ecrasement ");
-            return 1;
-        }
-        else if (strcmp(tab[i], "2>>") == 0)
-        {
-            printf("redirection sortie erreur standard en concatenation \n");
-            return 1;
-        }
-        else if (strcmp(tab[i], "|") == 0)
-        {
+            if(strcmp(tab[i],redirections[j])==0){
+                char **tab_clean = explode_redirection(tab, taille);
+                int taille_tabclean = taille - 2;
+                decoupe_commande(tab_clean,taille_tabclean,last_exit,tab[taille-1],tab[taille-2]);
+                return 1;
 
-            printf("redirection de la sortie standard de cmd1 et l'entrée standard cm2 tube \n");
-            return 1;
+            }
         }
     }
     return 0;
