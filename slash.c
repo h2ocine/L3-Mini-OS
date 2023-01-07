@@ -130,8 +130,9 @@ int main(void)
             int bool = 0;
             // On cherche si dans notre tableau
             if (bool == 0){
-                check_redirection(tab,taille);
-                recherche_commande_interne(tab, &last_exit, taille);
+                if (check_redirection(tab,taille,&last_exit) == 0){
+                     recherche_commande_interne(tab, &last_exit, taille);
+                }
                 bool = 1;
 
             }

@@ -2,10 +2,18 @@
     Ce header contient toute les méthodes auxiliaire à redirections
 */
 
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include <fcntl.h>
 #include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <wait.h>
+#include <string.h>
+
+
+
+
 
 //fonction qui check quel type de redirection
-void check_redirection(char **tab,int taille);
+int check_redirection(char **tab,int taille,int *last_exit);
+
