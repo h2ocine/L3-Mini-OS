@@ -1,4 +1,5 @@
 #include "../header/cmdext.h"
+#include "../main/signal.c"
 
 void execCMD(char *cmd, char **args,int *last_exit)
 {   
@@ -15,6 +16,7 @@ void execCMD(char *cmd, char **args,int *last_exit)
     }
     else
     {
+        valeur_de_retour_SIG();
         if(execvp(cmd, args) < 0){
             exit(WEXITSTATUS(t));
         }   
