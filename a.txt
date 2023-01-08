@@ -1,0 +1,2 @@
+exec_interne 
+ca rentre dans le pwd
