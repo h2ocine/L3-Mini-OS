@@ -13,7 +13,7 @@
 
 
 //fonction qui check quel type de redirection
-int check_redirection(char **tab,int taille,int *last_exit);
+int is_pipe_redirection(char **tab,int taille,int *last_exit);
 
 //Fonction qui "explode" le tableau de la ligne mais retire ce qui suit par exemple [ls,-l,>,fic.txt] -> [ls,-l]
 char **explode_redirection(char **tab, int taille);

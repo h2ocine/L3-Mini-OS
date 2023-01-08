@@ -155,8 +155,8 @@ void cut_cmd_redirec(char **tab, int taille, int *last_exit, char *fic, char *ty
                 snprintf(arguments_exec[i], strlen(tab[i]) + 1, "%s", tab[i]);
             }
             arguments_exec[taille] = NULL;
-            //execCMD(cpyPwd, arguments_exec, last_exit);
-            redirect_cmd(cpyPwd,arguments_exec,last_exit,fic,typeredirection);
+            // execCMD(cpyPwd, arguments_exec, last_exit);
+            redirect_cmd(cpyPwd, arguments_exec, last_exit, fic, typeredirection);
             free_StingArrayArray(arguments_exec, taille);
         }
         else
@@ -233,7 +233,7 @@ void cut_cmd_redirec(char **tab, int taille, int *last_exit, char *fic, char *ty
 
                     arguments_exec[i] = malloc(strlen(tab[i]) + 1);
                     snprintf(arguments_exec[i], strlen(tab[i]) + 1, "%s", tab[i]);
-                    //printf("args[%d] = %s \n", i, arguments_exec[i]);
+                    // printf("args[%d] = %s \n", i, arguments_exec[i]);
                 }
 
                 arguments_exec[taille] = NULL;
@@ -265,20 +265,19 @@ char **explode_redirection(char **tab, int taille)
     return newtab;
 }
 
-// Fonction qui va dispatcher les différents cas
-int check_redirection(char **tab, int taille, int *last_exit)
+
+
+int is_pipe_redirection(char **tab, int taille,int *last_exit)
 {
-    // Initialisation du nouveau tableau
     for (int i = 0; i < taille; i++)
     {
         if (strcmp(tab[i], "|") == 0)
         {
-            int nb = compte_nombre_pipe(tab, taille);
+            printf("pipe \n");
             return 1;
         }
         else
         {
-            // On parcourt le tableau des redirections pour voir si il y en a une
             for (int j = 0; j < 7; j++)
             {
                 if (strcmp(tab[i], redirections[j]) == 0)
@@ -293,3 +292,5 @@ int check_redirection(char **tab, int taille, int *last_exit)
     }
     return 0;
 }
+
+
