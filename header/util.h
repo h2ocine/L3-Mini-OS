@@ -80,3 +80,6 @@ char **delete_pre(char **tab, int taille, char *pre);
 char *good_path(char *path);
 
 void cherche_true_false(int *last_exit, char **tabvaleurprompt, int newtaille);
+
+// Ajoute elem à la fin du tableau tab
+void push(char **tab, int taille, char *elem);

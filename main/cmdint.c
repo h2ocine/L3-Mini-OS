@@ -12,7 +12,8 @@ int exits(char *val, int last_exit)
             exit(0);
         int n = atoi(val);
         if (n != 0)
-        {
+        {   
+            printf("on fait exit %d\n", n);
             exit(n);
         }
     }
@@ -126,8 +127,86 @@ char **ajoute_debut_tab(char **tab, int size_tab, char *s)
     return res;
 }
 
+int isCommandeInterne(char *cmd){
+    if(strcmp(cmd, "exit") == 0){
+        return 1;
+    }
+    if(strcmp(cmd, "cd") == 0){
+        return 1;
+    }
+    if(strcmp(cmd, "pwd") == 0){
+        return 1;
+    }
+}
+
+void casEtoileCmd(char **tab, int *last_exit, int taille){
+    int tailleAllFic;
+    char **all_fic = trans(".", tab[0], &tailleAllFic);
+    printf("tailleAllFic: %d\n", tailleAllFic);
+    for(int i=0; i<tailleAllFic; i++){
+        struct stat st;
+        if(stat(all_fic[i], &st) <0){
+            free_StingArrayArray(all_fic, tailleAllFic);
+            exit(1);
+        }
+        // Verifie si on a les droits d'execution
+        if(S_ISREG(st.st_mode) && isCommandeInterne(all_fic[i]) == 1){
+            char **newTab = NULL;
+            if(taille > 1){
+                for(int j=1; j<taille; j++){
+                    int taillePos;
+                    char **pos = trans(".", tab[j], &taillePos);
+
+                    if(taillePos == 1){
+                        printf("pos: %s\n", pos[0]);
+                        newTab = malloc(sizeof(char *)*2);
+                        newTab[0] = malloc(strlen(all_fic[i])+1);
+                        snprintf(newTab[0], strlen(all_fic[i])+1, "%s", all_fic[i]);
+                        newTab[0][strlen(all_fic[i])] = '\0';
+
+                        newTab[1] = malloc(strlen(pos[0])+1);
+                        snprintf(newTab[1], strlen(pos[0])+1, "%s", pos[0]);
+                        newTab[1][strlen(pos[0])] = '\0';
+
+                        affiche_mat(newTab, 2);
+                        free_StingArrayArray(pos, taillePos);
+                        free_StingArrayArray(all_fic, tailleAllFic);
+                        recherche_commande_interne(newTab, last_exit, 2);
+                    }else{
+                        printf("else\n");
+                        for(int y=0; y<taillePos; y++){
+                            newTab = malloc(sizeof(char *)*2);
+                            newTab[0] = malloc(strlen(all_fic[i])+1);
+                            snprintf(newTab[0], strlen(all_fic[i])+1, "%s", all_fic[i]);
+                            newTab[0][strlen(all_fic[i])] = '\0';
+
+                            newTab[1] = malloc(strlen(pos[y])+1);
+                            snprintf(newTab[1], strlen(pos[y])+1, "%s", pos[y]);
+                            newTab[1][strlen(pos[y])] = '\0';
+                            
+                            affiche_mat(newTab, 2);
+                            recherche_commande_interne(newTab, last_exit, 2);
+                        }
+                        free_StingArrayArray(all_fic, tailleAllFic);
+                        free_StingArrayArray(pos, taillePos);
+                        
+                    }
+                }
+            }
+            
+            return;
+        }
+    
+    }
+    free_StingArrayArray(all_fic, tailleAllFic);
+}
+
 void recherche_commande_interne(char **tab, int *last_exit, int taille)
-{
+{   
+    if(strchr(tab[0], '*') != NULL){
+        casEtoileCmd(tab, last_exit, taille);
+        return ;
+    }
     // On met tout les chemins mentionnées par l'utilisateur dans un tableau; ls * *.c -> ["*", "*.c"]
     char **all_path = NULL;
     int size_path = 0;

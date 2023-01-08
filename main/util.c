@@ -289,6 +289,10 @@ char **end_with(char *path, char *post, int *taille)
         {
             res_size++;
             res = realloc(res, sizeof(char *) * res_size);
+            if(res == NULL){
+                perror("realloc");
+            }
+    
             res[res_size - 1] = malloc(size_entry + 1);
             snprintf(res[res_size - 1], size_entry + 1, "%s", entry->d_name);
             res[res_size - 1][size_entry] = '\0';
@@ -391,6 +395,7 @@ char *with_slash(char *path)
     }
     char *cpy = malloc(strlen(path)+1);
     strncpy(cpy, path, strlen(path)+1);
+
     return cpy;
 }
 
@@ -463,4 +468,13 @@ void cherche_true_false(int *last_exit, char **tabvaleurprompt, int newtaille)
             *last_exit = 1;
         }  
     }
+}
+
+void push(char **tab, int taille, char *elem){
+    tab = realloc(tab, sizeof(char *) * (taille+1));
+    if(tab == NULL) perror("realloc");
+
+    tab[taille] = malloc(strlen(elem)+1);
+    snprintf(tab[taille], strlen(elem)+1, "%s", elem);
+    tab[taille][strlen(elem)] = '\0';
 }
