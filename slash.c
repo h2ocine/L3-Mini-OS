@@ -3,6 +3,8 @@
 #include "header/cmdext.h"
 #include "header/cmdint.h"
 #include "header/redirections.h"
+#include "header/signal.h"
+
 #include <stdlib.h>
 
 #include <readline/readline.h>
@@ -18,6 +20,9 @@
 */
 int main(void)
 {
+    //ignorer SIGINT et SIGTERM 
+    ignorer_signeaux();
+
     setenv("OLDPWD", getenv("PWD"), 1);
 
     char **tab;
