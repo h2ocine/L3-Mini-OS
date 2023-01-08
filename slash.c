@@ -2,21 +2,24 @@
 #include "header/prompt.h"
 #include "header/cmdext.h"
 #include "header/cmdint.h"
-#include <stdlib.h>
+#include "header/signal.h"
 
+#include <stdlib.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+
 
 #define MAX_ARGS_NUMBER 4096
 #define MAX_ARGS_STRLEN 4096
 #define TAILLE_PROMPT 47 //7 (rouge ou vert) + 5 (bleu) + 4 (blanc) + 1 ('\0')
-
 
 /*
     main
 */
 int main(void)
 {
+    ignorer_signeaux();
+
     setenv("OLDPWD", getenv("PWD"), 1);
 
     char **tab;
@@ -27,7 +30,6 @@ int main(void)
 
     while (1)
     {
-
         // affichage du prompt :
         //---------------------
         // recupération du dossier courant
@@ -55,9 +57,12 @@ int main(void)
         if(prompt_exit_variable == NULL) perror("malloc");
          //sprintf(prompt_exit_variable,"%s",last_exit_tab);
         strcpy(prompt_exit_variable,last_exit_tab);
-        strcpy(prompt_exit_variable+strlen(last_exit_tab),"\0");
+        strcpy(prompt_exit_variable + strlen(last_exit_tab),"\0");
         // printf("Valeur du last_exit variable = %s et longueur de last_exit variable = %ld \n",prompt_exit_variable,strlen(prompt_exit_variable));
 
+
+       // if(valeur_de_retour_SIG == 1)
+           // write(1,"VARIABLE MODIFIE\n",strlen("VARIABLE MODIFIE\n"));
 
         // on crée le tableau final du prompt_exit avec le [...]
         char *prompt_exit_final = malloc(strlen(last_exit_tab)+3);

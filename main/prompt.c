@@ -5,25 +5,8 @@ void formatage_couleur(int last_exit, char *prompt, char *prompt_exit)
     char *rouge = "\033[0;31m";
     char *vert = "\033[0;32m";
     char *cyan = "\033[36m";
-
-    // if (last_exit == 0)
-    // {
-    //     strcpy(prompt, vert);
-    //     strcat(prompt, "[");
-    //     strcat(prompt, prompt_exit);
-    //     strcat(prompt, "]");
-    //     strcat(prompt, cyan);
-    //     // Pas d'erreur à la derniere commande
-    // }
-    // else if (last_exit == 1)
-    // {
-    //     strcpy(prompt, rouge);
-    //     strcat(prompt, "[");
-    //     strcat(prompt, prompt_exit);
-    //     strcat(prompt, "]");
-    //     strcat(prompt, cyan);
-    // }
-        if (last_exit == 0)
+    
+    if (last_exit == 0)
     {
         strcpy(prompt, vert);
         //strcat(prompt, "[");
