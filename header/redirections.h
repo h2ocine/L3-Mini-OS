@@ -19,7 +19,7 @@ int check_redirection(char **tab,int taille,int *last_exit);
 char **explode_redirection(char **tab, int taille);
 
 //fonction qui decoupe la commande et ses arguments, semblable à quelque chose pret à celle de cmdexterne.
-void decoupe_commande(char **tab, int taille, int *last_exit, char *fic, char *typeredirection);
+void cut_cmd_redirec(char **tab, int taille, int *last_exit, char *fic, char *typeredirection);
 
 //fonction qui applique la rediction 
 void redirect_cmd(char *cmd, char **args, int *last_exit, char *fic, char *typeredirection);
