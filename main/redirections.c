@@ -159,7 +159,7 @@ void redirect_cmd_ext(char *cmd, char **args, int *last_exit, char *fic, char *t
         free(flags);
         free(descriptor);
         // Exécute la commande
-
+    
         if (execvp(cmd, args) < 0)
         {
             exit(WEXITSTATUS(t));
@@ -257,6 +257,7 @@ void redirect_cmd_interne(char **tab, int taille, int *last_exit, char *fic, cha
     int *flags = malloc(sizeof(int) * 10);
     int *descriptor = malloc(sizeof(int) * 10);
 
+
     good_flags_descriptor(typeredirection, flags, descriptor);
 
 
@@ -276,15 +277,18 @@ void redirect_cmd_interne(char **tab, int taille, int *last_exit, char *fic, cha
         exit(1);
     }
 
-    
-    // Exécute la commande
-    exec_interne(tab, last_exit, taille);
 
     close(fd);
     free(flags);
     free(descriptor);
+    
+    const char *message = "Bonjour, je suis une sortie standard !\n";
+    write(1,message,strlen(message));
+    // Exécute la commande
+    exec_interne(tab, last_exit, taille);
 
-    exit(1);
+
+
 }
 
 void cut_cmd_redirec(char **tab, int taille, int *last_exit, char *fic, char *typeredirection)
@@ -458,6 +462,7 @@ int verif_redirection(char **tab, int taille)
     }
     return 0;
 }
+
 
 // Fonction qui va dispatcher les différents cas
 int check_redirection(char **tab, int taille, int *last_exit)

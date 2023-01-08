@@ -1,0 +1,3 @@
+Bonjour, je suis une sortie standard !
+exec_interne 
+ca rentre dans le pwd
