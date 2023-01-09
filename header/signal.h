@@ -4,16 +4,9 @@
 #include <signal.h>
 #include <stdlib.h>
 
-//int valeur_de_retour_SIG = 0;
+//fonction de gestion des signeaux
+//boolean = 0 -> ignorer SIGINT et SIGTERM
+//boolean = 1 -> action par défault
+void gestion_signeaux(int boolean);
 
-//fonction vide pour ignorer les signeaux
-void sig_ignor_handler(int signum);
-
-//handler qui ajoute au prompt la chaîne "[SIG]" en lieu et place de la valeur de retour
-void sig_val_retour_handler(int signum);
-
-//fonction pour definir les handler pour ignorer les signeaux 
-void ignorer_signeaux();
-
-//fonction pour definir les handler pour ajouter la valeur de retour SIG
-void valeur_de_retour_SIG();
+void gestion_signeaux_fonctions_externes();
