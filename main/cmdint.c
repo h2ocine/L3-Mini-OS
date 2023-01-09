@@ -139,8 +139,25 @@ int isCommandeInterne(char *cmd){
 }
 
 void casEtoileCmd(char **tab, int *last_exit, int taille){
+    
+    
+    char *courant = "./";
+    char *pre = malloc(strlen(courant)+1);
+    snprintf(pre, strlen(courant)+1, "%s", tab[0]);
+    pre[strlen(courant)] = '\0';
+    
     int tailleAllFic;
-    char **all_fic = trans(".", tab[0], &tailleAllFic);
+    char **all_fic;
+    if(strcmp(pre, courant) == 0){
+        all_fic = all_joker_fic(tab[0], ".", &tailleAllFic);
+    }else{
+        all_fic = trans(".", tab[0], &tailleAllFic);
+    }
+    free(pre);
+
+    // affiche_mat(all_fic, tailleAllFic);
+    // *o -> ["echo"]
+    // affiche_mat(all_fic, tailleAllFic);
 
     for(int i=0; i<tailleAllFic; i++){
         struct stat st;
@@ -149,46 +166,53 @@ void casEtoileCmd(char **tab, int *last_exit, int taille){
             exit(1);
         }
         // Verifie si on a les droits d'execution
-        if(S_ISREG(st.st_mode) && isCommandeInterne(all_fic[i]) == 1){
-            char **newTab = NULL;
-            if(taille > 1){
-                for(int j=1; j<taille; j++){
+        if(S_ISREG(st.st_mode)){
+            int tailleNewTab = 1;
+            char **newTab = malloc(sizeof(char *));
+            newTab[0] = malloc(strlen(all_fic[0])+1);
+            snprintf(newTab[0], strlen(all_fic[0])+1, "%s", all_fic[0]);
+            newTab[0][strlen(all_fic[0])] = '\0';
+
+            int tailleArgs = 0;
+            char **args = NULL;
+            for(int h=1; h<taille; h++){
+                if(tab[h][0] == '-'){
+                    tailleArgs++;
+                    args = realloc(args, sizeof(char *) * tailleArgs);
+                    args[tailleArgs-1] = malloc(strlen(tab[h])+1);
+                    snprintf(args[tailleArgs-1], strlen(tab[h])+1, "%s", tab[h]);
+                    args[tailleArgs-1][strlen(tab[h])] = '\0';
+
+                }
+            }
+
+            int tailleCpyNTab = tailleNewTab;
+            char **cpyNTab = copie_tab(newTab, tailleNewTab);
+            free_StingArrayArray(newTab, tailleNewTab);
+
+            newTab = cat_tabs(cpyNTab, tailleCpyNTab, args, tailleArgs, &tailleNewTab);
+            free_StingArrayArray(cpyNTab, tailleCpyNTab);
+            free_StingArrayArray(args, tailleArgs);
+            
+
+                for(int j=tailleArgs+1; j<taille; j++){
+
                     int taillePos;
                     char **pos = trans(".", tab[j], &taillePos);
 
-                    if(taillePos == 1){
-                        newTab = malloc(sizeof(char *)*2);
-                        newTab[0] = malloc(strlen(all_fic[i])+1);
-                        snprintf(newTab[0], strlen(all_fic[i])+1, "%s", all_fic[i]);
-                        newTab[0][strlen(all_fic[i])] = '\0';
+                    int tailleCpy = tailleNewTab;
+                    char **cpy = copie_tab(newTab, tailleNewTab);
+                    free_StingArrayArray(newTab, tailleNewTab);
 
-                        newTab[1] = malloc(strlen(pos[0])+1);
-                        snprintf(newTab[1], strlen(pos[0])+1, "%s", pos[0]);
-                        newTab[1][strlen(pos[0])] = '\0';
+                    newTab = cat_tabs(cpy, tailleCpy, pos, taillePos, &tailleNewTab);
+                    free_StingArrayArray(cpy, tailleCpy);
 
-                        free_StingArrayArray(pos, taillePos);
-                        free_StingArrayArray(all_fic, tailleAllFic);
-                        recherche_commande_interne(newTab, last_exit, 2);
-                    }else{
-                        for(int y=0; y<taillePos; y++){
-                            newTab = malloc(sizeof(char *)*2);
-                            newTab[0] = malloc(strlen(all_fic[i])+1);
-                            snprintf(newTab[0], strlen(all_fic[i])+1, "%s", all_fic[i]);
-                            newTab[0][strlen(all_fic[i])] = '\0';
-
-                            newTab[1] = malloc(strlen(pos[y])+1);
-                            snprintf(newTab[1], strlen(pos[y])+1, "%s", pos[y]);
-                            newTab[1][strlen(pos[y])] = '\0';
-                            
-                            recherche_commande_interne(newTab, last_exit, 2);
-                        }
-                        free_StingArrayArray(all_fic, tailleAllFic);
-                        free_StingArrayArray(pos, taillePos);
-                        
-                    }
+                    free_StingArrayArray(pos, taillePos);
                 }
-            }
             
+            recherche_commande_interne(newTab, last_exit, tailleNewTab);
+            free_StingArrayArray(newTab, tailleNewTab);
+            free_StingArrayArray(all_fic, tailleAllFic);
             return;
         }
     
@@ -358,6 +382,7 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
                 int size_final;
                 char **final = cat_tabs(commande, size_cmd, tab_echo, size_tab_echo, &size_final);
                 commande_externe(final, size_final,last_exit);
+                free_StingArrayArray(final, size_final);
             }
             
 

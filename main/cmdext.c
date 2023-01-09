@@ -153,7 +153,7 @@ void commande_externe(char **tab, int taille,int *last_exit)
         
         char **arguments_exec = copie_tab(tab, taille);
 
-        arguments_exec = realloc(arguments_exec, sizeof(char *) * taille+1);
+        arguments_exec = realloc(arguments_exec, sizeof(char *) * (taille+1));
         arguments_exec[taille] = NULL;
 
         // char **arguments_exec = malloc(sizeof(char *)*4);
