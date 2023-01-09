@@ -29,7 +29,12 @@ void affichage_prompt(int last_exit, char* prompt)
         // on crée le tableau final du prompt_exit avec le [...]
         char *prompt_exit_final = malloc(strlen(last_exit_tab)+3);
         strcpy(prompt_exit_final,"[");
-        strcat(prompt_exit_final,prompt_exit_variable);
+
+        if(last_exit == 255)
+            strcat(prompt_exit_final,"SIG\0");
+        else
+            strcat(prompt_exit_final,prompt_exit_variable);
+        
         strcat(prompt_exit_final+strlen(prompt_exit_variable)+1,"]");
 
         // On ajoute la valeur de retour ([0] ou [1]) et s'occupe de la couleur du prompt

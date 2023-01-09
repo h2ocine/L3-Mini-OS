@@ -13,12 +13,17 @@ void execCMD(char *cmd, char **args,int *last_exit)
     }
     else if (pid != 0)
     {  
+        // Rendre le conportement par défault de SIGINT et SIGTERM 
         waitpid(pid,last_exit, 0);
+
+        // Vérification de la cause de l'arrêt du processus fils -> si c'est le cas retourner la valeur 255 (afin d'afficher SIG dans affiche_prompt)
+        if (WIFSIGNALED(*last_exit))
+            *last_exit = 255;
     }
     else
     {
+        gestion_signeaux(1);
 
-        gestion_signeaux_fonctions_externes();
         if(execvp(cmd, args) < 0){
             exit(WEXITSTATUS(t));
         }
