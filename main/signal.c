@@ -1,8 +1,9 @@
 #include "../header/signal.h"
 
+
 void sig_handler(int signum) {
     printf("SIG\n");
-    exit(0);
+    //exit(0);
 }
 
 //fonction de gestion des signeaux

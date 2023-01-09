@@ -17,6 +17,7 @@ void execCMD(char *cmd, char **args,int *last_exit)
     }
     else
     {
+
         gestion_signeaux_fonctions_externes();
         if(execvp(cmd, args) < 0){
             exit(WEXITSTATUS(t));

@@ -493,11 +493,11 @@ char ***separate_commands(char **tab, int taille, int *new_taille)
 // Fonction qui va dispatcher les différents cas
 int check_redirection(char **tab, int taille, int *last_exit)
 {
-
     // On verifie si il y a bien une redirection
-    
+
     if (verif_redirection(tab, taille) == 1 )
     {
+        printf("ca rentre dans les redirections \n");
         char **tab_clean = explode_redirection(tab, taille);
         int taille_tabclean = taille - 2;
         //Si c'est une commande interne et que ce n'est pas un executable "./"
