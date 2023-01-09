@@ -24,10 +24,24 @@ int compte_nombre_pipe(char **tab_clean, int taille_tabclean)
     return count;
 }
 
+int is_redirection(char *tab)
+{
+
+    for (int j = 0; j < 7; j++)
+    {
+        if (strcmp(tab, redirections[j]) == 0)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int verif_redirection(char **tab, int taille)
 {
     for (int i = 0; i < taille; i++)
     {
+
         for (int j = 0; j < 7; j++)
         {
             if (strcmp(tab[i], redirections[j]) == 0)
@@ -36,6 +50,7 @@ int verif_redirection(char **tab, int taille)
             }
         }
     }
+
     return 0;
 }
 
@@ -167,7 +182,11 @@ void redirect_cmd_interne(char **tab, int taille, int *last_exit, char *fic, cha
 {
 
     int *flags = malloc(sizeof(int) * 10);
+    if (flags == NULL)
+        perror("malloc");
     int *descriptor = malloc(sizeof(int) * 10);
+    if (descriptor == NULL)
+        perror("malloc");
 
     good_flags_descriptor(typeredirection, flags, descriptor);
 
@@ -246,10 +265,21 @@ void good_flags_descriptor(char *typeredirection, int *flags, int *descriptor)
 void redirect_cmd_externe(char *cmd, char **args, int *last_exit, char *fic, char *typeredirection)
 {
     int *flags = malloc(sizeof(int) * 10);
+    if (flags == NULL)
+        perror("malloc");
     int *descriptor = malloc(sizeof(int) * 10);
+    if (descriptor == NULL)
+        perror("malloc");
 
     // On trouve les bons flags et bons descripteurs bon pour la redirection
     good_flags_descriptor(typeredirection, flags, descriptor);
+
+    /*
+    printf("AFFICHAGEEEEEEEEEE \n");
+    printf("cmd = %s \n",cmd);
+    printf("affichage tableau args \n ");
+    affiche_mat(args,3);
+    */
 
     int status;
     int t = 0;
@@ -353,7 +383,7 @@ void exec_externe(char **tab, int taille, int *last_exit, char *fic, char *typer
     }
     else
     {
-
+       
         //  On recupere la variable d'environnement path et on lui cree une copie (car si on la modifie la var d'env se modifie)
 
         char *envPath = getenv("PATH");
@@ -400,7 +430,7 @@ void exec_externe(char **tab, int taille, int *last_exit, char *fic, char *typer
                 int t = taille_elem + 1 + strlen(tab[0]);
                 cmd[t] = '\0';
 
-                // printf("cmd  = %s \n", cmd);
+                //printf("cmd  = %s \n", cmd);
 
                 // On complete le premier argument du tableau avec la commande
                 arguments_exec[0] = malloc(strlen(cmd) + 1); //---------------------->fuite mem
@@ -412,7 +442,7 @@ void exec_externe(char **tab, int taille, int *last_exit, char *fic, char *typer
 
                     arguments_exec[i] = malloc(strlen(tab[i]) + 1);
                     snprintf(arguments_exec[i], strlen(tab[i]) + 1, "%s", tab[i]);
-                    // printf("args[%d] = %s \n", i, arguments_exec[i]);
+                    //printf("args[%d] = %s \n", i, arguments_exec[i]);
                 }
 
                 arguments_exec[taille] = NULL;
@@ -434,87 +464,146 @@ void exec_externe(char **tab, int taille, int *last_exit, char *fic, char *typer
 }
 
 /* 
-char ***separate_commands(char **tab, int taille, int *new_taille)
-{
-    // On compte le nombre de commandes à séparer
-    int nb_commands = 1;
-    for (int i = 0; i < taille; i++)
-    {
-        for (int j = 0; j < 7; j++)
-        {
-            if (strcmp(tab[i], redirections[j]) == 0)
-            {
-                nb_commands++;
-            }
-        }
-    }
-
-    // On crée le tableau de commandes séparées
-    char ***separated_commands = malloc(nb_commands * sizeof(char **));
-    int current_command = 0;
-    int current_arg = 0;
-    for (int i = 0; i < taille; i++)
-    {
-        // On compte le nombre d'arguments de la commande courante
-        int command_size = 0;
-        for (int j = i; j < taille; j++)
-        {
-            for (int k = 0; k < 7; k++)
-            {
-                if (strcmp(tab[j], redirections[k]) == 0)
-                {
-                    break;
-                }
-            }
-            command_size++;
-        }
-        // On alloue de la mémoire pour la commande courante
-        separated_commands[current_command] = malloc((command_size + 1) * sizeof(char *));
-
-        // On remplit la commande courante
-        for (int j = 0; j < command_size; j++)
-        {
-            separated_commands[current_command][j] = tab[i];
-            i++;
-        }
-        separated_commands[current_command][command_size] = NULL;
-
-        // On passe à la commande suivante
-        current_command++;
-    }
-
-    // On met à jour la taille du nouveau tableau
-    *new_taille = nb_commands;
-
-    return separated_commands;
-}
-*/
-
 // Fonction qui va dispatcher les différents cas
 int check_redirection(char **tab, int taille, int *last_exit)
 {
     // On verifie si il y a bien une redirection
 
-    if (verif_redirection(tab, taille) == 1 )
+    if (verif_redirection(tab, taille) == 1)
     {
-        printf("ca rentre dans les redirections \n");
         char **tab_clean = explode_redirection(tab, taille);
         int taille_tabclean = taille - 2;
-        //Si c'est une commande interne et que ce n'est pas un executable "./"
-        if (check_cmd_intern(tab, taille) == 1 && (verif_executable(tab_clean,taille_tabclean)==0))
+        // Si c'est une commande interne et que ce n'est pas un executable "./"
+        if (check_cmd_intern(tab, taille) == 1 && (verif_executable(tab_clean, taille_tabclean) == 0))
         {
-            //On fait la redirection sur la commande interne
+            // On fait la redirection sur la commande interne
             redirect_cmd_interne(tab_clean, taille_tabclean, last_exit, tab[taille - 1], tab[taille - 2]);
             return 1;
         }
         else
         {
-            //Si c'est une commande externe ou un executable on fait la redirection de la commande externe
+            // Si c'est une commande externe ou un executable on fait la redirection de la commande externe
             exec_externe(tab_clean, taille_tabclean, last_exit, tab[taille - 1], tab[taille - 2]);
             return 1;
         }
+        free_StingArrayArray(tab_clean, taille_tabclean);
     }
-    
 
+    return 0;
+}
+*/
+
+int dedans(const char **s, int taille, char *elem)
+{
+    for (int i = 0; i < taille; i++)
+    {
+        if (strcmp(s[i], elem) == 0)
+            return 1;
+    }
+    return 0;
+}
+
+char **getTab_Cmd(char **tab, int taille, const char **s, int tailleS, int *t)
+{
+    char **res = NULL;
+    int tailleRes = 0;
+    for (int i = 0; i < taille; i++)
+    {
+        if (dedans(s, tailleS, tab[i]))
+        {
+            *t = tailleRes;
+            return res;
+        }
+        tailleRes++;
+        res = realloc(res, sizeof(char *) * tailleRes);
+        if (res == NULL)
+            perror("realloc");
+
+        res[tailleRes - 1] = malloc(strlen(tab[i]) + 1);
+        snprintf(res[tailleRes - 1], strlen(tab[i]) + 1, "%s", tab[i]);
+        res[tailleRes - 1][strlen(tab[i])] = '\0';
+    }
+
+    *t = tailleRes;
+    return res;
+}
+
+
+char **getTab_args(char **tab, int taille, const char **s, int tailleS, int *t)
+{
+    char **res = NULL;
+    int tailleRes = 0;
+
+    for (int i = 0; i < taille; i++)
+    {
+        if (i > 0 && dedans(s, tailleS, tab[i - 1]))
+        {
+            tailleRes++;
+            res = realloc(res, sizeof(char *) * tailleRes);
+            if (res == NULL)
+                perror("realloc");
+
+            res[tailleRes - 1] = malloc(strlen(tab[i]) + 1);
+            snprintf(res[tailleRes - 1], strlen(tab[i]) + 1, "%s", tab[i]);
+            res[tailleRes - 1][strlen(tab[i])] = '\0';
+        }
+    }
+    *t = tailleRes;
+    return res;
+}
+
+char **get_tabredirection(char **tab, int taille, int *tailleredirec)
+{
+    char **res = NULL;
+    int tailleRes = 0;
+    for (int i = 0; i < taille; i++)
+    {
+        if (is_redirection(tab[i]) == 1)
+        {
+            tailleRes++;
+
+            res = realloc(res, sizeof(char *) * tailleRes);
+            if (res == NULL)
+                perror("realloc");
+
+            res[tailleRes - 1] = malloc(strlen(tab[i]) + 1);
+            snprintf(res[tailleRes - 1], strlen(tab[i]) + 1, "%s", tab[i]);
+            res[tailleRes - 1][strlen(tab[i])] = '\0';
+        }
+    }
+    *tailleredirec = tailleRes;
+    return res;
+}
+
+int new_check_redirection(char **tab, int taille, int *last_exit)
+{
+    int taille_cmd;
+    char **tab_cmd = getTab_Cmd(tab, taille, redirections, 7, &taille_cmd);
+
+    int taillefic;
+    char **tab_fic = getTab_args(tab, taille, redirections, 7, &taillefic);
+
+    int taille_redirec;
+    char **tab_redirec = get_tabredirection(tab, taille, &taille_redirec);
+
+    if (verif_redirection(tab, taille) == 1)
+    {
+
+        for (int i = 0; i < taillefic; i++)
+        {
+            if ((check_cmd_intern(tab_cmd, taille_cmd) == 1) &&(verif_executable(tab_cmd, taille_cmd) == 0))
+            {
+                redirect_cmd_interne(tab_cmd, taille_cmd, last_exit, tab_fic[i], tab_redirec[i]);
+            }
+            else
+            {
+                exec_externe(tab_cmd, taille_cmd, last_exit, tab_fic[i], tab_redirec[i]);
+            }
+        }
+        return 1;
+    }
+    free_StingArrayArray(tab_cmd,taille_cmd);
+    free_StingArrayArray(tab_fic,taillefic);
+    free_StingArrayArray(tab_redirec,taille_redirec);
     return 0;
 }
