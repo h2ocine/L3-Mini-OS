@@ -16,10 +16,10 @@ void execCMD(char *cmd, char **args,int *last_exit)
     }
     else
     {
-        valeur_de_retour_SIG();
+        gestion_signeaux_fonctions_externes();
         if(execvp(cmd, args) < 0){
             exit(WEXITSTATUS(t));
-        }   
+        }
     }
 }
 
