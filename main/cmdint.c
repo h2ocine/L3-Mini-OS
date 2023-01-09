@@ -13,7 +13,8 @@ int exits(char *val, int last_exit)
         int n = atoi(val);
         if (n != 0)
         {   
-            printf("on fait exit %d\n", n);
+           
+            //printf("on fait exit %d\n", n);
             exit(n);
         }
     }

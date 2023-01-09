@@ -34,6 +34,9 @@ int main(void)
     while (1)
     {
 
+         if (last_exit == 256){
+            last_exit = 1;
+        }
         // affichage du prompt :
         //---------------------
         // recupération du dossier courant
@@ -77,7 +80,7 @@ int main(void)
         // creation du prompt -> il a 30 caractère au maximum + (.)caractère de couleurs
         char prompt[TAILLE_PROMPT];
 
-     
+       
         //if(strlen(prompt_exit_variable))
 
         // On ajoute la valeur de retour ([0] ou [1]) et s'occupe de la couleur du prompt
@@ -135,7 +138,7 @@ int main(void)
             int bool = 0;
             // On cherche si dans notre tableau
             if (bool == 0){
-                if ( check_redirection(tab,taille,&last_exit)== 0){
+                if (check_redirection(tab,taille,&last_exit)== 0){
                      recherche_commande_interne(tab, &last_exit, taille);
                 }
                 bool = 1;

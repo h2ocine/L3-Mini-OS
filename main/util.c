@@ -86,10 +86,12 @@ void videString(char *s)
 int isIn(char *path, char *fic)
 {
     DIR *dir = opendir(path);
-    if (dir == NULL) return 0;
+    if (dir == NULL)
+        return 0;
     struct dirent *entry;
 
-    if(dir == NULL) return 0;
+    if (dir == NULL)
+        return 0;
 
     while ((entry = readdir(dir)))
     {
@@ -104,7 +106,7 @@ int isIn(char *path, char *fic)
 }
 
 char **explode(char *str, const char *separators, int *taille)
-{   
+{
     int i = 0;
     int size = 0;
     char *s = NULL;
@@ -214,10 +216,10 @@ char **add_start(char **tab, int taille, char *s)
     for (int i = 0; i < taille; i++)
     {
         res[i] = malloc(strlen(tab[i]) + strlen(s) + 1);
-        strncpy(res[i], s, strlen(s)+1);
+        strncpy(res[i], s, strlen(s) + 1);
 
-        char *cpy = malloc(strlen(tab[i])+1);
-        strncpy(cpy, tab[i], strlen(tab[i])+1);
+        char *cpy = malloc(strlen(tab[i]) + 1);
+        strncpy(cpy, tab[i], strlen(tab[i]) + 1);
 
         strncat(res[i], cpy, strlen(cpy));
         free(cpy);
@@ -264,6 +266,7 @@ char **begin_with(char *path, char *pre, int *taille)
     return res;
 }
 
+/*
 char **end_with(char *path, char *post, int *taille)
 {
     char **res = NULL;
@@ -292,7 +295,49 @@ char **end_with(char *path, char *post, int *taille)
             if(res == NULL){
                 perror("realloc");
             }
-    
+
+            res[res_size - 1] = malloc(size_entry + 1);
+            snprintf(res[res_size - 1], size_entry + 1, "%s", entry->d_name);
+            res[res_size - 1][size_entry] = '\0';
+        }
+        free(post_entry);
+    }
+    closedir(dir);
+    *taille = res_size;
+    return res;
+}
+ */
+
+
+
+char **end_with(char *path, char *post, int *taille)
+{
+    char **res = NULL;
+    int res_size = 0;
+    size_t size_post = strlen(post);
+    DIR *dir = opendir(path);
+    struct dirent *entry;
+    if (dir == NULL)
+    {
+        taille = 0;
+        return NULL;
+    }
+    while ((entry = readdir(dir)))
+    {
+        size_t size_entry = strlen(entry->d_name);
+        char *post_entry = malloc(size_post + 1);
+        snprintf(post_entry, size_post + 1, "%s", &entry->d_name[size_entry - size_post]);
+        post_entry[size_post] = '\0';
+
+        if (strcmp(post_entry, post) == 0)
+        {
+            res_size++;
+            res = realloc(res, sizeof(char *) * res_size);
+            if (res == NULL)
+            {
+                perror("realloc");
+                exit(EXIT_FAILURE);
+            }
             res[res_size - 1] = malloc(size_entry + 1);
             snprintf(res[res_size - 1], size_entry + 1, "%s", entry->d_name);
             res[res_size - 1][size_entry] = '\0';
@@ -304,6 +349,51 @@ char **end_with(char *path, char *post, int *taille)
     return res;
 }
 
+/* 
+char **end_with(char *path, char *post, int *taille)
+{
+    char **res = NULL;
+    int res_size = 0;
+    size_t size_post = strlen(post);
+    DIR *dir = opendir(path);
+    if (dir == NULL)
+    {
+        *taille = 0;
+        return NULL;
+    }
+    struct dirent *entry;
+    while ((entry = readdir(dir)))
+    {
+        size_t size_entry = strlen(entry->d_name);
+        char *post_entry = &entry->d_name[size_entry - size_post];
+        if (strcmp(post_entry, post) == 0)
+        {
+            res_size++;
+            res = reallocarray(res, res_size, sizeof(char *));
+            if (res == NULL)
+            {
+                perror("reallocarray");
+                for (int i = 0; i < res_size - 1; i++)
+                {
+                    free(res[i]);
+                }
+                // libération de la mémoire allouée pour le tableau res
+                free(res);
+                *taille = 0;
+                closedir(dir);
+                exit(EXIT_FAILURE);
+            }
+
+            res[res_size - 1] = strdup(entry->d_name);
+        }
+    }
+    closedir(dir);
+    *taille = res_size;
+
+    return res;
+}
+
+*/
 char **inter(char **tab1, int taille1, char **tab2, int taille2, int *taille)
 {
     char **res = NULL;
@@ -379,8 +469,9 @@ char **all_fic(char *path, int *taille)
 }
 
 char *with_slash(char *path)
-{   
-    if(strlen(path) == 0){
+{
+    if (strlen(path) == 0)
+    {
         char *res = malloc(1);
         res[0] = '\0';
         return res;
@@ -393,24 +484,24 @@ char *with_slash(char *path)
         new[strlen(path) + 1] = '\0';
         return new;
     }
-    char *cpy = malloc(strlen(path)+1);
-    strncpy(cpy, path, strlen(path)+1);
+    char *cpy = malloc(strlen(path) + 1);
+    strncpy(cpy, path, strlen(path) + 1);
 
     return cpy;
 }
 
 char **cat_tabs(char **tab1, int taille1, char **tab2, int taille2, int *taille)
-{   
+{
     char **res = malloc(sizeof(char *) * (taille1 + taille2));
-    
+
     for (int i = 0; i < taille1; i++)
-    {   
+    {
         res[i] = malloc(strlen(tab1[i]) + 1);
         snprintf(res[i], strlen(tab1[i]) + 1, "%s", tab1[i]);
         res[i][strlen(tab1[i])] = '\0';
     }
     for (int j = 0; j < taille2; j++)
-    {   
+    {
         res[j + taille1] = malloc(strlen(tab2[j]) + 1);
         snprintf(res[j + taille1], strlen(tab2[j]) + 1, "%s", tab2[j]);
         res[j + taille1][strlen(tab2[j])] = '\0';
@@ -420,40 +511,46 @@ char **cat_tabs(char **tab1, int taille1, char **tab2, int taille2, int *taille)
     return res;
 }
 
-char *truncate_start(char *s, int n){
-    size_t size =((strlen(s) - n) < 0)? 0 : strlen(s) - n;
+char *truncate_start(char *s, int n)
+{
+    size_t size = ((strlen(s) - n) < 0) ? 0 : strlen(s) - n;
     char *res = malloc(size + 1);
 
-    for(int i=0; i<size; i++){
-        res[i] = s[i+n];
+    for (int i = 0; i < size; i++)
+    {
+        res[i] = s[i + n];
     }
     res[size] = '\0';
     return res;
 }
 
-char **delete_pre(char **tab, int taille, char *pre){
+char **delete_pre(char **tab, int taille, char *pre)
+{
     char **res = malloc(sizeof(char *) * taille);
 
-    for(int i=0; i<taille; i++){
+    for (int i = 0; i < taille; i++)
+    {
         res[i] = supString(tab[i], pre);
     }
     return res;
 }
 
-char *good_path(char *path){
+char *good_path(char *path)
+{
     char *res = malloc(1);
     int ind = 0;
 
-    for(int i=0; i<strlen(path); i++){
-        if(i != strlen(path)-1 && path[i] == '/' && path[i+1] == '/') continue;
+    for (int i = 0; i < strlen(path); i++)
+    {
+        if (i != strlen(path) - 1 && path[i] == '/' && path[i + 1] == '/')
+            continue;
         ind++;
-        res = realloc(res, ind+1);
-        res[ind-1] = path[i];
+        res = realloc(res, ind + 1);
+        res[ind - 1] = path[i];
     }
     res[ind] = '\0';
     return res;
 }
-
 
 void cherche_true_false(int *last_exit, char **tabvaleurprompt, int newtaille)
 {
@@ -466,15 +563,17 @@ void cherche_true_false(int *last_exit, char **tabvaleurprompt, int newtaille)
         else if (strcmp(tabvaleurprompt[i], "false") == 0)
         {
             *last_exit = 1;
-        }  
+        }
     }
 }
 
-void push(char **tab, int taille, char *elem){
-    tab = realloc(tab, sizeof(char *) * (taille+1));
-    if(tab == NULL) perror("realloc");
+void push(char **tab, int taille, char *elem)
+{
+    tab = realloc(tab, sizeof(char *) * (taille + 1));
+    if (tab == NULL)
+        perror("realloc");
 
-    tab[taille] = malloc(strlen(elem)+1);
-    snprintf(tab[taille], strlen(elem)+1, "%s", elem);
+    tab[taille] = malloc(strlen(elem) + 1);
+    snprintf(tab[taille], strlen(elem) + 1, "%s", elem);
     tab[taille][strlen(elem)] = '\0';
 }

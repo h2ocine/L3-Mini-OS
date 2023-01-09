@@ -29,5 +29,4 @@ slash
 slash.c
 slash.o
 sortie.txt
-test.c
 util.o
