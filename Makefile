@@ -5,3 +5,4 @@ slash.o : slash.c
 clean:
 	rm -rf slash
 	rm -rf *.o
+	rm -rf *.txt
