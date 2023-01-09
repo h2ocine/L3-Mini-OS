@@ -16,7 +16,7 @@ void execCMD(char *cmd, char **args,int *last_exit)
     }
     else
     {
-        gestion_signeaux_fonctions_externes();
+        // gestion_signeaux_fonctions_externes();œ
         if(execvp(cmd, args) < 0){
             exit(WEXITSTATUS(t));
         }
@@ -24,7 +24,8 @@ void execCMD(char *cmd, char **args,int *last_exit)
 }
 
 void commande_externe(char **tab, int taille,int *last_exit)
-{
+{   
+    
     //printf("ca rentre \n");
     char pre[3];
     snprintf(pre, 3, "%s", tab[0]);
@@ -81,7 +82,6 @@ void commande_externe(char **tab, int taille,int *last_exit)
     }
     else
     {
-        //printf("ca rentre \n");
         // On recupere la variable d'environnement path et on lui cree une copie (car si on la modifie la var d'env se modifie)
         char *envPath = getenv("PATH");
         size_t taille_envPath = strlen(envPath);
@@ -94,19 +94,19 @@ void commande_externe(char **tab, int taille,int *last_exit)
         // On decoupe la variable path avec le separateur ":"
         int taillarrpath;
         char **pathDecoupe = explode(path, ":", &taillarrpath);
+        
         free(path);
 
         // on parcout chaque élément de la variable PATH
         for (int i = 0; i < taillarrpath; i++)
-        {
+        {   
             // On verifie si chaque chemin du tabl eau pathDecoup a un fichier de nom la commande ecrite par l'utilisateur (tab[0])
             // Si non on essaye avec un autre chemin
             if (isIn(pathDecoupe[i], tab[0]) == 0){
-                //printf("Encore \n");
                 continue;
             }
             else
-            {
+            {   
                 size_t taille_elem = strlen(pathDecoupe[i]);
 
                 // On cree un tableau de chaine de caratere pour la fonction exec qui doit ressembler à ça pour l'exemple "ls -l path" -> [/usr/bin/ls, -l, path, NULL]
@@ -114,8 +114,7 @@ void commande_externe(char **tab, int taille,int *last_exit)
                 char **arguments_exec = malloc((taille + 1) * sizeof(char *));
 
                 char *cmd = malloc(taille_elem + 1 + /* taille du '/' */ +strlen(tab[0]) + 1);
-                if (cmd == NULL)
-                    perror("malloc");
+                if (cmd == NULL) perror("malloc");
                 snprintf(cmd, taille_elem + 1, "%s", pathDecoupe[i]);
                 cmd[taille_elem] = '\0';
 
@@ -126,7 +125,7 @@ void commande_externe(char **tab, int taille,int *last_exit)
                 cmd[t] = '\0';
 
                 // On complete le premier argument du tableau avec la commande
-                arguments_exec[0] = malloc(strlen(cmd) + 1); //---------------------->fuite mem
+                arguments_exec[0] = malloc(strlen(cmd) + 1);
                 snprintf(arguments_exec[0], strlen(cmd) + 1, "%s", cmd);
                 arguments_exec[0][strlen(cmd)] = '\0';
 
@@ -135,8 +134,10 @@ void commande_externe(char **tab, int taille,int *last_exit)
                 {
                     arguments_exec[i] = malloc(strlen(tab[i]) + 1);
                     snprintf(arguments_exec[i], strlen(tab[i]) + 1, "%s", tab[i]);
+                    arguments_exec[i][strlen(tab[i])] = '\0';
                 }
                 arguments_exec[taille] = NULL;
+
                 execCMD(cmd, arguments_exec,last_exit);
                 free(cmd);
                 free_StingArrayArray(arguments_exec, taille);
@@ -144,7 +145,34 @@ void commande_externe(char **tab, int taille,int *last_exit)
                 return;
             }
         }
-        *last_exit = 127;
+        
+        char **arguments_exec = copie_tab(tab, taille);
+
+        arguments_exec = realloc(arguments_exec, sizeof(char *) * taille+1);
+        arguments_exec[taille] = NULL;
+
+        // char **arguments_exec = malloc(sizeof(char *)*4);
+
+        // char *cmd = "../commands/normalise";
+        // arguments_exec[0] = malloc(strlen(cmd)+1);
+        // snprintf(arguments_exec[0], strlen(cmd)+1, "%s", cmd);
+
+        // char *header = "header";
+        // arguments_exec[1] = malloc(strlen(header)+1);
+        // snprintf(arguments_exec[1], strlen(header)+1, "%s", header);
+
+        // char *main = "main";
+        // arguments_exec[2] = malloc(strlen(main)+1);
+        // snprintf(arguments_exec[2], strlen(main)+1, "%s", main);
+
+        // arguments_exec[3] = NULL;
+        
+        printf("taille: %d\n", taille);
+        affiche_mat(arguments_exec, taille);
+        execCMD(arguments_exec[0], arguments_exec, last_exit);
+
+        free_StingArrayArray(arguments_exec, taille);
+        // *last_exit = 127;
         free_StingArrayArray(pathDecoupe, taillarrpath);
     }
     

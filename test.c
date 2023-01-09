@@ -7,57 +7,12 @@
 #include <sys/stat.h>
 
 
-void push(char **tab, int taille, char *elem){
-    tab = realloc(tab, sizeof(char *) * (taille+1));
-    if(tab == NULL) perror("realloc");
-
-    tab[taille] = malloc(strlen(elem)+1);
-    snprintf(tab[taille], strlen(elem)+1, "%s", elem);
-    tab[taille][strlen(elem)] = '\0';
-}
-
 void free_StingArrayArray(char **s, int taille)
 {
     for (int i = 0; i < taille; i++)
         free(s[i]);
 
     free(s);
-}
-
-char *transformeEnChemin(char *dossier, char *sousDossier){
-    size_t size;
-    char *res = NULL;
-    if(dossier[strlen(dossier)-1] == '/'){
-        size = strlen(dossier) + strlen(sousDossier)+1;
-        res = malloc(size);
-        if(res == NULL) perror("malloc");
-
-        snprintf(res, strlen(dossier)+1, "%s", dossier);
-        res[strlen(dossier)] = '\0';
-        strncat(res, sousDossier, strlen(sousDossier));
-    }else{
-        size = strlen(dossier) + 1 + strlen(sousDossier) + 1;
-        res = malloc(size);
-        if(res == NULL) perror("malloc");
-        
-        snprintf(res, strlen(dossier)+1, "%s", dossier);
-        res[strlen(dossier)] = '/';
-        res[strlen(dossier)+1] = '\0';
-        strncat(res, sousDossier, strlen(sousDossier));
-    }
-    return res;
-}
-
-char **copie_tab(char **tab, int taille)
-{
-    char **cpy = malloc(taille * sizeof(char *));
-    for (int i = 0; i < taille; i++)
-    {
-        cpy[i] = malloc(strlen(tab[i]) + 1);
-        snprintf(cpy[i], strlen(tab[i]) + 1, "%s", tab[i]);
-        cpy[i][strlen(tab[i])] = '\0';
-    }
-    return cpy;
 }
 
 void affiche_mat(char **tab, int taille)
@@ -68,89 +23,91 @@ void affiche_mat(char **tab, int taille)
     }
 }
 
-char **cat_tabs(char **tab1, int taille1, char **tab2, int taille2, int *taille)
-{   
-    char **res = malloc(sizeof(char *) * (taille1 + taille2));
-    
-    for (int i = 0; i < taille1; i++)
-    {   
-        res[i] = malloc(strlen(tab1[i]) + 1);
-        snprintf(res[i], strlen(tab1[i]) + 1, "%s", tab1[i]);
-        res[i][strlen(tab1[i])] = '\0';
+int isIn(char **s, int taille, char *elem){
+    for(int i=0; i<taille; i++){
+        if(strcmp(s[i], elem) == 0) return 1;
     }
-    for (int j = 0; j < taille2; j++)
-    {   
-        res[j + taille1] = malloc(strlen(tab2[j]) + 1);
-        snprintf(res[j + taille1], strlen(tab2[j]) + 1, "%s", tab2[j]);
-        res[j + taille1][strlen(tab2[j])] = '\0';
-    }
-
-    *taille = taille1 + taille2;
-    return res;
+    return 0;
 }
 
-char **doubleEtoile(char *dossierCourant, int *taille){
-    
-    DIR *dir = opendir(dossierCourant);
-    if(dir == NULL) perror("opendir");
-    struct dirent *entry;
+char **get_tabredirection(char **tab,int taille,int *tailleredirec){
+    char **res = NULL;
+    int tailleRes = 0;
+    for(int i = 0;i<taille;i++){
+        if( is_redirection(tab[i]) ==1){
+            tailleRes++;
+            
+            res = realloc(res, sizeof(char *) * tailleRes);
+            if(res ==NULL) perror("realloc");
 
-    int tailleRes = 1;
-    char **res = malloc(sizeof(char *));
-    if(res == NULL) perror("malloc");
-
-    res[0] = malloc(strlen(dossierCourant)+1);
-    if(res[0] == NULL) perror("malloc");
-    
-
-    snprintf(res[0], strlen(dossierCourant)+1, "%s", dossierCourant);
-    res[0][strlen(dossierCourant)] = '\0';
-
-    while((entry = readdir(dir))){
-        if(strcmp(entry -> d_name, ".") == 0 || strcmp(entry -> d_name, "..") == 0 || entry->d_name[0] == '.') continue;
-
-        char *path = transformeEnChemin(dossierCourant, entry->d_name);
-        struct stat st;
-        if(stat(path, &st) <0) perror("stat");
-
-        // On vérifie que l'entrée est un dossier et n'est pas un lien symbolique
-        if(S_ISDIR(st.st_mode) && !S_ISLNK(st.st_mode)){
-
-            char **cpyRes = copie_tab(res, tailleRes);
-            int tailleCpyRes = tailleRes;
-
-            int tailleRecherche;
-            char **recherche = doubleEtoile(path, &tailleRecherche);
-
-            free_StingArrayArray(res, tailleRes);
-
-            res = cat_tabs(cpyRes, tailleRes, recherche, tailleRecherche, &tailleRes);
-
-            free_StingArrayArray(cpyRes, tailleCpyRes);
-            free_StingArrayArray(recherche, tailleRecherche);
-
+            res[tailleRes-1] = malloc(strlen(tab[i])+1);
+            snprintf(res[tailleRes-1], strlen(tab[i])+1, "%s", tab[i]);
+            res[tailleRes-1][strlen(tab[i])] = '\0';
         }
     }
-    closedir(dir);
-
-    *taille = tailleRes;
+    *tailleredirec = tailleRes;
     return res;
 }
 
-char **doubleEtoileInit(int *taille){
-    return doubleEtoile("./", taille);
+
+char **getCmd(char **tab, int taille, char **s, int tailleS, int *t){
+    char **res = NULL;
+    int tailleRes = 0;
+    for(int i=0; i<taille; i++){
+        if(isIn(s, tailleS, tab[i])){
+            *t = tailleRes;
+            return res;
+        }
+        tailleRes++;
+        res = realloc(res, sizeof(char *) * tailleRes);
+        if(res == NULL) perror("realloc");
+
+        res[tailleRes-1] = malloc(strlen(tab[i])+1);
+        snprintf(res[tailleRes-1], strlen(tab[i])+1, "%s", tab[i]);
+        res[tailleRes-1][strlen(tab[i])] = '\0';
+    }
+
+    *t = tailleRes;
+    return res;
 }
 
-void testDoubleEtoile(){
-    int taille;
-    char *dossierCourant = "./";
+char **apres(char **tab, int taille, char **s, int tailleS, int *t){
+    char **res = NULL;
+    int tailleRes = 0;
 
-    char **dossiers = doubleEtoile(dossierCourant, &taille);
-    affiche_mat(dossiers, taille);
-    free_StingArrayArray(dossiers, taille);
+    for(int i=0; i<taille; i++){
+        if(i>0 && isIn(s, tailleS, tab[i-1])){
+            tailleRes++;
+            res = realloc(res, sizeof(char *) * tailleRes);
+            if(res == NULL) perror("realloc");
+
+            res[tailleRes-1] = malloc(strlen(tab[i])+1);
+            snprintf(res[tailleRes-1], strlen(tab[i])+1, "%s", tab[i]);
+            res[tailleRes-1][strlen(tab[i])] = '\0';
+        }
+    }
+    *t = tailleRes;
+    return res;
+
 }
 
 int main(void){
-    testDoubleEtoile();
+    char *tab[] = {"ls", "-a", "2>", "test.txt", "2>", "error.txt"};
+    char *redirections[] = {">", "<", ">|", ">>", "2>", "2>|", "2>>"};
+
+    int taille;
+    char **res = getCmd(tab, 6, redirections, 7, &taille);
+
+    affiche_mat(res, taille);
+
+    free_StingArrayArray(res, taille);
+
+    int taille2;
+    char **res2 = apres(tab, 6, redirections, 7, &taille2);
+
+    affiche_mat(res2, taille2);
+
+    free_StingArrayArray(res2, taille2);
+
     return 0;
 }

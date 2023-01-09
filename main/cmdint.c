@@ -142,7 +142,7 @@ int isCommandeInterne(char *cmd){
 void casEtoileCmd(char **tab, int *last_exit, int taille){
     int tailleAllFic;
     char **all_fic = trans(".", tab[0], &tailleAllFic);
-    printf("tailleAllFic: %d\n", tailleAllFic);
+
     for(int i=0; i<tailleAllFic; i++){
         struct stat st;
         if(stat(all_fic[i], &st) <0){
@@ -168,12 +168,10 @@ void casEtoileCmd(char **tab, int *last_exit, int taille){
                         snprintf(newTab[1], strlen(pos[0])+1, "%s", pos[0]);
                         newTab[1][strlen(pos[0])] = '\0';
 
-                        affiche_mat(newTab, 2);
                         free_StingArrayArray(pos, taillePos);
                         free_StingArrayArray(all_fic, tailleAllFic);
                         recherche_commande_interne(newTab, last_exit, 2);
                     }else{
-                        printf("else\n");
                         for(int y=0; y<taillePos; y++){
                             newTab = malloc(sizeof(char *)*2);
                             newTab[0] = malloc(strlen(all_fic[i])+1);
@@ -184,7 +182,6 @@ void casEtoileCmd(char **tab, int *last_exit, int taille){
                             snprintf(newTab[1], strlen(pos[y])+1, "%s", pos[y]);
                             newTab[1][strlen(pos[y])] = '\0';
                             
-                            affiche_mat(newTab, 2);
                             recherche_commande_interne(newTab, last_exit, 2);
                         }
                         free_StingArrayArray(all_fic, tailleAllFic);
@@ -202,11 +199,13 @@ void casEtoileCmd(char **tab, int *last_exit, int taille){
 }
 
 void recherche_commande_interne(char **tab, int *last_exit, int taille)
-{   
+{     
+    
     if(strchr(tab[0], '*') != NULL){
         casEtoileCmd(tab, last_exit, taille);
         return ;
     }
+
     // On met tout les chemins mentionnées par l'utilisateur dans un tableau; ls * *.c -> ["*", "*.c"]
     char **all_path = NULL;
     int size_path = 0;
@@ -214,7 +213,7 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
     for (int i = 1; i < taille; i++)
     {
         if (tab[i][0] != '-')
-        {
+        {   
             size_path++;
             all_path = realloc(all_path, sizeof(char *) * size_path);
             all_path[size_path - 1] = malloc(strlen(tab[i]) + 1);
@@ -224,10 +223,12 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
     }
 
     int size_all_joker;
-  
-    char **all_joker = all(all_path, size_path, "", &size_all_joker);
     
-    // free_StingArrayArray(all_path,size_path);
+    
+    char **all_joker = all(all_path, size_path, "", &size_all_joker);
+
+    free_StingArrayArray(all_path,size_path);
+    
 
     if (strcmp("exit", tab[0]) == 0)
     {
@@ -287,7 +288,7 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
         *last_exit = pwd(taille, tab);
     }
     else
-    {
+    {   
         // set commande (commande avec ses arguments)
         // initialiser commande avec la commande de base
 
@@ -300,7 +301,8 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
         commande[0][strlen(tab[0])] = '\0';
 
         for (int h = 1; h < taille; h++)
-        {
+        {   
+            
             if (tab[h][0] != '-')
             {
                 break;
@@ -312,9 +314,10 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
             strncpy(commande[h], tab[h], strlen(tab[h])+1);
             commande[h][strlen(tab[h])] = '\0';
         }
+        
+        int tailleAll;
+        char **all = cat_tabs(commande, size_cmd, all_joker, size_all_joker, &tailleAll);
 
-        int t;
-        char **all = cat_tabs(commande, size_cmd, all_joker, size_all_joker, &t);
 
         if(strcmp(tab[0], "echo") == 0){
             char **echo = NULL;
@@ -365,13 +368,14 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
             free_StingArrayArray(echo, size_echo);
             free_StingArrayArray(tab_echo, size_tab_echo);
         }else{
-
             if(!(size_path != 0 && size_all_joker == 0))
-            commande_externe(all, t,last_exit);
-        }
 
+            
+            commande_externe(all, tailleAll,last_exit);
+            
+        }
+        free_StingArrayArray(all, tailleAll);
         free_StingArrayArray(commande, size_cmd);
-        free_StingArrayArray(all, t);
     }
     
     free_StingArrayArray(all_joker, size_all_joker);
