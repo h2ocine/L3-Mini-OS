@@ -13,7 +13,7 @@ void execCMD(char *cmd, char **args,int *last_exit)
     }
     else if (pid != 0)
     {  
-        // Rendre le conportement par défault de SIGINT et SIGTERM 
+        // Rendre le comportement par défault de SIGINT et SIGTERM 
         waitpid(pid,last_exit, 0);
 
         // Vérification de la cause de l'arrêt du processus fils -> si c'est le cas retourner la valeur 255 (afin d'afficher SIG dans affiche_prompt)
@@ -32,7 +32,6 @@ void execCMD(char *cmd, char **args,int *last_exit)
 
 void commande_externe(char **tab, int taille,int *last_exit)
 {
-    //printf("ca rentre \n");
     char pre[3];
     snprintf(pre, 3, "%s", tab[0]);
     pre[2] = '\0';

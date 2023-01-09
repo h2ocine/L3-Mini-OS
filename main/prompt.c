@@ -78,10 +78,7 @@ void formatage_couleur(int last_exit, char *prompt, char *prompt_exit)
     else if (last_exit == 1)
     {
         strcpy(prompt, rouge);
-        //strcat(prompt, "[");
-        //strcat(prompt, "[");
         strcat(prompt, prompt_exit);
-        //strcat(prompt, "]");
         strcat(prompt, cyan);
     }
     else{
