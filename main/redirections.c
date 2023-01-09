@@ -9,6 +9,8 @@
 const char *redirections[] = {">", "<", ">|", ">>", "2>", "2>|", "2>>"};
 const char *cmd_interne[] = {"pwd", "exit", "cd"};
 
+/****************************************************************************************/
+
 int compte_nombre_pipe(char **tab_clean, int taille_tabclean)
 {
     int count = 0;
@@ -20,6 +22,49 @@ int compte_nombre_pipe(char **tab_clean, int taille_tabclean)
         }
     }
     return count;
+}
+
+int verif_redirection(char **tab, int taille)
+{
+    for (int i = 0; i < taille; i++)
+    {
+        for (int j = 0; j < 7; j++)
+        {
+            if (strcmp(tab[i], redirections[j]) == 0)
+            {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+int verif_executable(char **tab, int taille)
+{
+    char pre[3];
+    snprintf(pre, 3, "%s", tab[0]);
+    pre[2] = '\0';
+
+    if (strcmp(pre, "./") == 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+
+int check_cmd_intern(char **tab, int taille)
+{
+    for (int i = 0; i < taille; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            if (strcmp(tab[i], cmd_interne[j]) == 0)
+            {
+                return 1;
+            }
+        }
+    }
+    return 0;
 }
 
 char **explode_redirection(char **tab, int taille)
@@ -34,143 +79,11 @@ char **explode_redirection(char **tab, int taille)
     return newtab;
 }
 
-void good_flags_descriptor(char *typeredirection, int *flags, int *descriptor)
-{
-    if (strcmp(typeredirection, ">") == 0)
-    {
-        *flags = O_WRONLY | O_CREAT | O_EXCL;
-        *descriptor = STDOUT_FILENO;
-    }
-    else if (strcmp(typeredirection, "<") == 0)
-    {
-        *flags = O_RDONLY;
-        *descriptor = STDIN_FILENO;
-    }
-    else if (strcmp(typeredirection, ">|") == 0)
-    {
-        *flags = O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW;
-        *descriptor = STDOUT_FILENO;
-    }
-    else if (strcmp(typeredirection, ">>") == 0)
-    {
-        *flags = O_APPEND | O_CREAT | O_WRONLY | O_NOFOLLOW;
-        *descriptor = STDOUT_FILENO;
-    }
-    else if (strcmp(typeredirection, "2>") == 0)
-    {
-        *flags = O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW;
-        *descriptor = STDERR_FILENO;
-    }
-    else if (strcmp(typeredirection, "2>|") == 0)
-    {
-        *flags = O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW;
-        *descriptor = STDERR_FILENO;
-    }
-    else if (strcmp(typeredirection, "2>>") == 0)
-    {
-        *flags = O_APPEND | O_CREAT | O_WRONLY | O_NOFOLLOW;
-        *descriptor = STDERR_FILENO;
-    }
-}
-
-
-
-void good_flags_descriptor_interne(char *typeredirection, int *flags, int *descriptor)
-{
-    if (strcmp(typeredirection, ">") == 0)
-    {
-        *flags = O_WRONLY | O_CREAT | O_EXCL;
-        *descriptor = STDERR_FILENO;
-    }
-    else if (strcmp(typeredirection, "<") == 0)
-    {
-        *flags = O_RDONLY;
-        *descriptor = STDIN_FILENO;
-    }
-    else if (strcmp(typeredirection, ">|") == 0)
-    {
-        *flags = O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW;
-        *descriptor = STDERR_FILENO;
-    }
-    else if (strcmp(typeredirection, ">>") == 0)
-    {
-        *flags = O_APPEND | O_CREAT | O_WRONLY | O_NOFOLLOW;
-        *descriptor = STDERR_FILENO;
-    }
-    else if (strcmp(typeredirection, "2>") == 0)
-    {
-        *flags = O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW;
-        *descriptor = STDERR_FILENO;
-    }
-    else if (strcmp(typeredirection, "2>|") == 0)
-    {
-        *flags = O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW;
-        *descriptor = STDERR_FILENO;
-    }
-    else if (strcmp(typeredirection, "2>>") == 0)
-    {
-        *flags = O_APPEND | O_CREAT | O_WRONLY | O_NOFOLLOW;
-        *descriptor = STDERR_FILENO;
-    }
-}
-
- 
-
-void redirect_cmd_ext(char *cmd, char **args, int *last_exit, char *fic, char *typeredirection)
-{
-
-    int *flags = malloc(sizeof(int) * 10);
-    int *descriptor = malloc(sizeof(int) * 10);
-
-    good_flags_descriptor(typeredirection, flags, descriptor);
-
-    int status;
-    int t = 0;
-
-    // Crée un processus fils
-    pid_t pid = fork();
-    if (pid == -1)
-    {
-        perror("Erreur lors de la création du processus fils");
-        exit(1);
-    }
-    else if (pid != 0)
-    {
-        waitpid(pid, last_exit, 0);
-    }
-    else
-    {
-        // Dans le processus fils :
-        // Redirige l'entrée standard de la commande vers le fichier ou le tube nommé
-        int fd = open(fic, *flags, 0644);
-
-        if (fd == -1)
-        {
-            perror("Erreur lors de l'ouverture du fichier ou du tube nommé");
-            exit(1);
-        }
-        if (dup2(fd, *descriptor) == -1)
-        {
-            perror("Erreur lors de la redirection de l'entrée standard de la commande");
-            exit(1);
-        }
-        // Ferme le descripteur de fichier
-        close(fd);
-        free(flags);
-        free(descriptor);
-        // Exécute la commande
-
-        if (execvp(cmd, args) < 0)
-        {
-            exit(WEXITSTATUS(t));
-        }
-    }
-}
+/****************************************************************************************/
 
 void exec_interne(char **tab, int *last_exit, int taille)
 {
-    // On met tout les chemins mentionnées par l'utilisateur dans un tableau; ls * *.c -> ["*", "*.c"]
-    printf("exec_interne \n");
+
     char **all_path = NULL;
     int size_path = 0;
     // printf(" ca rentre \n");
@@ -246,7 +159,6 @@ void exec_interne(char **tab, int *last_exit, int taille)
     }
     else if (strcmp("pwd", tab[0]) == 0)
     {
-        printf("ca rentre dans le pwd\n");
         *last_exit = pwd(taille, tab);
     }
 }
@@ -259,42 +171,136 @@ void redirect_cmd_interne(char **tab, int taille, int *last_exit, char *fic, cha
 
     good_flags_descriptor(typeredirection, flags, descriptor);
 
+    // Retient le *descriptor avant qu'on le change dans la variable fd_before
+    int fd_before = dup(*descriptor);
 
-    int status;
-    int t = 0;
-
-    // Crée un processus fils
-
-    // Dans le processus fils :
-    // Redirige l'entrée standard de la commande vers le fichier ou le tube nommé
+    // On open le fichier avec les bons flags
     int fd = open(fic, *flags, 0644);
 
-
+    if (fd == -1)
+    {
+        perror("Erreur lors de l'ouverture du fichier ou du tube nommé");
+        exit(1);
+    }
     if (dup2(fd, *descriptor) == -1)
     {
         perror("Erreur lors de la redirection de l'entrée standard de la commande");
         exit(1);
     }
-
-    
-    // Exécute la commande
-    exec_interne(tab, last_exit, taille);
-
+    // Ferme le descripteur de fichier
     close(fd);
     free(flags);
-    free(descriptor);
 
-    exit(1);
+    // Exécute la commande interne
+    exec_interne(tab, last_exit, taille);
+
+    // Puis on refait la redirection du descripteur qu'on a modifié vers son ancienne valeur
+    if (dup2(fd_before, *descriptor) == -1)
+    {
+        perror("Erreur lors du rétablissement du descripteur");
+        exit(1);
+    }
+    close(fd_before);
+    free(descriptor);
 }
 
-void cut_cmd_redirec(char **tab, int taille, int *last_exit, char *fic, char *typeredirection)
+void good_flags_descriptor(char *typeredirection, int *flags, int *descriptor)
 {
-    char pre[3];
-    snprintf(pre, 3, "%s", tab[0]);
-    pre[2] = '\0';
-
-    if (strcmp(pre, "./") == 0)
+    if (strcmp(typeredirection, ">") == 0)
     {
+        *flags = O_WRONLY | O_CREAT | O_EXCL;
+        *descriptor = STDOUT_FILENO;
+    }
+    else if (strcmp(typeredirection, "<") == 0)
+    {
+        *flags = O_RDONLY;
+        *descriptor = STDIN_FILENO;
+    }
+    else if (strcmp(typeredirection, ">|") == 0)
+    {
+        *flags = O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW;
+        *descriptor = STDOUT_FILENO;
+    }
+    else if (strcmp(typeredirection, ">>") == 0)
+    {
+        *flags = O_APPEND | O_CREAT | O_WRONLY | O_NOFOLLOW;
+        *descriptor = STDOUT_FILENO;
+    }
+    else if (strcmp(typeredirection, "2>") == 0)
+    {
+        *flags = O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW;
+        *descriptor = STDERR_FILENO;
+    }
+    else if (strcmp(typeredirection, "2>|") == 0)
+    {
+        *flags = O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW;
+        *descriptor = STDERR_FILENO;
+    }
+    else if (strcmp(typeredirection, "2>>") == 0)
+    {
+        *flags = O_APPEND | O_CREAT | O_WRONLY | O_NOFOLLOW;
+        *descriptor = STDERR_FILENO;
+    }
+}
+
+void redirect_cmd_externe(char *cmd, char **args, int *last_exit, char *fic, char *typeredirection)
+{
+    int *flags = malloc(sizeof(int) * 10);
+    int *descriptor = malloc(sizeof(int) * 10);
+
+    // On trouve les bons flags et bons descripteurs bon pour la redirection
+    good_flags_descriptor(typeredirection, flags, descriptor);
+
+    int status;
+    int t = 0;
+
+    // Crée un processus fils
+    pid_t pid = fork();
+    if (pid == -1)
+    {
+        perror("Erreur lors de la création du processus fils");
+        exit(1);
+    }
+    else if (pid != 0)
+    {
+        waitpid(pid, last_exit, 0);
+    }
+    else
+    {
+        // Dans le processus fils :
+        // Redirige l'entrée standard de la commande vers le fichier ou le tube nommé
+        int fd = open(fic, *flags, 0644);
+
+        if (fd == -1)
+        {
+            char *msgerreur = "bash: sortie: cannot overwrite existing file \n";
+            write(2, msgerreur, strlen(msgerreur));
+            *last_exit = 1;
+            exits("1", *last_exit);
+        }
+        if (dup2(fd, *descriptor) == -1)
+        {
+            perror("Erreur lors de la redirection de l'entrée standard de la commande");
+            exit(1);
+        }
+        // Ferme le descripteur de fichier
+        close(fd);
+        free(flags);
+        free(descriptor);
+        // Exécute la commande
+
+        if (execvp(cmd, args) < 0)
+        {
+            exit(WEXITSTATUS(t));
+        }
+    }
+}
+
+void exec_externe(char **tab, int taille, int *last_exit, char *fic, char *typeredirection)
+{
+    if (verif_executable(tab, taille) == 1)
+    {
+
         // printf(" ca rentre\n");
         int t;
         char **sep = explode(tab[0], "/", &t);
@@ -332,12 +338,12 @@ void cut_cmd_redirec(char **tab, int taille, int *last_exit, char *fic, char *ty
             }
             arguments_exec[taille] = NULL;
             // execCMD(cpyPwd, arguments_exec, last_exit);
-            redirect_cmd_ext(cpyPwd, arguments_exec, last_exit, fic, typeredirection);
+            redirect_cmd_externe(cpyPwd, arguments_exec, last_exit, fic, typeredirection);
             free_StingArrayArray(arguments_exec, taille);
         }
         else
         {
-            *last_exit = 127;
+            // *last_exit = 127;
             // printf("bash: ./%s: Aucun fichier ou dossier de ce type \n",sep[0]);
         }
 
@@ -349,10 +355,7 @@ void cut_cmd_redirec(char **tab, int taille, int *last_exit, char *fic, char *ty
     {
 
         //  On recupere la variable d'environnement path et on lui cree une copie (car si on la modifie la var d'env se modifie)
-        for (int i = 0; i < taille; i++)
-        {
-            printf("tab[%d] = %s \n", i, tab[i]);
-        }
+
         char *envPath = getenv("PATH");
         size_t taille_envPath = strlen(envPath);
 
@@ -397,7 +400,7 @@ void cut_cmd_redirec(char **tab, int taille, int *last_exit, char *fic, char *ty
                 int t = taille_elem + 1 + strlen(tab[0]);
                 cmd[t] = '\0';
 
-                printf("cmd  = %s \n", cmd);
+                // printf("cmd  = %s \n", cmd);
 
                 // On complete le premier argument du tableau avec la commande
                 arguments_exec[0] = malloc(strlen(cmd) + 1); //---------------------->fuite mem
@@ -415,7 +418,7 @@ void cut_cmd_redirec(char **tab, int taille, int *last_exit, char *fic, char *ty
                 arguments_exec[taille] = NULL;
 
                 // Fait la redirection qui correspond au "typeredirection"
-                redirect_cmd_ext(cmd, arguments_exec, last_exit, fic, typeredirection);
+                redirect_cmd_externe(cmd, arguments_exec, last_exit, fic, typeredirection);
 
                 free(cmd);
                 free_StingArrayArray(arguments_exec, taille);
@@ -424,61 +427,94 @@ void cut_cmd_redirec(char **tab, int taille, int *last_exit, char *fic, char *ty
                 return;
             }
         }
-        *last_exit = 127;
+        //*last_exit = 127;
         free_StingArrayArray(pathDecoupe, taillarrpath);
+        exit(0);
     }
 }
 
-int check_cmd_intern(char **tab, int taille)
+/* 
+char ***separate_commands(char **tab, int taille, int *new_taille)
 {
-    for (int i = 0; i < taille; i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            if (strcmp(tab[i], cmd_interne[j]) == 0)
-            {
-                return 1;
-            }
-        }
-    }
-    return 0;
-}
-
-int verif_redirection(char **tab, int taille)
-{
+    // On compte le nombre de commandes à séparer
+    int nb_commands = 1;
     for (int i = 0; i < taille; i++)
     {
         for (int j = 0; j < 7; j++)
         {
             if (strcmp(tab[i], redirections[j]) == 0)
             {
-                return 1;
+                nb_commands++;
             }
         }
     }
-    return 0;
+
+    // On crée le tableau de commandes séparées
+    char ***separated_commands = malloc(nb_commands * sizeof(char **));
+    int current_command = 0;
+    int current_arg = 0;
+    for (int i = 0; i < taille; i++)
+    {
+        // On compte le nombre d'arguments de la commande courante
+        int command_size = 0;
+        for (int j = i; j < taille; j++)
+        {
+            for (int k = 0; k < 7; k++)
+            {
+                if (strcmp(tab[j], redirections[k]) == 0)
+                {
+                    break;
+                }
+            }
+            command_size++;
+        }
+        // On alloue de la mémoire pour la commande courante
+        separated_commands[current_command] = malloc((command_size + 1) * sizeof(char *));
+
+        // On remplit la commande courante
+        for (int j = 0; j < command_size; j++)
+        {
+            separated_commands[current_command][j] = tab[i];
+            i++;
+        }
+        separated_commands[current_command][command_size] = NULL;
+
+        // On passe à la commande suivante
+        current_command++;
+    }
+
+    // On met à jour la taille du nouveau tableau
+    *new_taille = nb_commands;
+
+    return separated_commands;
 }
+*/
 
 // Fonction qui va dispatcher les différents cas
 int check_redirection(char **tab, int taille, int *last_exit)
 {
     // On verifie si il y a bien une redirection
-    if (verif_redirection(tab, taille) == 1)
+
+    if (verif_redirection(tab, taille) == 1 )
     {
-        if (check_cmd_intern(tab, taille) == 1)
+        printf("ca rentre dans les redirections \n");
+        char **tab_clean = explode_redirection(tab, taille);
+        int taille_tabclean = taille - 2;
+        //Si c'est une commande interne et que ce n'est pas un executable "./"
+        if (check_cmd_intern(tab, taille) == 1 && (verif_executable(tab_clean,taille_tabclean)==0))
         {
-            redirect_cmd_interne(tab, taille, last_exit, tab[taille - 1], tab[taille - 2]);
+            //On fait la redirection sur la commande interne
+            redirect_cmd_interne(tab_clean, taille_tabclean, last_exit, tab[taille - 1], tab[taille - 2]);
             return 1;
         }
         else
         {
-            char **tab_clean = explode_redirection(tab, taille);
-            int taille_tabclean = taille - 2;
-            cut_cmd_redirec(tab_clean, taille_tabclean, last_exit, tab[taille - 1], tab[taille - 2]);
+            //Si c'est une commande externe ou un executable on fait la redirection de la commande externe
+            exec_externe(tab_clean, taille_tabclean, last_exit, tab[taille - 1], tab[taille - 2]);
             return 1;
         }
     }
-    // On parcourt le tableau des redirections pour voir si il y en a une
+    
 
     return 0;
 }

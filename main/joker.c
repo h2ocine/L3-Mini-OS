@@ -318,14 +318,12 @@ char **all(char **tabInput, int size_tabInput, char *dos, int *taille)
         }
         
         char *input_propre = good_path(input[i]); 
-    
+
         int size_jok;
         char **jok = all_joker_fic(input_propre, dos, &size_jok);
         
         char **cpy = malloc(size_res * sizeof(char *));
         int taille_cpy = 0;
-
-        
         for (int j = 0; j < size_res; j++)
         {
             size_t taille_resj = strlen(res[j]);
@@ -340,8 +338,8 @@ char **all(char **tabInput, int size_tabInput, char *dos, int *taille)
         free(input_propre);
         free_StingArrayArray(cpy, taille_cpy);
         free_StingArrayArray(jok, size_jok);
-        
     }
+    free_StingArrayArray(input, size_input);
     *taille = size_res;
     
     return res;

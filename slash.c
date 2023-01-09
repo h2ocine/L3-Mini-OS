@@ -3,6 +3,7 @@
 #include "header/cmdext.h"
 #include "header/cmdint.h"
 #include "header/signal.h"
+#include "header/redirections.h"
 
 #include <stdlib.h>
 #include <readline/readline.h>
@@ -16,6 +17,7 @@
 */
 int main(void)
 {
+    //ignorer SIGINT et SIGTERM 
     gestion_signeaux(0);
 
     setenv("OLDPWD", getenv("PWD"), 1);
@@ -25,8 +27,11 @@ int main(void)
 
     int last_exit = 0;
 
+    int boolean_signal = 0;
+
     while (1)
     {
+
         //affichage du prompt 
         char prompt[TAILLE_PROMPT];
         affichage_prompt(last_exit,prompt);
@@ -60,9 +65,13 @@ int main(void)
             int bool = 0;
             // On cherche si dans notre tableau
             if (bool == 0){
-                recherche_commande_interne(tab, &last_exit, taille);
-                bool = 1;
+                if ( check_redirection(tab,taille,&last_exit) ==0){
+                     recherche_commande_interne(tab, &last_exit, taille);
+                     bool = 1;
 
+
+                }
+               
             }
            
             // On verifie si il y a présence de true ou false

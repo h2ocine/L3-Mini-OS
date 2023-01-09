@@ -12,8 +12,7 @@ int exits(char *val, int last_exit)
             exit(0);
         int n = atoi(val);
         if (n != 0)
-        {   
-            printf("on fait exit %d\n", n);
+        {
             exit(n);
         }
     }
@@ -158,7 +157,6 @@ void casEtoileCmd(char **tab, int *last_exit, int taille){
                     char **pos = trans(".", tab[j], &taillePos);
 
                     if(taillePos == 1){
-                        printf("pos: %s\n", pos[0]);
                         newTab = malloc(sizeof(char *)*2);
                         newTab[0] = malloc(strlen(all_fic[i])+1);
                         snprintf(newTab[0], strlen(all_fic[i])+1, "%s", all_fic[i]);
@@ -236,7 +234,6 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
         {
             if (size_all_joker > 1)
             {
-                printf("Erreur dans exit\n");
                 free_StingArrayArray(all_joker, size_all_joker);
                 return;
             }
@@ -258,7 +255,6 @@ void recherche_commande_interne(char **tab, int *last_exit, int taille)
     {
         if (size_all_joker > 1)
         {
-            printf("Erreur dans exit\n");
             free_StingArrayArray(all_joker, size_all_joker);
             return;
         }

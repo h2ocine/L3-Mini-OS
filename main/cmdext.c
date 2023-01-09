@@ -1,6 +1,7 @@
 #include "../header/cmdext.h"
 #include "../main/signal.c"
 
+
 void execCMD(char *cmd, char **args,int *last_exit)
 {   
     int status;
@@ -12,11 +13,17 @@ void execCMD(char *cmd, char **args,int *last_exit)
     }
     else if (pid != 0)
     {  
+        // Rendre le comportement par défault de SIGINT et SIGTERM 
         waitpid(pid,last_exit, 0);
+
+        // Vérification de la cause de l'arrêt du processus fils -> si c'est le cas retourner la valeur 255 (afin d'afficher SIG dans affiche_prompt)
+        if (WIFSIGNALED(*last_exit))
+            *last_exit = 255;
     }
     else
     {
-        // gestion_signeaux_fonctions_externes();œ
+        gestion_signeaux(1);
+
         if(execvp(cmd, args) < 0){
             exit(WEXITSTATUS(t));
         }
@@ -24,9 +31,7 @@ void execCMD(char *cmd, char **args,int *last_exit)
 }
 
 void commande_externe(char **tab, int taille,int *last_exit)
-{   
-    
-    //printf("ca rentre \n");
+{
     char pre[3];
     snprintf(pre, 3, "%s", tab[0]);
     pre[2] = '\0';
@@ -167,8 +172,6 @@ void commande_externe(char **tab, int taille,int *last_exit)
 
         // arguments_exec[3] = NULL;
         
-        printf("taille: %d\n", taille);
-        affiche_mat(arguments_exec, taille);
         execCMD(arguments_exec[0], arguments_exec, last_exit);
 
         free_StingArrayArray(arguments_exec, taille);
