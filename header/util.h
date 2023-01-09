@@ -80,3 +80,9 @@ char **delete_pre(char **tab, int taille, char *pre);
 char *good_path(char *path);
 
 void cherche_true_false(int *last_exit, char **tabvaleurprompt, int newtaille);
+
+// Ajoute elem à la fin du tableau tab
+char ** push(char **tab, int taille, char *elem);
+
+// Transforme un dossier et un sous dossier en chemin complet en ajoutant un slash (si besoin). ex: "A" "B" -> "A/B" 
+char *transformeEnChemin(char *dossier, char *sousDossier);

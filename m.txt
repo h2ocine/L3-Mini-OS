@@ -1,0 +1,2 @@
+/home/atomtibi/WORK/L3/SYSTEME/projet-systeme
+exec_interne 
