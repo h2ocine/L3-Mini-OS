@@ -17,6 +17,7 @@
 */
 int main(void)
 {
+    //ignorer SIGINT et SIGTERM 
     gestion_signeaux(0);
 
     setenv("OLDPWD", getenv("PWD"), 1);
