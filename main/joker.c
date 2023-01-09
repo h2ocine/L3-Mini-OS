@@ -161,6 +161,179 @@ char **all_joker_fic(char *input, char *dos, int *t){
     return res;
 }
 
+
+
+// char **doubleEtoile(char *dossierCourant, int *taille){
+    
+//     DIR *dir = opendir(dossierCourant);
+//     if(dir == NULL) perror("opendir");
+//     struct dirent *entry;
+
+//     int tailleRes = 1;
+//     char **res = malloc(sizeof(char *));
+//     if(res == NULL) perror("malloc");
+
+//     res[0] = malloc(strlen(dossierCourant)+1);
+//     if(res[0] == NULL) perror("malloc");
+    
+
+//     snprintf(res[0], strlen(dossierCourant)+1, "%s", dossierCourant);
+//     res[0][strlen(dossierCourant)] = '\0';
+
+//     while((entry = readdir(dir))){
+//         if(strcmp(entry -> d_name, ".") == 0 || strcmp(entry -> d_name, "..") == 0 || entry->d_name[0] == '.') continue;
+
+//         char *path = transformeEnChemin(dossierCourant, entry->d_name);
+//         struct stat st;
+//         if(stat(path, &st) <0) perror("stat");
+
+//         // On vérifie que l'entrée est un dossier et n'est pas un lien symbolique
+//         if(S_ISDIR(st.st_mode) && !S_ISLNK(st.st_mode)){
+
+//             char **cpyRes = copie_tab(res, tailleRes);
+//             int tailleCpyRes = tailleRes;
+
+//             int tailleRecherche;
+//             char **recherche = doubleEtoile(path, &tailleRecherche);
+
+//             free_StingArrayArray(res, tailleRes);
+
+//             res = cat_tabs(cpyRes, tailleRes, recherche, tailleRecherche, &tailleRes);
+
+//             free_StingArrayArray(cpyRes, tailleCpyRes);
+//             free_StingArrayArray(recherche, tailleRecherche);
+
+//         }
+//     }
+//     closedir(dir);
+
+//     *taille = tailleRes;
+//     return res;
+// }
+
+char **doubleEtoile(char *dossierCourant, int *taille){
+    
+    DIR *dir = opendir(dossierCourant);
+    if(dir == NULL) perror("opendir");
+    struct dirent *entry;
+
+    int tailleRes = 0;
+    char **res = NULL;
+
+    while((entry = readdir(dir))){
+        if(strcmp(entry -> d_name, ".") == 0 || strcmp(entry -> d_name, "..") == 0 || entry->d_name[0] == '.') continue;
+
+        char *path = transformeEnChemin(dossierCourant, entry->d_name);
+
+        struct stat st;
+        if(stat(path, &st) <0) perror("stat");
+
+        // On vérifie que l'entrée est un dossier et n'est pas un lien symbolique
+        if(S_ISDIR(st.st_mode) && !S_ISLNK(st.st_mode)){
+            char **cpyRes1 = copie_tab(res, tailleRes);
+            int tailleCpyRes1 = tailleRes;
+
+            free_StingArrayArray(res, tailleRes);
+            res = push(cpyRes1, tailleCpyRes1, path);
+            free_StingArrayArray(cpyRes1, tailleCpyRes1);
+            tailleRes++;
+
+
+            char **cpyRes = copie_tab(res, tailleRes);
+            int tailleCpyRes = tailleRes;
+
+            int tailleRecherche;
+            char **recherche = doubleEtoile(path, &tailleRecherche);
+
+            free_StingArrayArray(res, tailleRes);
+
+            res = cat_tabs(cpyRes, tailleRes, recherche, tailleRecherche, &tailleRes);
+
+            free_StingArrayArray(cpyRes, tailleCpyRes);
+            free_StingArrayArray(recherche, tailleRecherche);
+
+        }
+        free(path);
+    }
+    closedir(dir);
+
+    *taille = tailleRes;
+    return res;
+}
+
+char **doubleEtoileInit(int *taille){
+    char **res = doubleEtoile("./", taille);
+
+    // ON supprimer les "./" de toute les chaines de caractere
+    char **cpyRes = copie_tab(res, *taille);
+    free_StingArrayArray(res, *taille);
+
+    res = delete_pre(cpyRes, *taille, "./");
+    free_StingArrayArray(cpyRes, *taille);
+
+    // // On ajoute un slash a la fin de toute les chaines de charactere
+    // char **cpyRes2 = copie_tab(res, *taille);
+    // free_StingArrayArray(res, *taille);
+
+    // res = add_last(cpyRes2, *taille, "/");
+    // free_StingArrayArray(cpyRes2, *taille);
+
+    // affiche_mat(res, *taille);
+
+    return res;
+}
+
+int isDoubleEtoile(char *input){
+    char *doubleEtoile = "**/";
+    if(strlen(input) < strlen(doubleEtoile)) return 0;
+   
+    char *troisPremierChar = malloc(4);
+    snprintf(troisPremierChar, 4, "%s", input);
+    troisPremierChar[3] = '\0';
+
+    if(strcmp(troisPremierChar, doubleEtoile) != 0){
+        free(troisPremierChar);
+        return 0;
+    }
+
+    free(troisPremierChar);
+    return 1;
+}
+
+char ** casDoubleEtoile(char *joker, char **input, int *size_input){
+    char *separator = "/";
+
+    int tailleSepar;
+    char **separ = explode(joker, separator, &tailleSepar);
+    
+    int tailleDossiers;
+    char **dossiers = doubleEtoileInit(&tailleDossiers);
+
+    if(tailleSepar > 1){
+        char *post = separ[1];
+        char *postAvecSepar = malloc(1/* taille du '/' */ + strlen(post) + 1);
+        postAvecSepar[0] = '/';
+        postAvecSepar[1] = '\0';
+        strncat(postAvecSepar, post, strlen(post));
+
+        char **cpyDossiers = copie_tab(dossiers, tailleDossiers);
+
+        free_StingArrayArray(dossiers, tailleDossiers);
+        dossiers = add_last(cpyDossiers, tailleDossiers, postAvecSepar);
+        free_StingArrayArray(cpyDossiers, tailleDossiers);
+        free(postAvecSepar);
+    }
+    char **cpyInput = copie_tab(input, *size_input);
+    free_StingArrayArray(input, *size_input);
+
+    char **res = cat_tabs(cpyInput, *size_input, dossiers, tailleDossiers, size_input);
+
+    free_StingArrayArray(separ, tailleSepar);
+    free_StingArrayArray(dossiers, tailleDossiers);
+
+    return res;
+}
+
 char **all(char **input, int size_input, char *dos, int *taille)
 {   
     char **res = NULL;
@@ -168,13 +341,20 @@ char **all(char **input, int size_input, char *dos, int *taille)
 
     for (int i = 0; i < size_input; i++)
     {   
+        if(isDoubleEtoile(input[i]) == 1){
+            input = casDoubleEtoile(input[i], input, &size_input);
+            continue;
+        }
+        
         char *input_propre = good_path(input[i]); 
-
+    
         int size_jok;
         char **jok = all_joker_fic(input_propre, dos, &size_jok);
         
         char **cpy = malloc(size_res * sizeof(char *));
         int taille_cpy = 0;
+
+        
         for (int j = 0; j < size_res; j++)
         {
             size_t taille_resj = strlen(res[j]);
@@ -188,6 +368,7 @@ char **all(char **input, int size_input, char *dos, int *taille)
         free(input_propre);
         free_StingArrayArray(cpy, taille_cpy);
         free_StingArrayArray(jok, size_jok);
+        
     }
     *taille = size_res;
     

@@ -169,6 +169,30 @@ void affiche_mat(char **tab, int taille)
     }
 }
 
+char *transformeEnChemin(char *dossier, char *sousDossier){
+    size_t size;
+    char *res = NULL;
+    if(dossier[strlen(dossier)-1] == '/'){
+        size = strlen(dossier) + strlen(sousDossier)+1;
+        res = malloc(size);
+        if(res == NULL) perror("malloc");
+
+        snprintf(res, strlen(dossier)+1, "%s", dossier);
+        res[strlen(dossier)] = '\0';
+        strncat(res, sousDossier, strlen(sousDossier));
+    }else{
+        size = strlen(dossier) + 1 + strlen(sousDossier) + 1;
+        res = malloc(size);
+        if(res == NULL) perror("malloc");
+        
+        snprintf(res, strlen(dossier)+1, "%s", dossier);
+        res[strlen(dossier)] = '/';
+        res[strlen(dossier)+1] = '\0';
+        strncat(res, sousDossier, strlen(sousDossier));
+    }
+    return res;
+}
+
 // char **double_tab(char **tab, int taille)
 // {
 //     affiche_mat(tab, taille);
@@ -279,14 +303,15 @@ char **end_with(char *path, char *post, int *taille)
     }
 
     while ((entry = readdir(dir)))
-    {
+    {   
+
         size_t size_entry = strlen(entry->d_name);
         char *post_entry = malloc(size_post + 1);
         snprintf(post_entry, size_post + 1, "%s", &entry->d_name[size_entry - size_post]);
         post_entry[size_post] = '\0';
 
         if (strcmp(post_entry, post) == 0)
-        {
+        {   
             res_size++;
             res = realloc(res, sizeof(char *) * res_size);
             if(res == NULL){
@@ -470,11 +495,18 @@ void cherche_true_false(int *last_exit, char **tabvaleurprompt, int newtaille)
     }
 }
 
-void push(char **tab, int taille, char *elem){
-    tab = realloc(tab, sizeof(char *) * (taille+1));
-    if(tab == NULL) perror("realloc");
+char ** push(char **tab, int taille, char *elem){
+    char **res = malloc(sizeof(char *) * (taille+1));
+    if(res==NULL) perror("malloc");
 
-    tab[taille] = malloc(strlen(elem)+1);
-    snprintf(tab[taille], strlen(elem)+1, "%s", elem);
-    tab[taille][strlen(elem)] = '\0';
+    for(int i=0; i<taille; i++){
+        res[i] = malloc(strlen(tab[i])+1);
+        snprintf(res[i], strlen(tab[i])+1, "%s", tab[i]);
+        res[i][strlen(tab[i])] = '\0';
+    }
+    res[taille] = malloc(strlen(elem)+1);
+    snprintf(res[taille], strlen(elem)+1, "%s", elem);
+    res[taille][strlen(elem)] = '\0';
+
+    return res;
 }
