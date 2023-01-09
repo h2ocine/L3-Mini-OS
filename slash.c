@@ -31,6 +31,9 @@ int main(void)
     while (1)
     {
 
+        if(last_exit == 256){
+            last_exit = 1;
+        }
         //affichage du prompt 
         char prompt[TAILLE_PROMPT];
         affichage_prompt(last_exit,prompt);
@@ -44,6 +47,7 @@ int main(void)
             // On appelle exit sans paramètres
             exits(NULL, last_exit);
         }
+
 
         // On ajoute la dernière commande à l'historique
         add_history(ligne);
@@ -64,10 +68,9 @@ int main(void)
             int bool = 0;
             // On cherche si dans notre tableau
             if (bool == 0){
-                if ( check_redirection(tab,taille,&last_exit) ==0){
-                     recherche_commande_interne(tab, &last_exit, taille);
-                     bool = 1;
-
+                if (new_check_redirection(tab,taille,&last_exit) == 0){
+                    recherche_commande_interne(tab, &last_exit, taille);
+                    bool = 1;
 
                 }
                
